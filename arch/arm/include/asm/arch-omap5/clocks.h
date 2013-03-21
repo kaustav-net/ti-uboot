@@ -239,4 +239,15 @@
  * into microsec and passing the value.
  */
 #define CONFIG_DEFAULT_OMAP_RESET_TIME_MAX_USEC	31219
+
+/* CONTROL ID CODE */
+#define CONTROL_CORE_ID_CODE	0x4A002204
+#define CONTROL_WKUP_ID_CODE	0x4AE0C204
+
+#ifdef CONFIG_DRA7XX
+#define CONTROL_ID_CODE		CONTROL_WKUP_ID_CODE
+#else
+#define CONTROL_ID_CODE		CONTROL_CORE_ID_CODE
+#endif
+
 #endif /* _CLOCKS_OMAP5_H_ */
