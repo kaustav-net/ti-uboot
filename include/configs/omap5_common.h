@@ -137,12 +137,21 @@
  */
 
 #define CONFIG_BOOTDELAY	3
+#define CONFIG_ENV_VARS_UBOOT_CONFIG
+#define CONFIG_CMD_FS_GENERIC
+#define CONFIG_CMD_EXT2
+#define CONFIG_CMD_EXT4
 
 #define CONFIG_ENV_OVERWRITE
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"loadaddr=0x82000000\0" \
 	"console=ttyO2,115200n8\0" \
+	"fdt_high=0xffffffff\0" \
+	"fdtaddr=0x80f80000\0" \
+	"bootpart=0:1\0" \
+	"bootdir=\0" \
+	"bootfile=uImage\0" \
 	"usbtty=cdc_acm\0" \
 	"vram=16M\0" \
 	"mmcdev=0\0" \
@@ -155,19 +164,35 @@
 	"loadbootscript=fatload mmc ${mmcdev} ${loadaddr} boot.scr\0" \
 	"bootscript=echo Running bootscript from mmc${mmcdev} ...; " \
 		"source ${loadaddr}\0" \
-	"loaduimage=fatload mmc ${mmcdev} ${loadaddr} uImage\0" \
+	"loadbootenv=fatload mmc ${mmcdev} ${loadaddr} uEnv.txt\0" \
+	"importbootenv=echo Importing environment from mmc${mmcdev} ...; " \
+		"env import -t ${loadaddr} ${filesize}\0" \
+	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"mmcboot=echo Booting from mmc${mmcdev} ...; " \
 		"run mmcargs; " \
-		"bootm ${loadaddr}\0" \
+		"bootm ${loadaddr} - ${fdtaddr}\0" \
+	"findfdt="\
+		"if test $board_name = omap5_uevm; then " \
+			"setenv fdtfile omap5-uevm.dtb; fi;\0 " \
+	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
 
 #define CONFIG_BOOTCOMMAND \
+	"run findfdt; " \
 	"mmc dev ${mmcdev}; if mmc rescan; then " \
 		"if run loadbootscript; then " \
 			"run bootscript; " \
 		"else " \
-			"if run loaduimage; then " \
-				"run mmcboot; " \
-			"fi; " \
+			"if run loadbootenv; then " \
+				"run importbootenv; " \
+			"fi;" \
+			"if test -n ${uenvcmd}; then " \
+				"echo Running uenvcmd ...;" \
+				"run uenvcmd;" \
+			"fi;" \
+		"fi;" \
+		"if run loadimage; then " \
+			"run loadfdt; " \
+			"run mmcboot; " \
 		"fi; " \
 	"fi"
 
