@@ -36,9 +36,6 @@
 
 #include <configs/omap5_common.h>
 
-#define CONFIG_OMAP5430	/* which is in a 5430 */
-#define CONFIG_5430EVM	/* working with EVM */
-
 /* TWL6035 */
 #ifndef CONFIG_SPL_BUILD
 #define CONFIG_TWL6035_POWER
