@@ -655,20 +655,27 @@ static u32 get_ddr_phy_ctrl_1(u32 freq, u8 RL)
 	return phy;
 }
 
-static u32 get_emif_mem_size(struct emif_device_details *devices)
+static u32 get_emif_mem_size(u32 base)
 {
 	u32 size_mbytes = 0, temp;
+	struct emif_device_details dev_details;
+	struct lpddr2_device_details cs0_dev_details, cs1_dev_details;
+	u32 emif_nr = emif_num(base);
 
-	if (!devices)
-		return 0;
+	emif_reset_phy(base);
+	dev_details.cs0_device_details = emif_get_device_details(emif_nr, CS0,
+						&cs0_dev_details);
+	dev_details.cs1_device_details = emif_get_device_details(emif_nr, CS1,
+						&cs1_dev_details);
+	emif_reset_phy(base);
 
-	if (devices->cs0_device_details) {
-		temp = devices->cs0_device_details->density;
+	if (dev_details.cs0_device_details) {
+		temp = dev_details.cs0_device_details->density;
 		size_mbytes += lpddr2_density_2_size_in_mbytes[temp];
 	}
 
-	if (devices->cs1_device_details) {
-		temp = devices->cs1_device_details->density;
+	if (dev_details.cs1_device_details) {
+		temp = dev_details.cs1_device_details->density;
 		size_mbytes += lpddr2_density_2_size_in_mbytes[temp];
 	}
 	/* convert to bytes */
@@ -1040,12 +1047,8 @@ static void do_sdram_init(u32 base)
 	/* Return if no devices on this EMIF */
 	if (!dev_details.cs0_device_details &&
 	    !dev_details.cs1_device_details) {
-		emif_sizes[emif_nr - 1] = 0;
 		return;
 	}
-
-	if (!in_sdram)
-		emif_sizes[emif_nr - 1] = get_emif_mem_size(&dev_details);
 
 	/*
 	 * Get device timings:
@@ -1071,6 +1074,11 @@ static void do_sdram_init(u32 base)
 			lpddr2_init(base, regs);
 		else
 			ddr3_init(base, regs);
+	}
+	if (warm_reset() && (emif_sdram_type() == EMIF_SDRAM_TYPE_DDR3)) {
+		set_lpmode_selfrefresh(base);
+		emif_reset_phy(base);
+		ddr3_leveling(base, regs);
 	}
 
 	/* Write to the shadow registers */
@@ -1108,8 +1116,8 @@ void dmm_init(u32 base)
 	mapped_size = 0;
 	section_cnt = 3;
 	sys_addr = CONFIG_SYS_SDRAM_BASE;
-	emif1_size = emif_sizes[0];
-	emif2_size = emif_sizes[1];
+	emif1_size = get_emif_mem_size(EMIF1_BASE);
+	emif2_size = get_emif_mem_size(EMIF2_BASE);
 	debug("emif1_size 0x%x emif2_size 0x%x\n", emif1_size, emif2_size);
 
 	if (!emif1_size && !emif2_size)
@@ -1259,10 +1267,10 @@ void sdram_init(void)
 	in_sdram = running_from_sdram();
 	debug("in_sdram = %d\n", in_sdram);
 
-	if (!(in_sdram || warm_reset())) {
-		if (sdram_type == EMIF_SDRAM_TYPE_LPDDR2)
+	if (!in_sdram) {
+		if ((sdram_type == EMIF_SDRAM_TYPE_LPDDR2) && !warm_reset())
 			bypass_dpll((*prcm)->cm_clkmode_dpll_core);
-		else
+		else if (sdram_type == EMIF_SDRAM_TYPE_DDR3)
 			writel(CM_DLL_CTRL_NO_OVERRIDE, (*prcm)->cm_dll_ctrl);
 	}
 
