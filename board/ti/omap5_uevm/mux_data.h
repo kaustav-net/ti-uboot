@@ -56,7 +56,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{USBD0_HS_DP, (IEN | M0)},	/*  USBD0_HS_DP */
 	{USBD0_HS_DM, (IEN | M0)},	/*  USBD0_HS_DM */
 	{USBD0_SS_RX, (IEN | M0)},	/*  USBD0_SS_RX */
-
+	{GPIO8_234, (IEN | PTU | M7)},	/* MSECURE for palmas PMIC */
 };
 
 const struct pad_conf_entry wkup_padconf_array_essential[] = {
