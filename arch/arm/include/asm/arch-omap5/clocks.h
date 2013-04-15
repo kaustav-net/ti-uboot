@@ -190,6 +190,10 @@
 #define OPTFCLKEN_SRCOMP_FCLK_SHIFT		8
 #define OPTFCLKEN_SRCOMP_FCLK_MASK		(1 << 8)
 
+/* PRM_RSTTIME */
+#define RSTTIME1_SHIFT				0
+#define RSTTIME1_MASK				(0x3ff << 0)
+
 /* Clock frequencies */
 #define OMAP_SYS_CLK_FREQ_38_4_MHZ	38400000
 #define OMAP_SYS_CLK_IND_38_4_MHZ	6
@@ -251,4 +255,5 @@
 #define DPLL_NO_LOCK	0
 #define DPLL_LOCK	1
 
+#define CONFIG_DEFAULT_OMAP_RESET_TIME_MAX_USEC	31219
 #endif /* _CLOCKS_OMAP5_H_ */
