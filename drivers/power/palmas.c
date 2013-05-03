@@ -28,7 +28,7 @@ void palmas_init_settings(void)
 	return;
 }
 
-int palmas_mmc1_poweron_ldo(void)
+int palmas_mmc1_poweron_ldo9(void)
 {
 	u8 val = 0;
 
@@ -45,6 +45,29 @@ int palmas_mmc1_poweron_ldo(void)
 
 	if (palmas_i2c_write_u8(0x48, LDO9_CTRL, val)) {
 		printf("twl6035: could not turn on LDO9.\n");
+		return 1;
+	}
+
+	return 0;
+}
+
+int palmas_mmc1_poweron_ldo1(void)
+{
+	u8 val = 0;
+
+	/* set LDO9 TWL6035 to 3V */
+	val = 0x2b; /* (3 -.9)*20 +1 */
+
+	if (palmas_i2c_write_u8(0x58, LDO1_VOLTAGE, val)) {
+		printf("twl6035: could not set LDO1 voltage\n");
+		return 1;
+	}
+
+	/* TURN ON LDO9 */
+	val = LDO_ON | LDO_MODE_SLEEP | LDO_MODE_ACTIVE;
+
+	if (palmas_i2c_write_u8(0x58, LDO1_CTRL, val)) {
+		printf("twl6035: could not turn on LDO1\n");
 		return 1;
 	}
 

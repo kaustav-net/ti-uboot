@@ -30,6 +30,8 @@
 #define PALMAS_CHIP_ADDR	0x48
 
 /* 0x1XY translates to page 1, register address 0xXY */
+#define LDO1_CTRL		0x50
+#define LDO1_VOLTAGE		0x51
 #define LDO9_CTRL		0x60
 #define LDO9_VOLTAGE		0x61
 
@@ -53,6 +55,7 @@ static inline int palmas_i2c_read_u8(u8 chip_no, u8 reg, u8 *val)
 }
 
 void palmas_init_settings(void);
-int palmas_mmc1_poweron_ldo(void);
+int palmas_mmc1_poweron_ldo9(void);
+int palmas_mmc1_poweron_ldo1(void);
 
 #endif /* PALMAS_H */
