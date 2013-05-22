@@ -362,6 +362,7 @@ struct omap_sys_ctrl_regs {
 	u32 control_ldosram_iva_voltage_ctrl;
 	u32 control_ldosram_mpu_voltage_ctrl;
 	u32 control_ldosram_core_voltage_ctrl;
+	u32 control_usbotghs_ctrl;
 	u32 control_padconf_core_base;
 	u32 control_paconf_global;
 	u32 control_paconf_mode;
@@ -545,9 +546,6 @@ void enable_non_essential_clocks(void);
 void scale_vcores(struct vcores_data const *);
 u32 get_offset_code(u32 volt_offset, struct pmic_data *pmic);
 void do_scale_vcore(u32 vcore_reg, u32 volt_mv, struct pmic_data *pmic);
-
-/* Max value for DPLL multiplier M */
-#define OMAP_DPLL_MAX_N	127
 
 /* HW Init Context */
 #define OMAP_INIT_CONTEXT_SPL			0
