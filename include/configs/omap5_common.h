@@ -46,7 +46,6 @@
 #define CONFIG_DISPLAY_BOARDINFO
 
 /* Clock Defines */
-#define V_OSCK			19200000	/* Clock output from T2 */
 #define V_SCLK	V_OSCK
 
 #define CONFIG_MISC_INIT_R
