@@ -61,5 +61,8 @@
 /* Clock Defines */
 #define V_OSCK			19200000	/* Clock output from T2 */
 
+#define NON_SECURE_SRAM_START	0x40300000
+#define NON_SECURE_SRAM_END	0x40320000	/* Not inclusive */
+
 #define CONFIG_OMAP_PLATFORM_RESET_TIME_MAX_USEC	16296
 #endif /* __CONFIG_OMAP5_EVM_H */

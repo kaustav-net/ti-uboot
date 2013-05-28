@@ -42,4 +42,7 @@
 /* Clock Defines */
 #define V_OSCK			20000000	/* Clock output from T2 */
 
+#define NON_SECURE_SRAM_START	0x40300000
+#define NON_SECURE_SRAM_END	0x40380000	/* Not inclusive */
+
 #endif /* __CONFIG_DRA7XX_EVM_H */
