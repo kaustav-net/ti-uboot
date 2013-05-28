@@ -45,4 +45,5 @@
 #define NON_SECURE_SRAM_START	0x40300000
 #define NON_SECURE_SRAM_END	0x40380000	/* Not inclusive */
 
+#define CONFIG_SYS_OMAP_ABE_SYSCK
 #endif /* __CONFIG_DRA7XX_EVM_H */
