@@ -117,6 +117,12 @@ int spi_flash_cmd_write_multi(struct spi_flash *flash, u32 offset,
 		if (ret)
 			break;
 
+		ret = spi_flash_cmd_write_disable(flash);
+		if (ret < 0) {
+			printf("SF: disabling write failed\n");
+			break;
+		}
+
 		byte_addr += chunk_len;
 		if (byte_addr == page_size) {
 			page_addr++;
@@ -147,17 +153,40 @@ int spi_flash_read_common(struct spi_flash *flash, const u8 *cmd,
 int spi_flash_cmd_read_fast(struct spi_flash *flash, u32 offset,
 		size_t len, void *data)
 {
-	u8 cmd[5];
+	unsigned long page_addr, byte_addr, page_size;
+	size_t chunk_len, actual;
+	int ret = 0;
+	u8 cmd[4];
 
 	/* Handle memory-mapped SPI */
 	if (flash->memory_map)
 		memcpy(data, flash->memory_map + offset, len);
+	page_size = flash->page_size;
+	page_addr = offset / page_size;
+	byte_addr = offset % page_size;
 
-	cmd[0] = CMD_READ_ARRAY_FAST;
-	spi_flash_addr(offset, cmd);
-	cmd[4] = 0x00;
+	cmd[0] = CMD_READ_ARRAY_SLOW;
+	for (actual = 0; actual < len; actual += chunk_len) {
+		chunk_len = min(len - actual, page_size - byte_addr);
 
-	return spi_flash_read_common(flash, cmd, sizeof(cmd), data, len);
+		cmd[1] = page_addr >> 8;
+		cmd[2] = page_addr;
+		cmd[3] = byte_addr;
+
+		ret = spi_flash_read_common(flash, cmd, sizeof(cmd), data + actual, chunk_len);
+		if (ret < 0) {
+			debug("SF: read failed");
+			break;
+		}
+
+		byte_addr += chunk_len;
+		if (byte_addr == page_size) {
+			page_addr++;
+			byte_addr = 0;
+		}
+	}
+
+	return ret;
 }
 
 int spi_flash_cmd_poll_bit(struct spi_flash *flash, unsigned long timeout,
