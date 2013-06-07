@@ -28,13 +28,12 @@ DRA752 EVM # sf erase 50000 10000
 DRA752 EVM # sf erase 60000 10000
 
 DRA752 EVM # sf write 82000000 0 10000
-DRA752 EVM # sf write 83000000 80000 80000
+DRA752 EVM # sf write 83000000 20000 60000
 
-
-For #2, set sysboot to QSPI-1 boot mode and power on. ROM should find
-the GP header at offset 0 and load/execute SPL. SPL then detects that
-ROM was in QSPI-1 mode (boot code 10) and attempts to find a U-Boot
-image header at offset 0x80000 (set in the config file) and proceeds to
-load that image using the U-Boot image payload offset/size from the
-header. It will then start U-Boot.
+For #2, set sysboot to QSPI-1 boot mode(SYSBOOT[5:0] = 100110) and power
+on. ROM should find the GP header at offset 0 and load/execute SPL. SPL
+then detects that ROM was in QSPI-1 mode (boot code 10) and attempts to
+find a U-Boot image header at offset 0x20000 (set in the config file)
+and proceeds to load that image using the U-Boot image payload offset/size
+from the header. It will then start U-Boot.
 ~                                               
