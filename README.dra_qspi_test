@@ -1,0 +1,40 @@
+-------------------------------------------------
+   Simple steps used to test the QSPI at U-Boot 
+-------------------------------------------------
+
+For #1, build the patched U-Boot and load MLO/u-boot.img
+
+----------------------------------
+Boot from another medium like MMC
+----------------------------------
+
+DRA752 EVM # mmc dev 0
+DRA752 EVM # fatload mmc 0 0x82000000 MLO
+DRA752 EVM # fatload mmc 0 0x82000000 u-boot.img
+
+--------------------------------------------------
+Commands to erase/write u-boot/mlo to flash device
+--------------------------------------------------
+
+DRA752 EVM # sf probe 0
+[should detect the S25FL256S serial flash device]
+
+DRA752 EVM # sf erase 0 10000
+DRA752 EVM # sf erase 10000 10000
+DRA752 EVM # sf erase 20000 10000
+DRA752 EVM # sf erase 30000 10000
+DRA752 EVM # sf erase 40000 10000
+DRA752 EVM # sf erase 50000 10000
+DRA752 EVM # sf erase 60000 10000
+
+DRA752 EVM # sf write 82000000 0 10000
+DRA752 EVM # sf write 83000000 80000 80000
+
+
+For #2, set sysboot to QSPI-1 boot mode and power on. ROM should find
+the GP header at offset 0 and load/execute SPL. SPL then detects that
+ROM was in QSPI-1 mode (boot code 10) and attempts to find a U-Boot
+image header at offset 0x80000 (set in the config file) and proceeds to
+load that image using the U-Boot image payload offset/size from the
+header. It will then start U-Boot.
+~                                               
