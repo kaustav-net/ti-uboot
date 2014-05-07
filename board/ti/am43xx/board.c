@@ -25,9 +25,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#ifdef CONFIG_DRIVER_TI_CPSW
 static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
-#endif
 
 /*
  * Read header information from EEPROM into global structure.
@@ -120,12 +118,16 @@ const struct emif_regs emif_regs_lpddr2 = {
 	.emif_rd_wr_lvl_rmp_ctl		= 0x0,
 	.emif_rd_wr_lvl_ctl		= 0x0,
 	.emif_ddr_phy_ctlr_1		= 0x0E084006,
-	.emif_rd_wr_exec_thresh		= 0x00000405,
 	.emif_ddr_ext_phy_ctrl_1	= 0x04010040,
 	.emif_ddr_ext_phy_ctrl_2	= 0x00500050,
 	.emif_ddr_ext_phy_ctrl_3	= 0x00500050,
 	.emif_ddr_ext_phy_ctrl_4	= 0x00500050,
-	.emif_ddr_ext_phy_ctrl_5	= 0x00500050
+	.emif_ddr_ext_phy_ctrl_5	= 0x00500050,
+	.emif_rd_wr_exec_thresh		= 0x80000405,
+	.emif_prio_class_serv_map	= 0x80000001,
+	.emif_connect_id_serv_1_map	= 0x80000094,
+	.emif_connect_id_serv_2_map	= 0x00000000,
+	.emif_cos_config		= 0x000FFFFF
 };
 
 /* TODO: Reconcile with OMAP5/DRA7xx changes */
@@ -180,7 +182,11 @@ const struct emif_regs ddr3_emif_regs_400Mhz = {
 	.emif_ddr_ext_phy_ctrl_3	= 0x00400040,
 	.emif_ddr_ext_phy_ctrl_4	= 0x00400040,
 	.emif_ddr_ext_phy_ctrl_5	= 0x00400040,
-	.emif_rd_wr_exec_thresh		= 0x00000405
+	.emif_rd_wr_exec_thresh		= 0x80000405,
+	.emif_prio_class_serv_map	= 0x80000001,
+	.emif_connect_id_serv_1_map	= 0x80000094,
+	.emif_connect_id_serv_2_map	= 0x00000000,
+	.emif_cos_config		= 0x000FFFFF
 };
 
 const u32 ext_phy_ctrl_const_base_ddr3[EMIF_EXT_PHY_CTRL_CONST_REG] = {
@@ -222,7 +228,11 @@ const struct emif_regs ddr3_emif_regs_400Mhz_beta = {
 	.emif_ddr_ext_phy_ctrl_3	= 0x00000091,
 	.emif_ddr_ext_phy_ctrl_4	= 0x000000B5,
 	.emif_ddr_ext_phy_ctrl_5	= 0x000000E5,
-	.emif_rd_wr_exec_thresh		= 0x00000405
+	.emif_rd_wr_exec_thresh		= 0x80000405,
+	.emif_prio_class_serv_map	= 0x80000001,
+	.emif_connect_id_serv_1_map	= 0x80000094,
+	.emif_connect_id_serv_2_map	= 0x00000000,
+	.emif_cos_config		= 0x000FFFFF
 };
 
 const u32 ext_phy_ctrl_const_base_ddr3_beta[EMIF_EXT_PHY_CTRL_CONST_REG] = {
@@ -264,7 +274,11 @@ const struct emif_regs ddr3_emif_regs_400Mhz_production = {
 	.emif_ddr_ext_phy_ctrl_3	= 0x00000091,
 	.emif_ddr_ext_phy_ctrl_4	= 0x000000B9,
 	.emif_ddr_ext_phy_ctrl_5	= 0x000000E6,
-	.emif_rd_wr_exec_thresh		= 0x00000405
+	.emif_rd_wr_exec_thresh		= 0x80000405,
+	.emif_prio_class_serv_map	= 0x80000001,
+	.emif_connect_id_serv_1_map	= 0x80000094,
+	.emif_connect_id_serv_2_map	= 0x00000000,
+	.emif_cos_config		= 0x000FFFFF
 };
 
 const u32 ext_phy_ctrl_const_base_ddr3_production[EMIF_EXT_PHY_CTRL_CONST_REG] = {
@@ -391,8 +405,44 @@ void sdram_init(void)
 
 int board_init(void)
 {
+	struct l3f_cfg_bwlimiter *bwlimiter = (struct l3f_cfg_bwlimiter *)L3F_CFG_BWLIMITER;
+	u32 mreqprio_0, mreqprio_1, modena_init0_bw_fractional,
+	    modena_init0_bw_integer, modena_init0_watermark_0;
+
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 	gpmc_init();
+
+	/* Clear all important bits for DSS errata that may need to be tweaked*/
+	mreqprio_0 = readl(&cdev->mreqprio_0) & MREQPRIO_0_SAB_INIT1_MASK &
+	                   MREQPRIO_0_SAB_INIT0_MASK;
+
+	mreqprio_1 = readl(&cdev->mreqprio_1) & MREQPRIO_1_DSS_MASK;
+
+	modena_init0_bw_fractional = readl(&bwlimiter->modena_init0_bw_fractional) &
+	                                   BW_LIMITER_BW_FRAC_MASK;
+
+	modena_init0_bw_integer = readl(&bwlimiter->modena_init0_bw_integer) &
+	                                BW_LIMITER_BW_INT_MASK;
+
+	modena_init0_watermark_0 = readl(&bwlimiter->modena_init0_watermark_0) &
+	                                 BW_LIMITER_BW_WATERMARK_MASK;
+
+	/* Setting MReq Priority of the DSS*/
+	mreqprio_0 |= 0x77;
+
+	/*
+	 * Set L3 Fast Configuration Register
+	 * Limiting bandwith for ARM core to 700 MBPS
+	 */
+	modena_init0_bw_fractional |= 0x10;
+	modena_init0_bw_integer |= 0x3;
+
+	writel(mreqprio_0, &cdev->mreqprio_0);
+	writel(mreqprio_1, &cdev->mreqprio_1);
+
+	writel(modena_init0_bw_fractional, &bwlimiter->modena_init0_bw_fractional);
+	writel(modena_init0_bw_integer, &bwlimiter->modena_init0_bw_integer);
+	writel(modena_init0_watermark_0, &bwlimiter->modena_init0_watermark_0);
 
 	return 0;
 }

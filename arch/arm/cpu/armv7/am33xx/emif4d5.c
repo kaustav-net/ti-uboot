@@ -173,6 +173,18 @@ void do_sdram_init(const struct ctrl_ioregs *ioregs,
 	writel(regs->emif_ddr_phy_ctlr_1, &emif->emif_ddr_phy_ctrl_1_shdw);
 	writel(regs->emif_rd_wr_exec_thresh, &emif->emif_rd_wr_exec_thresh);
 
+	/*
+	 * for most SOCs these registers won't need to be changed so only
+	 * write to these registers if someone explicitly has set the
+	 * register's value.
+	 */
+	if(regs->emif_cos_config) {
+		writel(regs->emif_prio_class_serv_map, &emif->emif_prio_class_serv_map);
+		writel(regs->emif_connect_id_serv_1_map, &emif->emif_connect_id_serv_1_map);
+		writel(regs->emif_connect_id_serv_2_map, &emif->emif_connect_id_serv_2_map);
+		writel(regs->emif_cos_config, &emif->emif_cos_config);
+	}
+
 	ext_phy_settings(regs, ext_phy_ctrl_const_regs);
 
 	clrbits_le32(&emif->emif_sdram_ref_ctrl, EMIF_REG_INITREF_DIS_MASK);
