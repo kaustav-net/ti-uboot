@@ -88,6 +88,18 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{RGMII0_RXD2, (IEN | M0) },
 	{RGMII0_RXD1, (IEN | M0) },
 	{RGMII0_RXD0, (IEN | M0) },
+	{VIN2A_D12, (M3) },
+	{VIN2A_D13, (M3) },
+	{VIN2A_D14, (M3) },
+	{VIN2A_D15, (M3) },
+	{VIN2A_D16, (M3) },
+	{VIN2A_D17, (M3) },
+	{VIN2A_D18, (IEN | M3)},
+	{VIN2A_D19, (IEN | M3)},
+	{VIN2A_D20, (IEN | M3)},
+	{VIN2A_D21, (IEN | M3)},
+	{VIN2A_D22, (IEN | M3)},
+	{VIN2A_D23, (IEN | M3)},
 #if defined(CONFIG_NAND) || defined(CONFIG_NOR)
 	/* NAND / NOR pin-mux */
 	{GPMC_AD0 , M0 | IEN | PDIS}, /* GPMC_AD0  */
