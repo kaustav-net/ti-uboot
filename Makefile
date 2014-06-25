@@ -3258,6 +3258,9 @@ stm3240g-eval_config : unconfig
 ea-lpc1788_config : unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm_cortexm3 ea-lpc1788 nxp lpc178x
 
+tm4c_config :  unconfig
+	@$(MKCONFIG) $(@:_config=) arm arm_cortexm3 tm4c ti tm4c
+
 twr-k60n512_config : unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm_cortexm3 twr-k60n512 freescale kinetis
 

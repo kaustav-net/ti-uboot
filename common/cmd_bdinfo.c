@@ -324,7 +324,9 @@ int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	int i;
 	bd_t *bd = gd->bd;
 
+#ifdef CONFIG_CMDLINE_TAG
 	print_num ("arch_number",	bd->bi_arch_number);
+#endif
 	print_num ("env_t",		(ulong)bd->bi_env);
 	print_num ("boot_params",	(ulong)bd->bi_boot_params);
 

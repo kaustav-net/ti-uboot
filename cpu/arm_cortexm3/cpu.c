@@ -55,6 +55,7 @@ int arch_cpu_init(void)
 	 */
 	clock_init();
 
+#ifdef CONFIG_CMDLINE_TAG
 	/*
 	 * Architecture number; used by the Linux kernel.
 	 */
@@ -72,6 +73,7 @@ int arch_cpu_init(void)
 	gd->bd->bi_arch_number = MACH_TYPE_M2S;
 #else
 # error "Unsupported Cortex-M3 SOC."
+#endif
 #endif
 
 	/*
