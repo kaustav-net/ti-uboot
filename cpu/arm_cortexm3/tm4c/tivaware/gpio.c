@@ -44,17 +44,13 @@
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
-#include "inc/hw_gpio.h"
-#include "inc/hw_ints.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_sysctl.h"
-#include "inc/hw_types.h"
-#include "driverlib/debug.h"
-#include "driverlib/gpio.h"
-#include "driverlib/interrupt.h"
+#include "hw_gpio.h"
+#include "hw_memmap.h"
+#include "hw_sysctl.h"
+#include "hw_types.h"
+#include "gpio.h"
 
+#if 0
 //*****************************************************************************
 //
 // A mapping of GPIO port address to interrupt number.
@@ -476,6 +472,7 @@ GPIOIntTypeGet(uint32_t ui32Port, uint8_t ui8Pin)
     return(((ui32IBE & ui8Pin) ? 1 : 0) | ((ui32IS & ui8Pin) ? 2 : 0) |
            ((ui32IEV & ui8Pin) ? 4 : 0) | (ui32SI & 0x01) ? 0x10000 : 0);
 }
+#endif
 
 //*****************************************************************************
 //
@@ -547,26 +544,6 @@ GPIOPadConfigSet(uint32_t ui32Port, uint8_t ui8Pins,
                  uint32_t ui32Strength, uint32_t ui32PinType)
 {
     uint8_t ui8Bit;
-
-    //
-    // Check the arguments.
-    //
-    ASSERT(_GPIOBaseValid(ui32Port));
-    ASSERT((ui32Strength == GPIO_STRENGTH_2MA) ||
-           (ui32Strength == GPIO_STRENGTH_4MA) ||
-           (ui32Strength == GPIO_STRENGTH_6MA) ||
-           (ui32Strength == GPIO_STRENGTH_8MA) ||
-           (ui32Strength == GPIO_STRENGTH_8MA_SC) ||
-           (ui32Strength == GPIO_STRENGTH_10MA) ||
-           (ui32Strength == GPIO_STRENGTH_12MA));
-    ASSERT((ui32PinType == GPIO_PIN_TYPE_STD) ||
-           (ui32PinType == GPIO_PIN_TYPE_STD_WPU) ||
-           (ui32PinType == GPIO_PIN_TYPE_STD_WPD) ||
-           (ui32PinType == GPIO_PIN_TYPE_OD) ||
-           (ui32PinType == GPIO_PIN_TYPE_WAKE_LOW) ||
-           (ui32PinType == GPIO_PIN_TYPE_WAKE_HIGH) ||
-           (ui32PinType == GPIO_PIN_TYPE_ANALOG));
-
 
     //
     // Set the GPIO peripheral configuration register first as required.  This
@@ -687,12 +664,6 @@ GPIOPadConfigGet(uint32_t ui32Port, uint8_t ui8Pin,
     uint32_t ui32PinType, ui32Strength;
 
     //
-    // Check the arguments.
-    //
-    ASSERT(_GPIOBaseValid(ui32Port));
-    ASSERT(ui8Pin < 8);
-
-    //
     // Convert from a pin number to a bit position.
     //
     ui8Pin = (1 << ui8Pin);
@@ -724,6 +695,7 @@ GPIOPadConfigGet(uint32_t ui32Port, uint8_t ui8Pin,
     *pui32PinType = ui32PinType;
 }
 
+#if 0
 //*****************************************************************************
 //
 //! Enables the specified GPIO interrupts.
@@ -2662,6 +2634,7 @@ GPIOADCTriggerDisable(uint32_t ui32Port, uint8_t ui8Pins)
     //
     HWREG(ui32Port + GPIO_O_ADCCTL) &= (~ui8Pins);
 }
+#endif
 
 //*****************************************************************************
 //

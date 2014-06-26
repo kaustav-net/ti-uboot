@@ -22,17 +22,18 @@
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
-#include "inc/hw_gpio.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "driverlib/gpio.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/rom.h"
-#include "driverlib/rom_map.h"
-#include "driverlib/sysctl.h"
-#include "drivers/pinout.h"
+//#include <stdbool.h>
+//#include <stdint.h>
+#include "hw_gpio.h"
+#include "hw_memmap.h"
+#include "hw_types.h"
+#include "gpio.h"
+#include "pin_map.h"
+#define TARGET_IS_TM4C129_RA0
+#include "rom.h"
+//#include "driverlib/rom_map.h"
+#include "sysctl.h"
+//#include "drivers/pinout.h"
 
 //*****************************************************************************
 //
@@ -63,7 +64,7 @@
 //
 //*****************************************************************************
 void
-PinoutSet(bool bEthernet, bool bUSB)
+PinoutSet(void)
 {
     //
     // Enable all the GPIO peripherals.
@@ -91,48 +92,17 @@ PinoutSet(bool bEthernet, bool bUSB)
     ROM_GPIOPinConfigure(GPIO_PA1_U0TX);
     ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
-    //
-    // PB0-1/PD6/PL6-7 are used for USB.
-    // PQ4 can be used as a power fault detect on this board but it is not
-    // the hardware peripheral power fault input pin.
-    //
-    if(bUSB)
-    {
-        HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
-        HWREG(GPIO_PORTD_BASE + GPIO_O_CR) = 0xff;
-        ROM_GPIOPinConfigure(GPIO_PD6_USB0EPEN);
-        ROM_GPIOPinTypeUSBAnalog(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-        ROM_GPIOPinTypeUSBDigital(GPIO_PORTD_BASE, GPIO_PIN_6);
-        ROM_GPIOPinTypeUSBAnalog(GPIO_PORTL_BASE, GPIO_PIN_6 | GPIO_PIN_7);
-        ROM_GPIOPinTypeGPIOInput(GPIO_PORTQ_BASE, GPIO_PIN_4);
-    }
-    else
     {
         //
         // Keep the default config for most pins used by USB.
         // Add a pull down to PD6 to turn off the TPS2052 switch
         //
         ROM_GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_6);
-        MAP_GPIOPadConfigSet(GPIO_PORTD_BASE, GPIO_PIN_6, GPIO_STRENGTH_2MA,
+        GPIOPadConfigSet(GPIO_PORTD_BASE, GPIO_PIN_6, GPIO_STRENGTH_2MA,
                              GPIO_PIN_TYPE_STD_WPD);
 
     }
 
-    //
-    // PF0/PF4 are used for Ethernet LEDs.
-    //
-    if(bEthernet)
-    {
-        //
-        // this app wants to configure for ethernet LED function.
-        //
-        ROM_GPIOPinConfigure(GPIO_PF0_EN0LED0);
-        ROM_GPIOPinConfigure(GPIO_PF4_EN0LED1);
-
-        GPIOPinTypeEthernetLED(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
-
-    }
-    else
     {
 
         //
@@ -145,7 +115,7 @@ PinoutSet(bool bEthernet, bool bUSB)
         // Default the LEDs to OFF.
         //
         ROM_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, 0);
-        MAP_GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4,
+        GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4,
                              GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
 
 
@@ -161,15 +131,32 @@ PinoutSet(bool bEthernet, bool bUSB)
     // PN0 and PN1 are used for USER LEDs.
     //
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-    MAP_GPIOPadConfigSet(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1,
+    GPIOPadConfigSet(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1,
                              GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
 
     //
     // Default the LEDs to OFF.
     //
     ROM_GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1, 0);
+
+	/* Do UART pinmux here */
+	ROM_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_1);
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+	ROM_GPIOPinConfigure(GPIO_PA0_U0RX);
+	ROM_GPIOPinConfigure(GPIO_PA1_U0TX);
+	ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+
+	/* More.. */
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+
+	ROM_UARTConfigSetExpClk(CONFIG_SYS_NS16550_COM1,
+				CONFIG_SYS_NS16550_CLK, 115200,
+						    (0x0 | 0x0 | 0x00000060 ));
+	ROM_UARTEnable(CONFIG_SYS_NS16550_COM1);
 }
 
+#if 0
 //*****************************************************************************
 //
 //! This function writes a state to the LED bank.
@@ -292,6 +279,7 @@ void LEDRead(uint32_t *pui32LEDValue)
         *pui32LEDValue |= CLP_D1;
     }
 }
+#endif
 
 //*****************************************************************************
 //

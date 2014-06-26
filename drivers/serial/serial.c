@@ -163,6 +163,7 @@ static int calc_divisor (NS16550_t port)
 #if !defined(CONFIG_SERIAL_MULTI)
 int serial_init (void)
 {
+#if 0
 	int clock_divisor;
 
 #ifdef CONFIG_NS87308
@@ -185,24 +186,35 @@ int serial_init (void)
 	clock_divisor = calc_divisor(serial_ports[3]);
 	NS16550_init(serial_ports[3], clock_divisor);
 #endif
+#endif
 
 	return (0);
 }
 #endif
 
+#define ROM_APITABLE            ((uint32_t *)0x01000010)
+#define ROM_UARTTABLE           ((uint32_t *)(ROM_APITABLE[1]))
+#define ROM_UARTCharPut                                                       \
+	((void (*)(uint32_t ui32Base,                                         \
+		   unsigned char ucData))ROM_UARTTABLE[0])
+#define ROM_UARTCharGet                                                       \
+	        ((int32_t (*)(uint32_t ui32Base))ROM_UARTTABLE[14])
+
+
+
 void
 _serial_putc(const char c,const int port)
 {
 	if (c == '\n')
-		NS16550_putc(PORT, '\r');
+		ROM_UARTCharPut(0x4000C000, '\r');
 
-	NS16550_putc(PORT, c);
+	ROM_UARTCharPut(0x4000C000, c);
 }
 
 void
 _serial_putc_raw(const char c,const int port)
 {
-	NS16550_putc(PORT, c);
+	ROM_UARTCharPut(0x4000C000, c);
 }
 
 void
@@ -217,7 +229,7 @@ _serial_puts (const char *s,const int port)
 int
 _serial_getc(const int port)
 {
-	return NS16550_getc(PORT);
+	return ROM_UARTCharGet(0x4000C000);
 }
 
 int

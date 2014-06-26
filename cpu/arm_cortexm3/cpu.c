@@ -35,15 +35,19 @@ DECLARE_GLOBAL_DATA_PTR;
 extern void cortex_m3_soc_init(void);
 #endif
 
+void PinoutSet(void);
+
 /*
  * CPU specific initilization
  */
 int arch_cpu_init(void)
 {
+#ifdef CONFIG_ENVM
 	/*
 	 * Initialize the eNVM driver
 	 */
 	envm_init();
+#endif
 
 	/*
 	 * Initialize the timers.
@@ -54,6 +58,13 @@ int arch_cpu_init(void)
 	 * Initialize the clock frequencies.
 	 */
 	clock_init();
+
+#ifdef CONFIG_SYS_TM4C
+	/*
+	 * Pinout
+	 */
+	PinoutSet();
+#endif
 
 #ifdef CONFIG_CMDLINE_TAG
 	/*

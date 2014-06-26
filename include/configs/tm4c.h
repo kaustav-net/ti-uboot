@@ -1,8 +1,7 @@
 /*
- * (C) Copyright 2012 Emcraft Systems
+ * Copyright (C) 2014, Texas Instruments, Inc. http://www.ti.com/
  *
- * Configuration settings for Emcraft Systems'
- * SmartFusion system-on-module (SOM).
+ * Configuration settings for TI TM4C family of boards
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -29,7 +28,7 @@
 /*
  * Disable debug messages
  */
-#define DEBUG
+#undef DEBUG
 
 /*
  * This is an ARM Cortex-M3 CPU core
@@ -105,18 +104,6 @@
 #define CONFIG_SYS_RAM_SIZE		CONFIG_MEM_RAM_SIZE
 #endif
 
-/*
- * External Memory Controller settings
- * Slow, safe timings for external SRAM
- * XXX: A2F SOM still
-#define CONFIG_SYS_EMC0CS0CR		0x00002aad
- */
-
-/*
- * Timings for the external Flash
- */
-#define CONFIG_SYS_EMC0CS1CR		0x00011147
-
 #if 0
 /*
  * Settings for the CFI Flash driver
@@ -152,12 +139,11 @@
  * Serial console configuration
  */
 #define CONFIG_SYS_NS16550		1
-#undef CONFIG_NS16550_MIN_FUNCTIONS
 #define CONFIG_SYS_NS16550_SERIAL	1
 #define CONFIG_SYS_NS16550_REG_SIZE     (-4)
 #define CONFIG_SYS_NS16550_CLK		clock_get(CLOCK_PCLK0)
 #define CONFIG_CONS_INDEX               1
-#define CONFIG_SYS_NS16550_COM1         0x40000000
+#define CONFIG_SYS_NS16550_COM1         0x4000C000
 #define CONFIG_BAUDRATE                 115200
 #define CONFIG_SYS_BAUDRATE_TABLE       { 9600, 19200, 38400, 57600, 115200 }
 
@@ -187,20 +173,18 @@
 #define CONFIG_BITBANGMII_MULTI		1
 #endif
 
-#define CONFIG_SYS_MEMTEST_START	CONFIG_MEM_RAM_BASE
-#define CONFIG_SYS_MEMTEST_END		(CONFIG_MEM_RAM_BASE + \
-					CONFIG_MEM_RAM_SIZE)
+#define CONFIG_SYS_MEMTEST_START	CONFIG_MEM_RAM_BASE + (192 << 10)
+#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_MEMTEST_START + (32 << 10))
 
 /*
  * Needed by "loadb"
  */
-#define CONFIG_SYS_LOAD_ADDR		CONFIG_MEM_RAM_BASE
+#define CONFIG_SYS_LOAD_ADDR		CONFIG_MEM_RAM_BASE + (192 << 10)
 
 /*
  * Monitor is actually in eNVM. In terms of U-Boot, it is neither "flash",
  * not RAM, but CONFIG_SYS_MONITOR_BASE must be defined.
  */
-#define CONFIG_SYS_MONITOR_BASE		0x0
 
 /*
  * Monitor is not in flash. Needs to define this to prevent

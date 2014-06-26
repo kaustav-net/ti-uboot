@@ -29,7 +29,11 @@ else
 ifeq ($(SOC),omap3)
 STANDALONE_LOAD_ADDR = 0x80300000
 else
+ifeq ($(SOC),tm4c)
+STANDALONE_LOAD_ADDR = 0x20030000
+else
 STANDALONE_LOAD_ADDR = 0xc100000
+endif
 endif
 endif
 

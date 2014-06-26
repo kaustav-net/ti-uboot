@@ -150,7 +150,6 @@ extern void GPIOPadConfigGet(uint32_t ui32Port, uint8_t ui8Pin,
                              uint32_t *pui32Strength, uint32_t *pui32PadType);
 extern void GPIOIntEnable(uint32_t ui32Port, uint32_t ui32IntFlags);
 extern void GPIOIntDisable(uint32_t ui32Port, uint32_t ui32IntFlags);
-extern uint32_t GPIOIntStatus(uint32_t ui32Port, bool bMasked);
 extern void GPIOIntClear(uint32_t ui32Port, uint32_t ui32IntFlags);
 extern void GPIOIntRegister(uint32_t ui32Port, void (*pfnIntHandler)(void));
 extern void GPIOIntUnregister(uint32_t ui32Port);

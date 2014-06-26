@@ -1,10 +1,9 @@
 /*
- * board/emcraft/a2f-som/board.c
+ * board/ti/tm4c/board.c
  *
- * Board specific code the the Emcraft SmartFusion system-on-module (SOM).
+ * Board specific code the TI Tiva C "TM4C" family.
  *
- * Copyright (C) 2012
- * Vladimir Khusainov, Emcraft Systems, vlad@emcraft.com
+ * Copyright (C) 2014, Texas Instruments, Inc. http://www.ti.com/
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,17 +22,11 @@
  */
 
 #include <common.h>
-#include <netdev.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
 int board_init(void)
 {
-	/*
-	 * A2F: Check if PSRAM_IP is instantiated, and if so, put PSRAM into
-	 * Page Mode.  Enable the EMC interface so we are able to access Flash
-	 * (and then external RAM after dram_init has run).
-	 */
 	return 0;
 }
 
@@ -44,8 +37,7 @@ int checkboard(void)
 }
 
 /*
- * The TM4C platforms have 256KiB of SRAM and no external DDR, need
- * to see what needs hacking to make that work.
+ * The TM4C platforms have 256KiB of SRAM and no external DDR.
  */
 int dram_init (void)
 {
