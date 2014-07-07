@@ -455,8 +455,12 @@ static int bootm_start_standalone(ulong iflag, int argc, char *argv[])
 		setenv("filesize", buf);
 		return 0;
 	}
-	appl = (int (*)(int, char *[]))ntohl(images.ep);
-	(*appl)(argc-1, &argv[1]);
+#ifdef CONFIG_SYS_ARMCORTEXM3
+	/* Workaround blx issue */
+	images.ep += 1;
+#endif
+	appl = (int (*)(int, char *[]))images.ep;
+	appl(argc-1, &argv[1]);
 
 	return 0;
 }

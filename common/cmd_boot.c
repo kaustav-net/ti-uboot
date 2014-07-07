@@ -49,6 +49,11 @@ int do_go (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 	printf ("## Starting application at 0x%08lX ...\n", addr);
 
+#ifdef CONFIG_SYS_ARMCORTEXM3
+	/* Workaround blx issue */
+	addr += 1;
+#endif
+
 	/*
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args

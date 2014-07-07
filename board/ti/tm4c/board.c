@@ -41,7 +41,16 @@ int checkboard(void)
  */
 int dram_init (void)
 {
-        return 0;
+
+	/*
+	 * Fill in global info with description of SRAM configuration
+	 */
+	gd->bd->bi_dram[0].start = CONFIG_MEM_RAM_BASE;
+	gd->bd->bi_dram[0].size  = CONFIG_MEM_RAM_SIZE;
+
+	cortex_m3_mpu_full_access();
+
+	return 0;
 }
 
 int misc_init_r(void)

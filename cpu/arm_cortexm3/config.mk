@@ -35,5 +35,5 @@ endif
 
 PLATFORM_CPPFLAGS += -I$(TOPDIR)/cpu/$(CPU)
 
-PLATFORM_RELFLAGS += -g2 -mthumb -mcpu=cortex-m3 -fsigned-char -O2 -fno-builtin-puts -fno-common -ffixed-r8
+PLATFORM_RELFLAGS += -g2 -mthumb -mcpu=cortex-m4 -fsigned-char -fno-builtin-puts -fno-common -ffixed-r8 -mabi=aapcs
 
