@@ -14,6 +14,7 @@
 #include <asm/arch/omap.h>
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/sys_proto.h>
+#include <asm/ti-common/edma.h>
 #include <watchdog.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -93,6 +94,10 @@ u32 spl_boot_mode(void)
 
 void spl_board_init(void)
 {
+#if defined(CONFIG_SPL_DMA_SUPPORT) && defined(CONFIG_TI_EDMA)
+	edma_init(0);
+	edma_request_channel(1,1,0);
+#endif
 #ifdef CONFIG_SPL_NAND_SUPPORT
 	gpmc_init();
 #endif

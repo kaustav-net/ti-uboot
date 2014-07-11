@@ -13,6 +13,7 @@
 #include <spi.h>
 #include <asm/gpio.h>
 #include <asm/omap_gpio.h>
+#include <asm/ti-common/edma.h>
 
 /* ti qpsi register bit masks */
 #define QSPI_TIMEOUT                    2000000
@@ -340,3 +341,72 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen, const void *dout,
 
 	return 0;
 }
+
+#if defined(CONFIG_SPL_DMA_SUPPORT) && defined(CONFIG_TI_EDMA)
+void spi_flash_copy_mmap(void *data, void *offset, size_t len)
+{
+	struct edma_param_entry edma_param;
+	int           b_cnt_value = 1;
+	int           rem_bytes  = 0;
+	int           a_cnt_value = len;
+	unsigned int          addr      = (unsigned int) (data);
+	unsigned int          max_acnt  = 0x7FFFU;
+	unsigned int edma_ch_num = 1;
+
+	if (len > max_acnt)
+	{
+		b_cnt_value = (len / max_acnt);
+		rem_bytes  = (len % max_acnt);
+		a_cnt_value = max_acnt;
+	}
+
+	/* Compute QSPI address and size */
+	edma_param.opt      = 0;
+	edma_param.src_addr  = ((unsigned int) offset);
+	edma_param.dest_addr = addr;
+	edma_param.a_cnt     = a_cnt_value;
+	edma_param.b_cnt     = b_cnt_value;
+	edma_param.c_cnt     = 1;
+	edma_param.src_bidx  = a_cnt_value;
+	edma_param.dest_bidx = a_cnt_value;
+	edma_param.src_cidx  = 0;
+	edma_param.dest_cidx = 0;
+	edma_param.link_addr = 0xFFFF;
+	edma_param.opt     |=
+		(EDMA_TPCC_OPT_TCINTEN_MASK |
+		 ((edma_ch_num <<
+		   EDMA_TPCC_OPT_TCC_SHIFT) &
+		  EDMA_TPCC_OPT_TCC_MASK) | EDMA_TPCC_OPT_SYNCDIM_MASK);
+
+	edma_set_param(edma_ch_num, &edma_param);
+	edma_enable_transfer(edma_ch_num);
+
+	while (!(edma_get_intr_status() & (1 << edma_ch_num))) ;
+	edma_clr_intr(edma_ch_num);
+	if (rem_bytes != 0)
+	{
+		/* Compute QSPI address and size */
+		edma_param.opt     = 0;
+		edma_param.src_addr =
+			(b_cnt_value * max_acnt) + ((unsigned int) offset);
+		edma_param.dest_addr = (addr + (max_acnt * b_cnt_value));
+		edma_param.a_cnt     = rem_bytes;
+		edma_param.b_cnt     = 1;
+		edma_param.c_cnt     = 1;
+		edma_param.src_bidx  = rem_bytes;
+		edma_param.dest_bidx = rem_bytes;
+		edma_param.src_cidx  = 0;
+		edma_param.dest_cidx = 0;
+		edma_param.link_addr = 0xFFFF;
+		edma_param.opt     |=
+			(EDMA_TPCC_OPT_TCINTEN_MASK |
+			 ((edma_ch_num << EDMA_TPCC_OPT_TCC_SHIFT) & EDMA_TPCC_OPT_TCC_MASK));
+		edma_set_param(edma_ch_num, &edma_param);
+		edma_enable_transfer(edma_ch_num);
+
+		while (!(edma_get_intr_status() & (1 << edma_ch_num))) ;
+		edma_clr_intr(edma_ch_num);
+	}
+	*((unsigned int *) offset) += len;
+}
+#endif

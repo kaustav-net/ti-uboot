@@ -418,6 +418,7 @@ void enable_basic_clocks(void)
 #ifdef CONFIG_DRIVER_TI_CPSW
 		(*prcm)->cm_gmac_clkstctrl,
 #endif
+		(*prcm)->cm_l3_1_clkstctrl,
 		0
 	};
 
@@ -434,6 +435,8 @@ void enable_basic_clocks(void)
 		(*prcm)->cm_l4per_gpio6_clkctrl,
 		(*prcm)->cm_l4per_gpio7_clkctrl,
 		(*prcm)->cm_l4per_gpio8_clkctrl,
+		(*prcm)->cm_l3main1_tptc1_clkctrl,
+		(*prcm)->cm_l3main1_tptc2_clkctrl,
 		0
 	};
 
@@ -499,8 +502,6 @@ void enable_basic_uboot_clocks(void)
 
 	u32 const clk_modules_hw_auto_essential[] = {
 		(*prcm)->cm_l3init_hsusbtll_clkctrl,
-		(*prcm)->cm_l3main1_tptc1_clkctrl,
-		(*prcm)->cm_l3main1_tptc2_clkctrl,
 		0
 	};
 
