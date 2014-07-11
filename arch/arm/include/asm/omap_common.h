@@ -344,6 +344,10 @@ struct prcm_regs {
 	/* GMAC Clk Ctrl */
 	u32 cm_gmac_gmac_clkctrl;
 	u32 cm_gmac_clkstctrl;
+
+	/*l3main1 edma*/
+	u32 cm_l3main1_tptc1_clkctrl;
+	u32 cm_l3main1_tptc2_clkctrl;
 };
 
 struct omap_sys_ctrl_regs {

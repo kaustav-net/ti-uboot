@@ -499,6 +499,8 @@ void enable_basic_uboot_clocks(void)
 
 	u32 const clk_modules_hw_auto_essential[] = {
 		(*prcm)->cm_l3init_hsusbtll_clkctrl,
+		(*prcm)->cm_l3main1_tptc1_clkctrl,
+		(*prcm)->cm_l3main1_tptc2_clkctrl,
 		0
 	};
 
