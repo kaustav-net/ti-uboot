@@ -46,6 +46,7 @@
 
 /* Always 128 KiB env size */
 #define CONFIG_ENV_SIZE			(128 << 10)
+#define CONFIG_ENV_IS_NOWHERE
 
 /* Enhance our eMMC support / experience. */
 #define CONFIG_CMD_GPT
@@ -402,6 +403,7 @@
 #define CONFIG_SPL_SPI_CS		0
 #define CONFIG_SYS_SPI_U_BOOT_OFFS	0x20000
 
+#undef CONFIG_ENV_IS_NOWHERE
 #define CONFIG_ENV_IS_IN_SPI_FLASH
 #define CONFIG_SYS_REDUNDAND_ENVIRONMENT
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
@@ -463,6 +465,7 @@
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_FLASH_BASE
 /* Reduce SPL size by removing unlikey targets */
 #ifdef CONFIG_NOR_BOOT
+#undef  CONFIG_ENV_IS_NOWHERE
 #define CONFIG_ENV_IS_IN_FLASH
 #define CONFIG_ENV_SECT_SIZE		(128 << 10)	/* 128 KiB */
 #define CONFIG_ENV_OFFSET		(512 << 10)	/* 512 KiB */
