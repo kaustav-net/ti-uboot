@@ -1017,6 +1017,8 @@ static int mmc_startup(struct mmc *mmc)
 
 			if (err)
 				return err;
+			else
+				ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
 
 			/* Read out group size from ext_csd */
 			mmc->erase_grp_size =
