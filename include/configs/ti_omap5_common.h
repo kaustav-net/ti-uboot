@@ -127,6 +127,7 @@
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
 	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
 	NANDARGS \
+	DFUARGS \
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
