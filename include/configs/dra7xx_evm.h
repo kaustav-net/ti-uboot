@@ -43,6 +43,25 @@
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}"
 
+#ifdef CONFIG_NAND
+/* Define NAND information. */
+#define NANDARGS \
+	"mtdids=" MTDIDS_DEFAULT "\0" \
+	"mtdparts=" MTDPARTS_DEFAULT "\0" \
+	"nandargs=setenv bootargs console=${console} " \
+		"${optargs} " \
+		"root=${nandroot} " \
+		"rootfstype=${nandrootfstype}\0" \
+	"nandroot=ubi0:rootfs rw ubi.mtd=NAND.file-system,4096\0" \
+	"nandrootfstype=ubifs rootwait=1\0" \
+	"nandboot=echo Booting from nand ...; " \
+		"run nandargs; " \
+		"nand read ${fdtaddr} NAND.u-boot-spl-os; " \
+		"nand read ${loadaddr} NAND.kernel; " \
+		"bootz ${loadaddr} - ${fdtaddr}\0"
+#define NANDBOOT			"run nandboot; "
+#endif
+
 #include <configs/ti_omap5_common.h>
 
 /* Enhance our eMMC support / experience. */

@@ -66,6 +66,10 @@
 #ifndef PARTS_DEFAULT
 #define PARTS_DEFAULT
 #endif
+#ifndef NANDARGS
+#define NANDARGS
+#define NANDBOOT
+#endif
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -122,6 +126,7 @@
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
 	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
+	NANDARGS \
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
@@ -130,6 +135,7 @@
 	"setenv bootpart 1:2; " \
 	"setenv mmcroot /dev/mmcblk0p2 rw; " \
 	"run mmcboot;" \
+	NANDBOOT \
 
 
 /*
