@@ -283,7 +283,7 @@ static void device_qual(struct usb_composite_dev *cdev)
 	qual->bDeviceSubClass = cdev->desc.bDeviceSubClass;
 	qual->bDeviceProtocol = cdev->desc.bDeviceProtocol;
 	/* ASSUME same EP0 fifo size at both speeds */
-	qual->bMaxPacketSize0 = cdev->desc.bMaxPacketSize0;
+	qual->bMaxPacketSize0 = cdev->gadget->ep0->maxpacket;
 	qual->bNumConfigurations = count_configs(cdev, USB_DT_DEVICE_QUALIFIER);
 	qual->bRESERVED = 0;
 }
@@ -331,8 +331,8 @@ static int set_config(struct usb_composite_dev *cdev,
 	} else
 		result = 0;
 
-	debug("%s: %s speed config #%d: %s\n", __func__,
-	     ({ char *speed;
+	printf("%s: %s speed config #%d: %s\n", __func__,
+	       ({ char *speed;
 		     switch (gadget->speed) {
 		     case USB_SPEED_LOW:
 			     speed = "low";
@@ -736,6 +736,8 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 		case USB_DT_DEVICE:
 			cdev->desc.bNumConfigurations =
 				count_configs(cdev, USB_DT_DEVICE);
+			cdev->desc.bMaxPacketSize0 =
+				cdev->gadget->ep0->maxpacket;
 			value = min(w_length, (u16) sizeof cdev->desc);
 			memcpy(req->buf, &cdev->desc, value);
 			break;
@@ -987,7 +989,6 @@ static int composite_bind(struct usb_gadget *gadget)
 
 	memcpy(&cdev->desc, composite->dev,
 	       sizeof(struct usb_device_descriptor));
-	cdev->desc.bMaxPacketSize0 = gadget->ep0->maxpacket;
 
 	debug("%s: ready\n", composite->name);
 	return 0;
