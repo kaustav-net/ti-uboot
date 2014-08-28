@@ -30,6 +30,10 @@ struct usb_ep;
  * @dma: DMA address corresponding to 'buf'.  If you don't set this
  *	field, and the usb controller needs one, it is responsible
  *	for mapping and unmapping the buffer.
+ * @sg: a scatterlist for SG-capable controllers.
+ * @num_sgs: number of SG entries
+ * @num_mapped_sgs: number of SG entries mapped to DMA (internal)
+ * @stream_id: The stream id, when USB3.0 bulk streams are being used
  * @length: Length of that data
  * @no_interrupt: If true, hints that no completion irq is needed.
  *	Helpful sometimes with deep request queues that are handled
@@ -84,6 +88,11 @@ struct usb_request {
 	unsigned		length;
 	dma_addr_t		dma;
 
+	struct scatterlist	*sg;
+	unsigned		num_sgs;
+	unsigned		num_mapped_sgs;
+
+	unsigned		stream_id:16;
 	unsigned		no_interrupt:1;
 	unsigned		zero:1;
 	unsigned		short_not_ok:1;
@@ -120,6 +129,7 @@ struct usb_ep_ops {
 	int (*dequeue) (struct usb_ep *ep, struct usb_request *req);
 
 	int (*set_halt) (struct usb_ep *ep, int value);
+	int (*set_wedge)(struct usb_ep *ep);
 	int (*fifo_status) (struct usb_ep *ep);
 	void (*fifo_flush) (struct usb_ep *ep);
 };
@@ -132,8 +142,18 @@ struct usb_ep_ops {
  * @maxpacket:The maximum packet size used on this endpoint.  The initial
  *	value can sometimes be reduced (hardware allowing), according to
  *      the endpoint descriptor used to configure the endpoint.
+ * @maxpacket_limit:The maximum packet size value which can be handled by this
+ *	endpoint. It's set once by UDC driver when endpoint is initialized, and
+ *	should not be changed. Should not be confused with maxpacket.
+ * @max_streams: The maximum number of streams supported
+ *	by this EP (0 - 16, actual number is 2^n)
+ * @maxburst: the maximum number of bursts supported by this EP (for usb3)
  * @driver_data:for use by the gadget driver.  all other fields are
  *	read-only to gadget drivers.
+ * @desc: endpoint descriptor.  This pointer is set before the endpoint is
+ *	enabled and remains valid until the endpoint is disabled.
+ * @comp_desc: In case of SuperSpeed support, this is the endpoint companion
+ *	descriptor that is used to configure the endpoint
  *
  * the bus controller driver lists all the general purpose endpoints in
  * gadget->ep_list.  the control endpoint (gadget->ep0) is not in that list,
@@ -145,9 +165,29 @@ struct usb_ep {
 	const struct usb_ep_ops	*ops;
 	struct list_head	ep_list;
 	unsigned		maxpacket:16;
+	unsigned		maxpacket_limit:16;
+	unsigned		max_streams:16;
+	unsigned		maxburst:5;
+	const struct usb_endpoint_descriptor	*desc;
+	const struct usb_ss_ep_comp_descriptor	*comp_desc;
 };
 
 /*-------------------------------------------------------------------------*/
+
+/**
+ * usb_ep_set_maxpacket_limit - set maximum packet size limit for endpoint
+ * @ep:the endpoint being configured
+ * @maxpacket_limit:value of maximum packet size limit
+ *
+ * This function shoud be used only in UDC drivers to initialize endpoint
+ * (usually in probe function).
+ */
+static inline void usb_ep_set_maxpacket_limit(struct usb_ep *ep,
+					      unsigned maxpacket_limit)
+{
+	ep->maxpacket_limit = maxpacket_limit;
+	ep->maxpacket = maxpacket_limit;
+}
 
 /**
  * usb_ep_enable - configure endpoint, making it usable
@@ -395,7 +435,7 @@ static inline void usb_ep_fifo_flush(struct usb_ep *ep)
 /*-------------------------------------------------------------------------*/
 
 struct usb_gadget;
-
+struct usb_gadget_driver;
 /* the rest of the api to the controller hardware: device operations,
  * which don't involve endpoints (or i/o).
  */
@@ -408,9 +448,13 @@ struct usb_gadget_ops {
 	int	(*pullup) (struct usb_gadget *, int is_on);
 	int	(*ioctl)(struct usb_gadget *,
 				unsigned code, unsigned long param);
+	int	(*udc_start)(struct usb_gadget *,
+			     struct usb_gadget_driver *);
+	int	(*udc_stop)(struct usb_gadget *,
+			    struct usb_gadget_driver *);
 };
 
-struct device {
+struct usb_gadget_device {
 	void		*driver_data;	/* data private to the driver */
 	void            *device_data;   /* data private to the device */
 };
@@ -422,6 +466,10 @@ struct device {
  *	driver setup() requests
  * @ep_list: List of other endpoints supported by the device.
  * @speed: Speed of current connection to USB host.
+ * @max_speed: Maximal speed the UDC can handle.  UDC must support this
+ *	and all slower speeds.
+ * @state: the state we are now (attached, suspended, configured, etc)
+ * @sg_supported: true if we can handle scatter-gather
  * @is_dualspeed: true if the controller supports both high and full speed
  *	operation.  If it does, the gadget driver must also support both.
  * @is_otg: true if the USB device port uses a Mini-AB jack, so that the
@@ -438,6 +486,8 @@ struct device {
  * @name: Identifies the controller hardware type.  Used in diagnostics
  *	and sometimes configuration.
  * @dev: Driver model state for this abstract device.
+ * @quirk_ep_out_aligned_size: epout requires buffer size to be aligned to
+ *	MaxPacketSize.
  *
  * Gadgets have a mostly-portable "gadget driver" implementing device
  * functions, handling all usb configurations and interfaces.  Gadget
@@ -463,6 +513,9 @@ struct usb_gadget {
 	struct usb_ep			*ep0;
 	struct list_head		ep_list;	/* of usb_ep */
 	enum usb_device_speed		speed;
+	enum usb_device_speed		max_speed;
+	unsigned			sg_supported:1;
+	enum usb_device_state		state;
 	unsigned			is_dualspeed:1;
 	unsigned			is_otg:1;
 	unsigned			is_a_peripheral:1;
@@ -470,7 +523,8 @@ struct usb_gadget {
 	unsigned			a_hnp_support:1;
 	unsigned			a_alt_hnp_support:1;
 	const char			*name;
-	struct device			dev;
+	struct usb_gadget_device	dev;
+	unsigned			quirk_ep_out_aligned_size:1;
 };
 
 static inline void set_gadget_data(struct usb_gadget *gadget, void *data)
@@ -483,7 +537,8 @@ static inline void *get_gadget_data(struct usb_gadget *gadget)
 	return gadget->dev.driver_data;
 }
 
-static inline struct usb_gadget *dev_to_usb_gadget(struct device *dev)
+static inline
+struct usb_gadget *dev_to_usb_gadget(struct usb_gadget_device *dev)
 {
 	return container_of(dev, struct usb_gadget, dev);
 }
@@ -689,7 +744,8 @@ static inline int usb_gadget_disconnect(struct usb_gadget *gadget)
 /*-------------------------------------------------------------------------*/
 
 /**
- * struct usb_gadget_driver - driver for usb 'slave' devices
+ * struct usb_gadget_driver - driver for uisb 'slave' devices
+ * @function: String describing the gadget's function
  * @speed: Highest speed the driver handles.
  * @bind: Invoked when the driver is bound to a gadget, usually
  *	after registering the driver.
@@ -757,6 +813,7 @@ static inline int usb_gadget_disconnect(struct usb_gadget *gadget)
  * power is maintained.
  */
 struct usb_gadget_driver {
+	char			*function;
 	enum usb_device_speed	speed;
 	int			(*bind)(struct usb_gadget *);
 	void			(*unbind)(struct usb_gadget *);
@@ -860,5 +917,13 @@ extern struct usb_ep *usb_ep_autoconfig(struct usb_gadget *,
 extern void usb_ep_autoconfig_reset(struct usb_gadget *);
 
 extern int usb_gadget_handle_interrupts(void);
+
+/* utility to set gadget state properly */
+
+void usb_gadget_set_state(struct usb_gadget *gadget,
+			  enum usb_device_state state);
+int usb_add_gadget_udc_release(struct usb_gadget *gadget);
+int usb_add_gadget_udc(struct usb_gadget *gadget);
+void usb_del_gadget_udc(struct usb_gadget *gadget);
 
 #endif	/* __LINUX_USB_GADGET_H */

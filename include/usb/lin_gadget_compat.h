@@ -27,6 +27,12 @@
 
 #define GFP_KERNEL	0
 
+enum irqreturn {
+	IRQ_NONE,
+	IRQ_HANDLED,
+	IRQ_WAKE_THREAD,
+};
+
 #define IRQ_HANDLED	1
 
 #define ENOTSUPP	524	/* Operation is not supported */

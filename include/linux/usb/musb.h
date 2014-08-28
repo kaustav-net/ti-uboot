@@ -14,6 +14,9 @@
 #define __deprecated
 #endif
 
+struct device {
+};
+
 /* The USB role is defined by the connector used on the board, so long as
  * standards are being followed.  (Developer boards sometimes won't.)
  */

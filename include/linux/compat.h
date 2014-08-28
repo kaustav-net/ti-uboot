@@ -1,6 +1,8 @@
 #ifndef _LINUX_COMPAT_H_
 #define _LINUX_COMPAT_H_
 
+#include <common.h>
+
 #define ndelay(x)	udelay(1)
 
 #define dev_dbg(dev, fmt, args...)		\
@@ -53,8 +55,13 @@
 #define BUG_ON(condition) do { if (condition) BUG(); } while(0)
 #endif /* BUG */
 
-#define WARN_ON(x) if (x) {printf("WARNING in %s line %d\n" \
-				  , __FILE__, __LINE__); }
+#define WARN_ON(x) _WARN_ON((int)(x), __FILE__, __LINE__)
+static inline int _WARN_ON(int x, char *file, int line)
+{
+	if (x)
+		printf("WARNING in %s line %d\n", file, line);
+	return x;
+}
 
 #define PAGE_SIZE	4096
 #endif
