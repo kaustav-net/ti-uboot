@@ -897,6 +897,16 @@ int usb_gadget_get_string(struct usb_gadget_strings *table, int id, u8 *buf);
 
 /*-------------------------------------------------------------------------*/
 
+/* utility to simplify map/unmap of usb_requests to/from DMA */
+
+extern int usb_gadget_map_request(struct usb_gadget *gadget,
+				  struct usb_request *req, int is_in);
+
+extern void usb_gadget_unmap_request(struct usb_gadget *gadget,
+				     struct usb_request *req, int is_in);
+
+/*-------------------------------------------------------------------------*/
+
 /* utility to simplify managing config descriptors */
 
 /* write vector of descriptors into buffer */
