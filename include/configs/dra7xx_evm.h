@@ -240,18 +240,14 @@
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)	/* 128 KiB */
 #define MTDIDS_DEFAULT			"nor0=physmap-flash.0"
 #define MTDPARTS_DEFAULT		"mtdparts=physmap-flash.0:" \
-					"128k(NOR.SPL)," \
-					"128k(NOR.SPL.backup1)," \
-					"128k(NOR.SPL.backup2)," \
-					"128k(NOR.SPL.backup3)," \
-					"256k(NOR.u-boot-spl-os)," \
 					"1m(NOR.u-boot)," \
 					"128k(NOR.u-boot-env)," \
 					"128k(NOR.u-boot-env.backup1)," \
+					"256k(NOR.u-boot-spl-os)," \
 					"8m(NOR.kernel)," \
 					"-(NOR.rootfs)"
-#define CONFIG_ENV_OFFSET		0x001c0000
-#define CONFIG_ENV_OFFSET_REDUND	0x001e0000
+#define CONFIG_ENV_OFFSET		0x00100000
+#define CONFIG_ENV_OFFSET_REDUND	0x00120000
 #endif
 #endif  /* NOR support */
 
