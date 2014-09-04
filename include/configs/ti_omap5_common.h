@@ -70,6 +70,9 @@
 #define NANDARGS
 #define NANDBOOT
 #endif
+#ifndef DFUARGS
+#define DFUARGS
+#endif
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
