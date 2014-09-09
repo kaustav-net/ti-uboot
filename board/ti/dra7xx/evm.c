@@ -146,34 +146,40 @@ static struct dwc3_device usb_otg_ss1 = {
 	.maximum_speed = USB_SPEED_SUPER,
 	.base = DRA7_USB_OTG_SS1_BASE,
 	.needs_fifo_resize = false,
+	.index = 0,
 };
 
 static struct dwc3_omap_device usb_otg_ss1_glue = {
 	.base = (void *)DRA7_USB_OTG_SS1_GLUE_BASE,
 	.utmi_mode = DWC3_OMAP_UTMI_MODE_SW,
 	.vbus_id_status = OMAP_DWC3_VBUS_VALID,
+	.index = 0,
 };
 
 static struct ti_usb_phy_device usb_phy1_device = {
 	.pll_ctrl_base = (void *)DRA7_USB3_PHY1_PLL_CTRL,
 	.usb2_phy_power = (void *)DRA7_USB2_PHY1_POWER,
 	.usb3_phy_power = (void *)DRA7_USB3_PHY1_POWER,
+	.index = 0,
 };
 
 static struct dwc3_device usb_otg_ss2 = {
 	.maximum_speed = USB_SPEED_SUPER,
 	.base = DRA7_USB_OTG_SS2_BASE,
 	.needs_fifo_resize = false,
+	.index = 1,
 };
 
 static struct dwc3_omap_device usb_otg_ss2_glue = {
 	.base = (void *)DRA7_USB_OTG_SS2_GLUE_BASE,
 	.utmi_mode = DWC3_OMAP_UTMI_MODE_SW,
 	.vbus_id_status = OMAP_DWC3_VBUS_VALID,
+	.index = 1,
 };
 
 static struct ti_usb_phy_device usb_phy2_device = {
 	.usb2_phy_power = (void *)DRA7_USB2_PHY2_POWER,
+	.index = 1,
 };
 
 int board_usb_init(int index, enum usb_init_type init)
