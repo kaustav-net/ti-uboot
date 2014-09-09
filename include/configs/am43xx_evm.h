@@ -99,6 +99,58 @@
 #define CONFIG_OMAP_USB_PHY
 #define CONFIG_AM437X_USB2PHY2_HOST
 
+/* USB GADGET */
+#ifndef CONFIG_SPL_BUILD
+#define CONFIG_USB_DWC3_PHY_OMAP
+#define CONFIG_USB_DWC3_OMAP
+#define CONFIG_USB_DWC3
+#define CONFIG_USB_DWC3_GADGET
+
+#define CONFIG_USB_GADGET
+#define CONFIG_USBDOWNLOAD_GADGET
+#define CONFIG_USB_GADGET_VBUS_DRAW 2
+#define CONFIG_G_DNL_MANUFACTURER "Texas Instruments"
+#define CONFIG_G_DNL_VENDOR_NUM 0x0403
+#define CONFIG_G_DNL_PRODUCT_NUM 0xBD00
+#define CONFIG_USB_GADGET_DUALSPEED
+
+/* USB Device Firmware Update support */
+#define CONFIG_DFU_FUNCTION
+#define CONFIG_DFU_RAM
+#define CONFIG_CMD_DFU
+
+#define CONFIG_DFU_MMC
+#define DFU_ALT_INFO_MMC \
+	"dfu_alt_info_mmc=" \
+	"boot part 0 1;" \
+	"rootfs part 0 2;" \
+	"MLO fat 0 1;" \
+	"spl-os-args fat 0 1;" \
+	"spl-os-image fat 0 1;" \
+	"u-boot.img fat 0 1;" \
+	"uEnv.txt fat 0 1\0"
+
+#define DFU_ALT_INFO_EMMC \
+	"dfu_alt_info_emmc=" \
+	"MLO raw 0x100 0x100 mmcpart 0;" \
+	"u-boot.img raw 0x300 0x1000 mmcpart 0\0"
+
+#define CONFIG_DFU_RAM
+#define DFU_ALT_INFO_RAM \
+	"dfu_alt_info_ram=" \
+	"kernel ram 0x80200000 0x4000000;" \
+	"fdt ram 0x80f80000 0x80000;" \
+	"ramdisk ram 0x81000000 0x4000000\0"
+
+#define DFUARGS \
+	"dfu_bufsiz=0x10000\0" \
+	DFU_ALT_INFO_MMC \
+	DFU_ALT_INFO_EMMC \
+	DFU_ALT_INFO_RAM
+#else
+#define DFUARGS
+#endif
+
 #ifdef CONFIG_QSPI_BOOT
 #define CONFIG_SYS_TEXT_BASE           0x30000000
 #undef CONFIG_ENV_IS_NOWHERE
@@ -231,6 +283,7 @@
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree; fi; \0" \
 	NANDARGS \
+	DFUARGS \
 
 
 #define CONFIG_BOOTCOMMAND \
