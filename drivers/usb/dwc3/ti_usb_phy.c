@@ -56,6 +56,13 @@
 #define OMAP_CTRL_USB3_PHY_TX_RX_POWERON	0x3
 #define OMAP_CTRL_USB3_PHY_TX_RX_POWEROFF	0x0
 
+#define OMAP_CTRL_USB2_PHY_PD			BIT(28)
+
+#define AM437X_CTRL_USB2_PHY_PD			BIT(0)
+#define AM437X_CTRL_USB2_OTG_PD			BIT(1)
+#define AM437X_CTRL_USB2_OTGVDET_EN		BIT(19)
+#define AM437X_CTRL_USB2_OTGSESSEND_EN		BIT(20)
+
 static LIST_HEAD(ti_usb_phy_list);
 typedef unsigned int u32;
 
@@ -102,6 +109,7 @@ static inline void ti_usb3_writel(void __iomem *base, u32 offset, u32 value)
 	writel(value, base + offset);
 }
 
+#ifndef CONFIG_AM43XX
 static struct usb3_dpll_params *ti_usb3_get_dpll_params(struct ti_usb_phy *phy)
 {
 	unsigned long rate;
@@ -172,19 +180,37 @@ static int ti_usb3_dpll_program(struct ti_usb_phy *phy)
 
 	return ti_usb3_dpll_wait_lock(phy);
 }
+#endif
 
 void ti_usb2_phy_power(struct ti_usb_phy *phy, int on)
 {
 	u32 val;
 
 	val = readl(phy->usb2_phy_power);
-	if (on)
+
+	if (on) {
+#ifdef CONFIG_DRA7XX
 		val &= ~OMAP_CTRL_DEV_PHY_PD;
-	else
+#elif defined(CONFIG_AM43XX)
+		val &= ~(AM437X_CTRL_USB2_PHY_PD |
+			 AM437X_CTRL_USB2_OTG_PD);
+		val |= (AM437X_CTRL_USB2_OTGVDET_EN |
+			AM437X_CTRL_USB2_OTGSESSEND_EN);
+#endif
+	} else {
+#ifdef CONFIG_DRA7XX
 		val |= OMAP_CTRL_DEV_PHY_PD;
+#elif defined(CONFIG_AM43XX)
+		val &= ~(AM437X_CTRL_USB2_OTGVDET_EN |
+			 AM437X_CTRL_USB2_OTGSESSEND_EN);
+		val |= (AM437X_CTRL_USB2_PHY_PD |
+			AM437X_CTRL_USB2_OTG_PD);
+#endif
+	}
 	writel(val, phy->usb2_phy_power);
 }
 
+#ifndef CONFIG_AM43XX
 void ti_usb3_phy_power(struct ti_usb_phy *phy, int on)
 {
 	u32 val;
@@ -210,6 +236,7 @@ void ti_usb3_phy_power(struct ti_usb_phy *phy, int on)
 	}
 	writel(val, phy->usb3_phy_power);
 }
+#endif
 
 /**
  * ti_usb_phy_uboot_init - usb phy uboot initialization code
@@ -238,9 +265,11 @@ int ti_usb_phy_uboot_init(struct ti_usb_phy_device *dev)
 	phy->usb2_phy_power = dev->usb2_phy_power;
 	phy->usb3_phy_power = dev->usb3_phy_power;
 
+#ifndef CONFIG_AM43XX
 	ti_usb3_dpll_program(phy);
-	ti_usb2_phy_power(phy, 1);
 	ti_usb3_phy_power(phy, 1);
+#endif
+	ti_usb2_phy_power(phy, 1);
 	mdelay(150);
 	list_add_tail(&phy->list, &ti_usb_phy_list);
 
@@ -266,7 +295,9 @@ void ti_usb_phy_uboot_exit(int index)
 			continue;
 
 		ti_usb2_phy_power(phy, 0);
+#ifndef CONFIG_AM43XX
 		ti_usb3_phy_power(phy, 0);
+#endif
 		list_del(&phy->list);
 		kfree(phy);
 		break;
