@@ -67,6 +67,10 @@
 	"boot part 0 1;" \
 	"rootfs part 0 2;" \
 	"MLO fat 0 1;" \
+	"MLO.raw raw 0x100 0x100;" \
+	"u-boot.img.raw raw 0x300 0x400;" \
+	"spl-os-args.raw raw 0x80 0x80;" \
+	"spl-os-image.raw raw 0x900 0x2000;" \
 	"spl-os-args fat 0 1;" \
 	"spl-os-image fat 0 1;" \
 	"u-boot.img fat 0 1;" \
@@ -74,8 +78,18 @@
 
 #define DFU_ALT_INFO_EMMC \
 	"dfu_alt_info_emmc=" \
-	"MLO raw 0x100 0x100 mmcpart 0;" \
-	"u-boot.img raw 0x300 0x1000 mmcpart 0\0"
+	"rawemmc raw 0 3751936;" \
+	"boot part 1 1;" \
+	"rootfs part 1 2;" \
+	"MLO fat 1 1;" \
+	"MLO.raw raw 0x100 0x100;" \
+	"u-boot.img.raw raw 0x300 0x400;" \
+	"spl-os-args.raw raw 0x80 0x80;" \
+	"spl-os-image.raw raw 0x900 0x2000;" \
+	"spl-os-args fat 1 1;" \
+	"spl-os-image fat 1 1;" \
+	"u-boot.img fat 1 1;" \
+	"uEnv.txt fat 1 1\0"
 
 #define DFU_ALT_INFO_RAM \
 	"dfu_alt_info_ram=" \

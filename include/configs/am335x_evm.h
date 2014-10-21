@@ -350,7 +350,20 @@
 	"spl-os-args fat 0 1;" \
 	"spl-os-image fat 0 1;" \
 	"u-boot.img fat 0 1;" \
-	"uEnv.txt fat 0 1\0"
+	"uEnv.txt fat 0 1\0" \
+	"dfu_alt_info_emmc=" \
+	"rawemmc raw 0 3751936;" \
+	"boot part 1 1;" \
+	"rootfs part 1 2;" \
+	"MLO fat 1 1;" \
+	"MLO.raw raw 0x100 0x100;" \
+	"u-boot.img.raw raw 0x300 0x400;" \
+	"spl-os-args.raw raw 0x80 0x80;" \
+	"spl-os-image.raw raw 0x900 0x2000;" \
+	"spl-os-args fat 1 1;" \
+	"spl-os-image fat 1 1;" \
+	"u-boot.img fat 1 1;" \
+	"uEnv.txt fat 1 1\0"
 #ifdef CONFIG_NAND
 #define CONFIG_DFU_NAND
 #define DFU_ALT_INFO_NAND \
@@ -373,7 +386,6 @@
 	"fdt ram 0x80F80000 0x80000;" \
 	"ramdisk ram 0x81000000 0x4000000\0"
 #define DFUARGS \
-	"dfu_alt_info_emmc=rawemmc raw 0 3751936\0" \
 	DFU_ALT_INFO_MMC \
 	DFU_ALT_INFO_RAM \
 	DFU_ALT_INFO_NAND

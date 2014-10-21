@@ -24,3 +24,8 @@ U-Boot # mmc write ${loadaddr} 300 400
 U-Boot # mmc bootbus 1 2 0 2
 U-Boot # mmc partconf 1 1 1 0
 U-Boot # mmc rst-function 1 1
+
+If you wish to update these partitions via DFU, then in the dfu_alt_info
+setting that exposes that particular location you will need to use the
+optional "mmcpart N" argument to say that this is on mmcpart 1 rather
+than the default of 0.
