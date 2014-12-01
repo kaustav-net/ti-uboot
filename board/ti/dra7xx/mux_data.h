@@ -125,7 +125,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{GPMC_BEN0,	M0 | IDIS | PEN | PTD}, /* GPMC Byte/Column En */
 	{GPMC_WAIT0,	M0 | IEN  | PEN | PTU}, /* GPMC Wait/Ready */
 	/* GPMC_WPN (Write Protect) is controlled by DIP Switch SW10(12) */
-#else
+#endif /* CONFIG_NAND || CONFIG_NOR */
 	/* QSPI pin-mux */
 	{GPMC_A13, (IEN | PDIS | M1)},  /* QSPI1_RTCLK */
 	{GPMC_A14, (IEN | PDIS | M1)},  /* QSPI1_D[3] */
@@ -137,7 +137,6 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{GPMC_A4, (IEN | PDIS | M1)},   /* QSPI1_CS3 */
 	{GPMC_CS2, (IEN | PTU | PDIS | M1)},    /* QSPI1_CS0 */
 	{GPMC_CS3, (IEN | PTU | PDIS | M1)},    /* QSPI1_CS1*/
-#endif /* CONFIG_NAND || CONFIG_NOR */
 	{USB2_DRVVBUS, (M0 | IEN | FSC) },
 	{SPI1_CS1, (PEN | IDIS | M14) },
 };
