@@ -44,7 +44,7 @@ void dram_init_banksize(void)
 static struct dmm_lisa_map_regs *hw_lisa_map_regs =
 				(struct dmm_lisa_map_regs *)DMM_BASE;
 #endif
-#ifndef CONFIG_TI816X
+#ifndef CONFIG_TI81XX
 static struct vtp_reg *vtpreg[2] = {
 				(struct vtp_reg *)VTP0_CTRL_ADDR,
 				(struct vtp_reg *)VTP1_CTRL_ADDR};
@@ -76,7 +76,7 @@ void config_dmm(const struct dmm_lisa_map_regs *regs)
 }
 #endif
 
-#ifndef CONFIG_TI816X
+#ifndef CONFIG_TI81XX
 static void config_vtp(int nr)
 {
 	writel(readl(&vtpreg[nr]->vtp0ctrlreg) | VTP_CTRL_ENABLE,
@@ -102,7 +102,7 @@ void config_ddr(unsigned int pll, const struct ctrl_ioregs *ioregs,
 		const struct emif_regs *regs, int nr)
 {
 	ddr_pll_config(pll);
-#ifndef CONFIG_TI816X
+#ifndef CONFIG_TI81XX
 	/*
 	 * If coming from a warm reset, skip the vtp configuration.  This
 	 * reg is warm reset insensitive.
