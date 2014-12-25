@@ -488,7 +488,7 @@ static int mmc_change_freq(struct mmc *mmc)
 	char cardtype;
 	int err;
 
-	mmc->card_caps = MMC_MODE_4BIT | MMC_MODE_8BIT;
+	mmc->card_caps = 0;
 
 	if (mmc_host_is_spi(mmc))
 		return 0;
@@ -496,6 +496,8 @@ static int mmc_change_freq(struct mmc *mmc)
 	/* Only version 4 supports high-speed */
 	if (mmc->version < MMC_VERSION_4)
 		return 0;
+
+	mmc->card_caps |= MMC_MODE_4BIT | MMC_MODE_8BIT;
 
 	err = mmc_send_ext_csd(mmc, ext_csd);
 
@@ -1091,7 +1093,8 @@ static int mmc_startup(struct mmc *mmc)
 			mmc->tran_speed = 50000000;
 		else
 			mmc->tran_speed = 25000000;
-	} else {
+	} else if (mmc->version >= MMC_VERSION_4) {
+		/* Only version 4 of MMC supports wider bus widths */
 		int idx;
 
 		/* An array of possible bus widths in order of preference */
