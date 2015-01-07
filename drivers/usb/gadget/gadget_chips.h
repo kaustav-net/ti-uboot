@@ -156,6 +156,12 @@
 #define gadget_is_fotg210(g)        0
 #endif
 
+#ifdef CONFIG_USB_DWC3_GADGET
+#define gadget_is_dwc3(g)	(!strcmp("dwc3-gadget", (g)->name))
+#else
+#define gadget_is_dwc3(g)	0
+#endif
+
 /*
  * CONFIG_USB_GADGET_SX2
  * CONFIG_USB_GADGET_AU1X00
@@ -223,5 +229,7 @@ static inline int usb_gadget_controller_number(struct usb_gadget *gadget)
 		return 0x21;
 	else if (gadget_is_fotg210(gadget))
 		return 0x22;
+	else if (gadget_is_dwc3(gadget))
+		return 0x23;
 	return -ENOENT;
 }
