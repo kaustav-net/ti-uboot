@@ -1278,6 +1278,7 @@ eth_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 		switch (wValue >> 8) {
 
 		case USB_DT_DEVICE:
+			device_desc.bMaxPacketSize0 = gadget->ep0->maxpacket;
 			value = min(wLength, (u16) sizeof device_desc);
 			memcpy(req->buf, &device_desc, value);
 			break;
@@ -2162,7 +2163,6 @@ autoconf_fail:
 		hs_subset_descriptors();
 	}
 
-	device_desc.bMaxPacketSize0 = gadget->ep0->maxpacket;
 	usb_gadget_set_selfpowered(gadget);
 
 	/* For now RNDIS is always a second config */
