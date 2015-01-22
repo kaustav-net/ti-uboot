@@ -136,7 +136,7 @@ static void omap_enable_usb3_phy(struct omap_xhci *omap)
 		     OCP2SCP1_CLKCTRL_MODULEMODE_HW);
 
 	/* Turn on 32K AON clk */
-	setbits_le32((*prcm)->cm_coreaon_usb_phy_core_clkctrl,
+	setbits_le32((*prcm)->cm_coreaon_usb_phy1_core_clkctrl,
 		     USBPHY_CORE_CLKCTRL_OPTFCLKEN_CLK32K);
 
 	/* Setting CM_L3INIT_CLKSTCTRL to 0x0 i.e NO sleep */
@@ -172,7 +172,7 @@ static void omap_enable_usb3_phy(struct omap_xhci *omap)
 
 	/* Enable the USB OTG Super speed clocks */
 	val = (OPTFCLKEN_REFCLK960M | OTG_SS_CLKCTRL_MODULEMODE_HW);
-	setbits_le32((*prcm)->cm_l3init_usb_otg_ss_clkctrl, val);
+	setbits_le32((*prcm)->cm_l3init_usb_otg_ss1_clkctrl, val);
 
 };
 #endif /* CONFIG_OMAP_USB3PHY1_HOST */
@@ -208,11 +208,11 @@ void usb_phy_power(int on)
 #ifdef CONFIG_AM437X_USB2PHY2_HOST
 static void am437x_enable_usb2_phy2(struct omap_xhci *omap)
 {
-	const u32 usb_otg_ss_clk_val = (USBOTGSSX_CLKCTRL_MODULE_EN |
+	const u32 usb_otg_ss1_clk_val = (USBOTGSSX_CLKCTRL_MODULE_EN |
 				USBOTGSSX_CLKCTRL_OPTFCLKEN_REFCLK960);
 
-	writel(usb_otg_ss_clk_val, PRM_PER_USB_OTG_SS0_CLKCTRL);
-	writel(usb_otg_ss_clk_val, PRM_PER_USB_OTG_SS1_CLKCTRL);
+	writel(usb_otg_ss1_clk_val, PRM_PER_USB_OTG_SS0_CLKCTRL);
+	writel(usb_otg_ss1_clk_val, PRM_PER_USB_OTG_SS1_CLKCTRL);
 
 	writel(USBPHYOCPSCP_MODULE_EN, PRM_PER_USBPHYOCP2SCP0_CLKCTRL);
 	writel(USBPHYOCPSCP_MODULE_EN, PRM_PER_USBPHYOCP2SCP1_CLKCTRL);
