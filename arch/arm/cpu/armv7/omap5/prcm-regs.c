@@ -376,6 +376,7 @@ struct omap_sys_ctrl_regs const omap5_ctrl = {
 
 struct omap_sys_ctrl_regs const dra7xx_ctrl = {
 	.control_status				= 0x4A002134,
+	.control_phy_power_usb			= 0x4A002370,
 	.control_phy_power_sata			= 0x4A002374,
 	.control_core_mac_id_0_lo		= 0x4A002514,
 	.control_core_mac_id_0_hi		= 0x4A002518,
