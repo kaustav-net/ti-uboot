@@ -506,6 +506,12 @@ static u32 optimize_vcore_voltage(struct volts const *v)
 	return val;
 }
 
+#ifdef CONFIG_IODELAY_RECALIBRATION
+void __weak recalibrate_iodelay(void)
+{
+}
+#endif
+
 /*
  * Setup the voltages for vdd_mpu, vdd_core, and vdd_iva
  * We set the maximum voltages allowed here because Smart-Reflex is not
@@ -518,6 +524,16 @@ void scale_vcores(struct vcores_data const *vcores)
 
 	val = optimize_vcore_voltage(&vcores->core);
 	do_scale_vcore(vcores->core.addr, val, vcores->core.pmic);
+
+	/*
+	 * IO delay recalibration should be done immediately after
+	 * adjusting AVS voltages for VDD_CORE_L.
+	 * Respective boards should call __recalibrate_iodelay()
+	 * with proper mux, virtual and manual mode configurations.
+	 */
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	recalibrate_iodelay();
+#endif
 
 	val = optimize_vcore_voltage(&vcores->mpu);
 	do_scale_vcore(vcores->mpu.addr, val, vcores->mpu.pmic);
