@@ -29,6 +29,10 @@ int	cleanup_before_linux(void);
 /* Set up ARMv7 MMU, caches and TLBs */
 void	cpu_init_cp15(void);
 
+#ifdef CONFIG_ARM_ARCH_CP15_ERRATA
+void	arch_cp15_errata_workaround(void);
+#endif
+
 /* cpu/.../arch/cpu.c */
 int	arch_cpu_init(void);
 int	arch_misc_init(void);

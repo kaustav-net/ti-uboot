@@ -169,6 +169,10 @@ ENTRY(cpu_init_cp15)
 	mcr	p15, 0, r0, c15, c0, 1	@ write diagnostic register
 #endif
 
+#ifdef CONFIG_ARM_ARCH_CP15_ERRATA
+	b arch_cp15_errata_workaround @ Do Machine specific errata WAs
+#endif
+
 	mov	pc, lr			@ back to my caller
 ENDPROC(cpu_init_cp15)
 
