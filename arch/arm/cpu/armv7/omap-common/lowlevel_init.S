@@ -22,11 +22,13 @@ ENTRY(save_boot_params)
 	bx	lr
 ENDPROC(save_boot_params)
 
-ENTRY(set_pl310_ctrl_reg)
+ENTRY(omap_smc1)
 	PUSH	{r4-r11, lr}	@ save registers - ROM code may pollute
 				@ our registers
-	LDR	r12, =0x102	@ Set PL310 control register - value in R0
+	MOV	r12, r0		@ Service
+	MOV	r0, r1		@ Argument
+	DSB
 	.word	0xe1600070	@ SMC #0 - hand assembled because -march=armv5
 				@ call ROM Code API to set control register
 	POP	{r4-r11, pc}
-ENDPROC(set_pl310_ctrl_reg)
+ENDPROC(omap_smc1)
