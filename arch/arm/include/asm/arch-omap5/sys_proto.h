@@ -69,6 +69,7 @@ void force_emif_self_refresh(void);
 void get_ioregs(const struct ctrl_ioregs **regs);
 void srcomp_enable(void);
 void setup_warmreset_time(void);
+void omap_smc1(u32 service, u32 val);
 
 static inline u32 div_round_up(u32 num, u32 den)
 {
@@ -79,4 +80,7 @@ static inline u32 usec_to_32k(u32 usec)
 {
 	return div_round_up(32768 * usec, 1000000);
 }
+
+#define OMAP5_SERVICE_L2ACTLR_SET    0x104
+
 #endif
