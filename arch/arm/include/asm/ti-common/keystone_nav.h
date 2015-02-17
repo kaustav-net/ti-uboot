@@ -184,7 +184,8 @@ struct rx_buff_desc {
 
 int ksnav_close(struct pktdma_cfg *pktdma);
 int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers);
-int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2);
+int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes,
+	       u32 dest_port);
 void *ksnav_recv(struct pktdma_cfg *pktdma, u32 **pkt, int *num_bytes);
 void ksnav_release_rxhd(struct pktdma_cfg *pktdma, void *hd);
 

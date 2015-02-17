@@ -278,7 +278,8 @@ int ksnav_close(struct pktdma_cfg *pktdma)
 	return QM_OK;
 }
 
-int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2)
+int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes,
+	       u32 dest_port)
 {
 	struct qm_host_desc *hd;
 
@@ -286,8 +287,17 @@ int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2)
 	if (hd == NULL)
 		return QM_ERR;
 
+	dest_port &= 0xf;
 	hd->desc_info	= num_bytes;
-	hd->swinfo[2]	= swinfo2;
+#if defined CONFIG_KSNET_NETCP_V1_0
+	hd->packet_info	= qm_cfg->qpool_num | (dest_port << 16);
+#elif defined CONFIG_KSNET_NETCP_V1_5
+	hd->packet_info = qm_cfg->qpool_num;
+	hd->tag_info = dest_port;
+#else
+#error	"Unknown NETCP version"
+#endif
+
 	hd->packet_info = qm_cfg->qpool_num;
 
 	qm_buff_push(hd, pktdma->tx_snd_q, pkt, num_bytes);
