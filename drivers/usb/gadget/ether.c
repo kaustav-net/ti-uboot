@@ -2337,6 +2337,7 @@ static int usb_eth_init(struct eth_device *netdev, bd_t *bd)
 	unsigned long ts;
 	unsigned long timeout = USB_CONNECT_TIMEOUT;
 
+	board_usb_init(0, USB_INIT_DEVICE);
 	if (!netdev) {
 		error("received NULL ptr");
 		goto fail;
@@ -2521,6 +2522,7 @@ void usb_eth_halt(struct eth_device *netdev)
 	}
 
 	usb_gadget_unregister_driver(&eth_driver);
+	board_usb_cleanup(0, USB_INIT_DEVICE);
 }
 
 static struct usb_gadget_driver eth_driver = {

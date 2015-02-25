@@ -609,9 +609,6 @@ int board_late_init(void)
 	safe_string[sizeof(header.version)] = 0;
 	setenv("board_rev", safe_string);
 #endif
-#ifdef CONFIG_USB_ETHER
-	board_usb_init(0, USB_INIT_DEVICE);
-#endif
 	return 0;
 }
 #endif
