@@ -93,6 +93,16 @@
 #define USBOTGSS_IRQMISC_DISCHRGVBUS_FALL		(1 << 3)
 #define USBOTGSS_IRQMISC_IDPULLUP_FALL		(1 << 0)
 
+#define USBOTGSS_INTERRUPTS (USBOTGSS_IRQMISC_OEVT | \
+			     USBOTGSS_IRQMISC_DRVVBUS_RISE | \
+			     USBOTGSS_IRQMISC_CHRGVBUS_RISE | \
+			     USBOTGSS_IRQMISC_DISCHRGVBUS_RISE | \
+			     USBOTGSS_IRQMISC_IDPULLUP_RISE | \
+			     USBOTGSS_IRQMISC_DRVVBUS_FALL | \
+			     USBOTGSS_IRQMISC_CHRGVBUS_FALL | \
+			     USBOTGSS_IRQMISC_DISCHRGVBUS_FALL | \
+			     USBOTGSS_IRQMISC_IDPULLUP_FALL)
+
 /* UTMI_OTG_CTRL REGISTER */
 #define USBOTGSS_UTMI_OTG_CTRL_DRVVBUS		(1 << 5)
 #define USBOTGSS_UTMI_OTG_CTRL_CHRGVBUS		(1 << 4)
@@ -182,6 +192,18 @@ static void dwc3_omap_write_irqmisc_set(struct dwc3_omap *omap, u32 value)
 static void dwc3_omap_write_irq0_set(struct dwc3_omap *omap, u32 value)
 {
 	dwc3_omap_writel(omap->base, USBOTGSS_IRQENABLE_SET_0 -
+						omap->irq0_offset, value);
+}
+
+static void dwc3_omap_write_irqmisc_clr(struct dwc3_omap *omap, u32 value)
+{
+	dwc3_omap_writel(omap->base, USBOTGSS_IRQENABLE_CLR_MISC +
+						omap->irqmisc_offset, value);
+}
+
+static void dwc3_omap_write_irq0_clr(struct dwc3_omap *omap, u32 value)
+{
+	dwc3_omap_writel(omap->base, USBOTGSS_IRQENABLE_CLR_0 -
 						omap->irq0_offset, value);
 }
 
@@ -289,24 +311,20 @@ static void dwc3_omap_enable_irqs(struct dwc3_omap *omap)
 	reg = USBOTGSS_IRQO_COREIRQ_ST;
 	dwc3_omap_write_irq0_set(omap, reg);
 
-	reg = (USBOTGSS_IRQMISC_OEVT |
-			USBOTGSS_IRQMISC_DRVVBUS_RISE |
-			USBOTGSS_IRQMISC_CHRGVBUS_RISE |
-			USBOTGSS_IRQMISC_DISCHRGVBUS_RISE |
-			USBOTGSS_IRQMISC_IDPULLUP_RISE |
-			USBOTGSS_IRQMISC_DRVVBUS_FALL |
-			USBOTGSS_IRQMISC_CHRGVBUS_FALL |
-			USBOTGSS_IRQMISC_DISCHRGVBUS_FALL |
-			USBOTGSS_IRQMISC_IDPULLUP_FALL);
-
+	reg = USBOTGSS_INTERRUPTS;
 	dwc3_omap_write_irqmisc_set(omap, reg);
 }
 
 static void dwc3_omap_disable_irqs(struct dwc3_omap *omap)
 {
+	u32			reg;
+
 	/* disable all IRQs */
-	dwc3_omap_write_irqmisc_set(omap, 0x00);
-	dwc3_omap_write_irq0_set(omap, 0x00);
+	reg = USBOTGSS_IRQO_COREIRQ_ST;
+	dwc3_omap_write_irq0_clr(omap, reg);
+
+	reg = USBOTGSS_INTERRUPTS;
+	dwc3_omap_write_irqmisc_clr(omap, reg);
 }
 
 /**
