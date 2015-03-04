@@ -14,6 +14,7 @@ ifdef CONFIG_TEGRA_GPIO
 obj-$(CONFIG_DM_GPIO)		+= gpio-uclass.o
 endif
 
+obj-$(CONFIG_PCF8575)		+= pcf8575.o
 obj-$(CONFIG_AT91_GPIO)	+= at91_gpio.o
 obj-$(CONFIG_INTEL_ICH6_GPIO)	+= intel_ich6_gpio.o
 obj-$(CONFIG_KIRKWOOD_GPIO)	+= kw_gpio.o
