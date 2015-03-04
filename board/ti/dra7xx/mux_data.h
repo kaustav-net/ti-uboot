@@ -318,7 +318,7 @@ const struct pad_conf_entry dra74x_core_padconf_array[] = {
 	{GPIO6_14, (M9 | PIN_INPUT_PULLUP)},	/* gpio6_14.i2c3_sda */
 	{GPIO6_15, (M9 | PIN_INPUT_PULLUP)},	/* gpio6_15.i2c3_scl */
 	{GPIO6_16, (M14 | PIN_INPUT_PULLUP)},	/* gpio6_16.gpio6_16 */
-	{XREF_CLK2, (M3 | PIN_INPUT_PULLDOWN)},	/* xref_clk2.mcasp3_ahclkx */
+	{XREF_CLK2, (M5 | PIN_INPUT_PULLDOWN)},	/* xref_clk2.atl_clk2 */
 	{MCASP1_ACLKX, (M0 | PIN_INPUT_PULLDOWN)},	/* mcasp1_aclkx.mcasp1_aclkx */
 	{MCASP1_FSX, (M0 | PIN_INPUT_SLEW)},	/* mcasp1_fsx.mcasp1_fsx */
 	{MCASP1_AXR0, (M0 | PIN_INPUT_SLEW)},	/* mcasp1_axr0.mcasp1_axr0 */
