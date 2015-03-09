@@ -25,6 +25,7 @@
 #include <dwc3-uboot.h>
 #include <dwc3-omap-uboot.h>
 #include <ti-usb-phy-uboot.h>
+#include <pcf8575.h>
 
 #include "mux_data.h"
 
@@ -36,6 +37,10 @@ DECLARE_GLOBAL_DATA_PTR;
 
 /* GPIO 7_11 */
 #define GPIO_DDR_VTT_EN 203
+
+/* pcf chip address enet_mux_s0 */
+#define PCF_ENET_MUX_ADDR	0x21
+#define PCF_SEL_ENET_MUX_S0	4
 
 const struct omap_sysinfo sysinfo = {
 	"Board: DRA7xx\n"
@@ -317,8 +322,12 @@ int board_eth_init(bd_t *bis)
 	ctrl_val |= 0x22;
 	writel(ctrl_val, (*ctrl)->control_core_control_io1);
 
-	if (*omap_si_rev == DRA722_ES1_0)
-		cpsw_data.active_slave = 1;
+	if (*omap_si_rev == DRA722_ES1_0) {
+		cpsw_data.active_slave = 0;
+		cpsw_data.slave_data[0].phy_addr = 3;
+		pcf8575_output(PCF_ENET_MUX_ADDR, PCF_SEL_ENET_MUX_S0,
+			       PCF8575_OUT_LOW);
+	}
 
 	ret = cpsw_register(&cpsw_data);
 	if (ret < 0)
