@@ -114,35 +114,35 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{VIN2A_D21, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d21.rgmii1_rxd2 */
 	{VIN2A_D22, (M3 | PIN_OUTPUT_PULLUP)},	/* vin2a_d22.rgmii1_rxd1 */
 	{VIN2A_D23, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d23.rgmii1_rxd0 */
-	{VOUT1_CLK, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_clk.vout1_clk */
-	{VOUT1_DE, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_de.vout1_de */
+	{VOUT1_CLK, (M0 | PIN_OUTPUT)},		/* vout1_clk.vout1_clk */
+	{VOUT1_DE, (M0 | PIN_OUTPUT)},		/* vout1_de.vout1_de */
 	{VOUT1_FLD, (M14 | PIN_INPUT_PULLDOWN)},	/* vout1_fld.gpio4_21 */
-	{VOUT1_HSYNC, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_hsync.vout1_hsync */
-	{VOUT1_VSYNC, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_vsync.vout1_vsync */
-	{VOUT1_D0, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d0.vout1_d0 */
-	{VOUT1_D1, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d1.vout1_d1 */
-	{VOUT1_D2, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d2.vout1_d2 */
-	{VOUT1_D3, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d3.vout1_d3 */
-	{VOUT1_D4, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d4.vout1_d4 */
-	{VOUT1_D5, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d5.vout1_d5 */
-	{VOUT1_D6, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d6.vout1_d6 */
-	{VOUT1_D7, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d7.vout1_d7 */
-	{VOUT1_D8, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d8.vout1_d8 */
-	{VOUT1_D9, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d9.vout1_d9 */
-	{VOUT1_D10, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d10.vout1_d10 */
-	{VOUT1_D11, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d11.vout1_d11 */
-	{VOUT1_D12, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d12.vout1_d12 */
-	{VOUT1_D13, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d13.vout1_d13 */
-	{VOUT1_D14, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d14.vout1_d14 */
-	{VOUT1_D15, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d15.vout1_d15 */
-	{VOUT1_D16, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d16.vout1_d16 */
-	{VOUT1_D17, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d17.vout1_d17 */
-	{VOUT1_D18, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d18.vout1_d18 */
-	{VOUT1_D19, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d19.vout1_d19 */
-	{VOUT1_D20, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d20.vout1_d20 */
-	{VOUT1_D21, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d21.vout1_d21 */
-	{VOUT1_D22, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d22.vout1_d22 */
-	{VOUT1_D23, (M0 | PIN_INPUT_PULLDOWN)},	/* vout1_d23.vout1_d23 */
+	{VOUT1_HSYNC, (M0 | PIN_OUTPUT)},	/* vout1_hsync.vout1_hsync */
+	{VOUT1_VSYNC, (M0 | PIN_OUTPUT)},	/* vout1_vsync.vout1_vsync */
+	{VOUT1_D0, (M0 | PIN_OUTPUT)},		/* vout1_d0.vout1_d0 */
+	{VOUT1_D1, (M0 | PIN_OUTPUT)},		/* vout1_d1.vout1_d1 */
+	{VOUT1_D2, (M0 | PIN_OUTPUT)},		/* vout1_d2.vout1_d2 */
+	{VOUT1_D3, (M0 | PIN_OUTPUT)},		/* vout1_d3.vout1_d3 */
+	{VOUT1_D4, (M0 | PIN_OUTPUT)},		/* vout1_d4.vout1_d4 */
+	{VOUT1_D5, (M0 | PIN_OUTPUT)},		/* vout1_d5.vout1_d5 */
+	{VOUT1_D6, (M0 | PIN_OUTPUT)},		/* vout1_d6.vout1_d6 */
+	{VOUT1_D7, (M0 | PIN_OUTPUT)},		/* vout1_d7.vout1_d7 */
+	{VOUT1_D8, (M0 | PIN_OUTPUT)},		/* vout1_d8.vout1_d8 */
+	{VOUT1_D9, (M0 | PIN_OUTPUT)},		/* vout1_d9.vout1_d9 */
+	{VOUT1_D10, (M0 | PIN_OUTPUT)},		/* vout1_d10.vout1_d10 */
+	{VOUT1_D11, (M0 | PIN_OUTPUT)},		/* vout1_d11.vout1_d11 */
+	{VOUT1_D12, (M0 | PIN_OUTPUT)},		/* vout1_d12.vout1_d12 */
+	{VOUT1_D13, (M0 | PIN_OUTPUT)},		/* vout1_d13.vout1_d13 */
+	{VOUT1_D14, (M0 | PIN_OUTPUT)},		/* vout1_d14.vout1_d14 */
+	{VOUT1_D15, (M0 | PIN_OUTPUT)},		/* vout1_d15.vout1_d15 */
+	{VOUT1_D16, (M0 | PIN_OUTPUT)},		/* vout1_d16.vout1_d16 */
+	{VOUT1_D17, (M0 | PIN_OUTPUT)},		/* vout1_d17.vout1_d17 */
+	{VOUT1_D18, (M0 | PIN_OUTPUT)},		/* vout1_d18.vout1_d18 */
+	{VOUT1_D19, (M0 | PIN_OUTPUT)},		/* vout1_d19.vout1_d19 */
+	{VOUT1_D20, (M0 | PIN_OUTPUT)},		/* vout1_d20.vout1_d20 */
+	{VOUT1_D21, (M0 | PIN_OUTPUT)},		/* vout1_d21.vout1_d21 */
+	{VOUT1_D22, (M0 | PIN_OUTPUT)},		/* vout1_d22.vout1_d22 */
+	{VOUT1_D23, (M0 | PIN_OUTPUT)},		/* vout1_d23.vout1_d23 */
 	{MDIO_MCLK, (M0 | PIN_INPUT_PULLUP)},	/* mdio_mclk.mdio_mclk */
 	{MDIO_D, (M0 | PIN_INPUT_PULLUP)},	/* mdio_d.mdio_d */
 	{RMII_MHZ_50_CLK, (M14 | PIN_INPUT_PULLUP)},	/* RMII_MHZ_50_CLK.gpio5_17 */
@@ -220,7 +220,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{MMC1_DAT2, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_dat2.mmc1_dat2 */
 	{MMC1_DAT3, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_dat3.mmc1_dat3 */
 	{MMC1_SDCD, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_sdcd.mmc1_sdcd */
-	{MMC1_SDWP, (M14 | PIN_INPUT_PULLUP)},	/* mmc1_sdwp.gpio6_28 */
+	{MMC1_SDWP, (M14 | PIN_OUTPUT)},	/* mmc1_sdwp.gpio6_28 */
 	{GPIO6_10, (M10 | PIN_INPUT_PULLDOWN)},	/* gpio6_10.ehrpwm2A */
 	{GPIO6_11, (M14 | PIN_INPUT_PULLUP)},	/* gpio6_11.gpio6_11 */
 	{MMC3_CLK, (M0 | PIN_INPUT_PULLUP)},	/* mmc3_clk.mmc3_clk */
@@ -236,9 +236,9 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{SPI1_SCLK, (M14 | PIN_INPUT_PULLDOWN)},	/* spi1_sclk.gpio7_7 */
 	{SPI1_D1, (M14 | PIN_INPUT_PULLDOWN)},	/* spi1_d1.gpio7_8 */
 	{SPI1_D0, (M14 | PIN_INPUT_PULLDOWN)},	/* spi1_d0.gpio7_9 */
-	{SPI1_CS0, (M14 | PIN_INPUT_PULLUP)},	/* spi1_cs0.gpio7_10 */
+	{SPI1_CS0, (M14 | PIN_OUTPUT)},		/* spi1_cs0.gpio7_10 */
 	{SPI1_CS1, (M14 | PIN_OUTPUT_PULLUP)},	/* spi1_cs1.gpio7_11 */
-	{SPI1_CS2, (M6 | PIN_INPUT_PULLUP)},	/* spi1_cs2.hdmi1_hpd */
+	{SPI1_CS2, (M14 | PIN_INPUT_PULLDOWN)},	/* spi1_cs2.gpio7_12 */
 	{SPI1_CS3, (M6 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* spi1_cs3.hdmi1_cec */
 	{SPI2_SCLK, (M14 | PIN_INPUT_PULLDOWN)},	/* spi2_sclk.gpio7_14 */
 	{SPI2_D1, (M14 | PIN_INPUT_PULLDOWN)},	/* spi2_d1.gpio7_15 */
@@ -252,8 +252,8 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{UART2_RXD, (M15 | PIN_INPUT_PULLDOWN)},	/* N/A.Driveroff */
 	{UART2_TXD, (M15 | PIN_INPUT_PULLDOWN)},	/* uart2_txd.Driveroff */
 	{UART2_CTSN, (M15 | PIN_INPUT_PULLDOWN)},	/* uart2_ctsn.Driveroff */
-	{I2C2_SDA, (M1 | PIN_INPUT_PULLUP)},	/* i2c2_sda.hdmi1_ddc_scl */
-	{I2C2_SCL, (M1 | PIN_INPUT_PULLUP)},	/* i2c2_scl.hdmi1_ddc_sda */
+	{I2C2_SDA, (M1 | PIN_INPUT)},		/* i2c2_sda.hdmi1_ddc_scl */
+	{I2C2_SCL, (M1 | PIN_INPUT)},		/* i2c2_scl.hdmi1_ddc_sda */
 	{WAKEUP0, (M0 | PIN_OUTPUT_PULLUP)},	/* Wakeup0.Wakeup0 */
 	{WAKEUP1, (M0 | PIN_OUTPUT_PULLDOWN)},	/* Wakeup1.Wakeup1 */
 	{WAKEUP2, (M0 | PIN_OUTPUT_PULLDOWN)},	/* Wakeup2.Wakeup2 */
