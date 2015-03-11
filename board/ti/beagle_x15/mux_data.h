@@ -43,7 +43,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{GPMC_A11, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a11.vin3a_fld0 */
 	{GPMC_A12, (M14 | PIN_INPUT_PULLUP)},	/* gpmc_a12.gpio2_2 */
 	{GPMC_A13, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a13.gpio2_3 */
-	{GPMC_A14, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a14.gpio2_4 */
+	{GPMC_A14, (M14 | PIN_INPUT_PULLUP)},	/* gpmc_a14.gpio2_4 */
 	{GPMC_A15, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a15.gpio2_5 */
 	{GPMC_A16, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a16.gpio2_6 */
 	{GPMC_A17, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a17.gpio2_7 */
