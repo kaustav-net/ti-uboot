@@ -88,10 +88,10 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{VIN2A_CLK0, (M14 | PIN_INPUT_PULLDOWN)},	/* vin2a_clk0.gpio3_28 */
 	{VIN2A_DE0, (M14 | PIN_INPUT_PULLDOWN)},	/* vin2a_de0.gpio3_29 */
 	{VIN2A_FLD0, (M14 | PIN_INPUT_PULLDOWN)},	/* vin2a_fld0.gpio3_30 */
-	{VIN2A_HSYNC0, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_hsync0.N/A */
-	{VIN2A_VSYNC0, (M11 | PIN_INPUT_PULLUP)},	/* vin2a_vsync0.N/A */
-	{VIN2A_D0, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_d0.N/A */
-	{VIN2A_D1, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_d1.N/A */
+	{VIN2A_HSYNC0, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_hsync0.pr1_uart0_cts_n */
+	{VIN2A_VSYNC0, (M11 | PIN_INPUT_PULLUP)},	/* vin2a_vsync0.pr1_uart0_rts_n */
+	{VIN2A_D0, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_d0.pr1_uart0_rxd */
+	{VIN2A_D1, (M11 | PIN_INPUT_PULLDOWN)},	/* vin2a_d1.pr1_uart0_txd */
 	{VIN2A_D2, (M8 | PIN_INPUT_PULLDOWN)},	/* vin2a_d2.uart10_rxd */
 	{VIN2A_D3, (M8 | PIN_INPUT_PULLDOWN)},	/* vin2a_d3.uart10_txd */
 	{VIN2A_D4, (M8 | PIN_INPUT_PULLDOWN)},	/* vin2a_d4.uart10_ctsn */
