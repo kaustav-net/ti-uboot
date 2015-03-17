@@ -13,34 +13,34 @@
 #include <asm/arch/mux_dra7xx.h>
 
 const struct pad_conf_entry core_padconf_array_essential[] = {
-	{GPMC_AD0, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad0.vin3a_d0 */
-	{GPMC_AD1, (M2 | PIN_INPUT_PULLUP)},	/* gpmc_ad1.vin3a_d1 */
-	{GPMC_AD2, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad2.vin3a_d2 */
-	{GPMC_AD3, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad3.vin3a_d3 */
-	{GPMC_AD4, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad4.vin3a_d4 */
-	{GPMC_AD5, (M2 | PIN_INPUT_PULLUP)},	/* gpmc_ad5.vin3a_d5 */
-	{GPMC_AD6, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad6.vin3a_d6 */
-	{GPMC_AD7, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad7.vin3a_d7 */
-	{GPMC_AD8, (M2 | PIN_INPUT_PULLUP)},	/* gpmc_ad8.vin3a_d8 */
-	{GPMC_AD9, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad9.vin3a_d9 */
-	{GPMC_AD10, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad10.vin3a_d10 */
-	{GPMC_AD11, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad11.vin3a_d11 */
-	{GPMC_AD12, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad12.vin3a_d12 */
-	{GPMC_AD13, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad13.vin3a_d13 */
-	{GPMC_AD14, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_ad14.vin3a_d14 */
-	{GPMC_AD15, (M2 | PIN_INPUT_PULLUP)},	/* gpmc_ad15.vin3a_d15 */
-	{GPMC_A0, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a0.vin3a_d16 */
-	{GPMC_A1, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a1.vin3a_d17 */
-	{GPMC_A2, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a2.vin3a_d18 */
-	{GPMC_A3, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a3.vin3a_d19 */
-	{GPMC_A4, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a4.vin3a_d20 */
-	{GPMC_A5, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a5.vin3a_d21 */
-	{GPMC_A6, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a6.vin3a_d22 */
-	{GPMC_A7, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a7.vin3a_d23 */
-	{GPMC_A8, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a8.vin3a_hsync0 */
-	{GPMC_A9, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a9.vin3a_vsync0 */
-	{GPMC_A10, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a10.vin3a_de0 */
-	{GPMC_A11, (M2 | PIN_INPUT_PULLDOWN)},	/* gpmc_a11.vin3a_fld0 */
+	{GPMC_AD0, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad0.vin3a_d0 */
+	{GPMC_AD1, (M2 | PIN_INPUT_PULLUP | MANUAL_MODE)},	/* gpmc_ad1.vin3a_d1 */
+	{GPMC_AD2, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad2.vin3a_d2 */
+	{GPMC_AD3, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad3.vin3a_d3 */
+	{GPMC_AD4, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad4.vin3a_d4 */
+	{GPMC_AD5, (M2 | PIN_INPUT_PULLUP | MANUAL_MODE)},	/* gpmc_ad5.vin3a_d5 */
+	{GPMC_AD6, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad6.vin3a_d6 */
+	{GPMC_AD7, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad7.vin3a_d7 */
+	{GPMC_AD8, (M2 | PIN_INPUT_PULLUP | MANUAL_MODE)},	/* gpmc_ad8.vin3a_d8 */
+	{GPMC_AD9, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad9.vin3a_d9 */
+	{GPMC_AD10, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad10.vin3a_d10 */
+	{GPMC_AD11, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad11.vin3a_d11 */
+	{GPMC_AD12, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad12.vin3a_d12 */
+	{GPMC_AD13, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad13.vin3a_d13 */
+	{GPMC_AD14, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_ad14.vin3a_d14 */
+	{GPMC_AD15, (M2 | PIN_INPUT_PULLUP | MANUAL_MODE)},	/* gpmc_ad15.vin3a_d15 */
+	{GPMC_A0, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a0.vin3a_d16 */
+	{GPMC_A1, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a1.vin3a_d17 */
+	{GPMC_A2, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a2.vin3a_d18 */
+	{GPMC_A3, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a3.vin3a_d19 */
+	{GPMC_A4, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a4.vin3a_d20 */
+	{GPMC_A5, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a5.vin3a_d21 */
+	{GPMC_A6, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a6.vin3a_d22 */
+	{GPMC_A7, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a7.vin3a_d23 */
+	{GPMC_A8, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a8.vin3a_hsync0 */
+	{GPMC_A9, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a9.vin3a_vsync0 */
+	{GPMC_A10, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a10.vin3a_de0 */
+	{GPMC_A11, (M2 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* gpmc_a11.vin3a_fld0 */
 	{GPMC_A12, (M14 | PIN_INPUT_PULLUP)},	/* gpmc_a12.gpio2_2 */
 	{GPMC_A13, (M14 | PIN_INPUT_PULLDOWN)},	/* gpmc_a13.gpio2_3 */
 	{GPMC_A14, (M14 | PIN_INPUT_PULLUP)},	/* gpmc_a14.gpio2_4 */
