@@ -112,7 +112,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{VIN2A_D19, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d19.rgmii1_rxctl */
 	{VIN2A_D20, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d20.rgmii1_rxd3 */
 	{VIN2A_D21, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d21.rgmii1_rxd2 */
-	{VIN2A_D22, (M3 | PIN_OUTPUT_PULLUP)},	/* vin2a_d22.rgmii1_rxd1 */
+	{VIN2A_D22, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d22.rgmii1_rxd1 */
 	{VIN2A_D23, (M3 | PIN_INPUT_PULLUP)},	/* vin2a_d23.rgmii1_rxd0 */
 	{VOUT1_CLK, (M0 | PIN_OUTPUT)},		/* vout1_clk.vout1_clk */
 	{VOUT1_DE, (M0 | PIN_OUTPUT)},		/* vout1_de.vout1_de */
