@@ -349,6 +349,10 @@ struct prcm_regs {
 	/*l3main1 edma*/
 	u32 cm_l3main1_tptc1_clkctrl;
 	u32 cm_l3main1_tptc2_clkctrl;
+
+	/* IPU */
+	u32 cm_ipu_clkstctrl;
+	u32 cm_ipu_i2c5_clkctrl;
 };
 
 struct omap_sys_ctrl_regs {
