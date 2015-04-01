@@ -146,8 +146,8 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{MDIO_MCLK, (M0 | PIN_INPUT_PULLUP)},	/* mdio_mclk.mdio_mclk */
 	{MDIO_D, (M0 | PIN_INPUT_PULLUP)},	/* mdio_d.mdio_d */
 	{RMII_MHZ_50_CLK, (M14 | PIN_INPUT_PULLUP)},	/* RMII_MHZ_50_CLK.gpio5_17 */
-	{UART3_RXD, (M0 | PIN_INPUT_SLEW)},	/* uart3_rxd.uart3_rxd */
-	{UART3_TXD, (M0 | PIN_INPUT_SLEW)},	/* uart3_txd.uart3_txd */
+	{UART3_RXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart3_rxd.gpio5_18 */
+	{UART3_TXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart3_txd.gpio5_19 */
 	{RGMII0_TXC, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_txc.rgmii0_txc */
 	{RGMII0_TXCTL, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_txctl.rgmii0_txctl */
 	{RGMII0_TXD3, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_txd3.rgmii0_txd3 */
@@ -251,7 +251,8 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{UART1_CTSN, (M15 | PIN_INPUT_PULLDOWN)},	/* uart1_ctsn.Driveroff */
 	{UART2_RXD, (M15 | PIN_INPUT_PULLDOWN)},	/* N/A.Driveroff */
 	{UART2_TXD, (M15 | PIN_INPUT_PULLDOWN)},	/* uart2_txd.Driveroff */
-	{UART2_CTSN, (M15 | PIN_INPUT_PULLDOWN)},	/* uart2_ctsn.Driveroff */
+	{UART2_CTSN, (M2 | PIN_INPUT_SLEW)},	/* uart2_ctsn.uart3_rxd */
+	{UART2_RTSN, (M1 | PIN_INPUT_SLEW)},	/* uart2_rtsn.uart3_txd */
 	{I2C2_SDA, (M1 | PIN_INPUT)},		/* i2c2_sda.hdmi1_ddc_scl */
 	{I2C2_SCL, (M1 | PIN_INPUT)},		/* i2c2_scl.hdmi1_ddc_sda */
 	{WAKEUP0, (M0 | PIN_OUTPUT_PULLUP)},	/* Wakeup0.Wakeup0 */
@@ -264,8 +265,8 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 };
 
 const struct pad_conf_entry early_padconf[] = {
-	{UART3_RXD, (PIN_INPUT_SLEW | M0)}, /* UART3_RXD */
-	{UART3_TXD, (PIN_INPUT_SLEW | M0)}, /* UART3_TXD */
+	{UART2_CTSN, (M2 | PIN_INPUT_SLEW)},	/* uart2_ctsn.uart3_rxd */
+	{UART2_RTSN, (M1 | PIN_INPUT_SLEW)},	/* uart2_rtsn.uart3_txd */
 	{I2C1_SDA, (PIN_INPUT_PULLUP | M0)},	/* I2C1_SDA */
 	{I2C1_SCL, (PIN_INPUT_PULLUP | M0)},	/* I2C1_SCL */
 };
