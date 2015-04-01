@@ -116,7 +116,7 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{VIN2A_D23, (M3 | PIN_INPUT_PULLUP | MANUAL_MODE)},	/* vin2a_d23.rgmii1_rxd0 */
 	{VOUT1_CLK, (M0 | PIN_OUTPUT)},		/* vout1_clk.vout1_clk */
 	{VOUT1_DE, (M0 | PIN_OUTPUT)},		/* vout1_de.vout1_de */
-	{VOUT1_FLD, (M14 | PIN_INPUT_PULLDOWN)},	/* vout1_fld.gpio4_21 */
+	{VOUT1_FLD, (M14 | PIN_INPUT)},		/* vout1_fld.gpio4_21 */
 	{VOUT1_HSYNC, (M0 | PIN_OUTPUT)},	/* vout1_hsync.vout1_hsync */
 	{VOUT1_VSYNC, (M0 | PIN_OUTPUT)},	/* vout1_vsync.vout1_vsync */
 	{VOUT1_D0, (M0 | PIN_OUTPUT)},		/* vout1_d0.vout1_d0 */
