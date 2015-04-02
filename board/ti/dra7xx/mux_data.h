@@ -89,18 +89,6 @@ const struct pad_conf_entry core_padconf_array_essential[] = {
 	{RGMII0_RXD2, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_rxd2.rgmii0_rxd2 */
 	{RGMII0_RXD1, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_rxd1.rgmii0_rxd1 */
 	{RGMII0_RXD0, (M0 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* rgmii0_rxd0.rgmii0_rxd0 */
-	{VIN2A_D12, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d12.rgmii1_txc */
-	{VIN2A_D13, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d13.rgmii1_txctl */
-	{VIN2A_D14, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d14.rgmii1_txd3 */
-	{VIN2A_D15, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d15.rgmii1_txd2 */
-	{VIN2A_D16, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d16.rgmii1_txd1 */
-	{VIN2A_D17, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d17.rgmii1_txd0 */
-	{VIN2A_D18, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d18.rgmii1_rxc */
-	{VIN2A_D19, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d19.rgmii1_rxctl */
-	{VIN2A_D20, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d20.rgmii1_rxd3 */
-	{VIN2A_D21, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d21.rgmii1_rxd2 */
-	{VIN2A_D22, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d22.rgmii1_rxd1 */
-	{VIN2A_D23, (M3 | PIN_INPUT_PULLDOWN | MANUAL_MODE)},	/* vin2a_d23.rgmii1_rxd0 */
 #if defined(CONFIG_NAND) || defined(CONFIG_NOR)
 	/* NAND / NOR pin-mux */
 	{GPMC_AD0 , M0 | IEN | PDIS}, /* GPMC_AD0  */
@@ -168,18 +156,6 @@ const struct iodelay_cfg_entry iodelay_cfg_array[] = {
 	{0x764, 1740, 240}, /* RGMMI0_TXD1_OUT */
 	{0x770, 1680, 380}, /* RGMMI0_TXD2_OUT */
 	{0x77C, 1740, 440}, /* RGMMI0_TXD3_OUT */
-	{0xAB0, 596, 0}, /* CFG_VIN2A_D18_IN */
-	{0xABC, 314, 980}, /* CFG_VIN2A_D19_IN */
-	{0xAD4, 241, 1536}, /* CFG_VIN2A_D20_IN */
-	{0xAE0, 103, 1689}, /* CFG_VIN2A_D21_IN */
-	{0xAEC, 161, 1563}, /* CFG_VIN2A_D22_IN */
-	{0xAF8, 0, 1613}, /* CFG_VIN2A_D23_IN */
-	{0xA70, 0, 200}, /* CFG_VIN2A_D12_OUT */
-	{0xA7C, 1560, 140}, /* CFG_VIN2A_D13_OUT */
-	{0xA88, 1700, 0}, /* CFG_VIN2A_D14_OUT */
-	{0xA94, 1260, 0}, /* CFG_VIN2A_D15_OUT */
-	{0xAA0, 1400, 0}, /* CFG_VIN2A_D16_OUT */
-	{0xAAC, 1290, 0}, /* CFG_VIN2A_D17_OUT */
 };
 #endif
 
