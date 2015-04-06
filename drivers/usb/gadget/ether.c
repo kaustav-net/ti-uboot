@@ -15,6 +15,7 @@
 #include <linux/usb/cdc.h>
 #include <linux/usb/gadget.h>
 #include <net.h>
+#include <usb.h>
 #include <malloc.h>
 #include <linux/ctype.h>
 
