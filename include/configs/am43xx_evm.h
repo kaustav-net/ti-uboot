@@ -39,7 +39,16 @@
 #define CONFIG_POWER_TPS65218
 
 /* SPL defines. */
+#ifdef CONFIG_USBHOST_BOOT
+/*
+ * For USB host boot, ROM uses DMA for copying MLO from USB storage
+ * and ARM internal ram is not accessible for DMA, so SPL text base
+ * should be in OCMC ram
+ */
+#define CONFIG_SPL_TEXT_BASE		0x40300350
+#else
 #define CONFIG_SPL_TEXT_BASE		0x402F4000
+#endif
 #define CONFIG_SPL_MAX_SIZE		(220 << 10)	/* 220KB */
 #define CONFIG_SYS_SPL_ARGS_ADDR	(CONFIG_SYS_SDRAM_BASE + \
 					 (128 << 20))
