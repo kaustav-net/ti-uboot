@@ -18,6 +18,13 @@
 
 static int isolate_io(u32 isolate)
 {
+	if (isolate) {
+		clrsetbits_le32((*ctrl)->control_pbias, SDCARD_PWRDNZ,
+				SDCARD_PWRDNZ);
+		clrsetbits_le32((*ctrl)->control_pbias, SDCARD_BIAS_PWRDNZ,
+				SDCARD_BIAS_PWRDNZ);
+	}
+
 	/* Override control on ISOCLKIN signal to IO pad ring. */
 	clrsetbits_le32((*prcm)->prm_io_pmctrl, PMCTRL_ISOCLK_OVERRIDE_MASK,
 			PMCTRL_ISOCLK_OVERRIDE_CTRL);
