@@ -297,7 +297,7 @@ const struct pad_conf_entry dra74x_core_padconf_array[] = {
 	{XREF_CLK2, (M5 | PIN_INPUT_PULLDOWN)},	/* xref_clk2.atl_clk2 */
 	{MCASP1_ACLKX, (M0 | PIN_INPUT_PULLDOWN)},	/* mcasp1_aclkx.mcasp1_aclkx */
 	{MCASP1_FSX, (M0 | PIN_INPUT_SLEW)},	/* mcasp1_fsx.mcasp1_fsx */
-	{MCASP1_AXR0, (M0 | PIN_INPUT_SLEW)},	/* mcasp1_axr0.mcasp1_axr0 */
+	{MCASP1_AXR0, (M0 | PIN_INPUT_SLEW | VIRTUAL_MODE15)},	/* mcasp1_axr0.mcasp1_axr0 */
 	{MCASP1_AXR1, (M0 | PIN_INPUT_SLEW)},	/* mcasp1_axr1.mcasp1_axr1 */
 	{MCASP1_AXR2, (M14 | PIN_INPUT_PULLDOWN)},	/* mcasp1_axr2.gpio5_4 */
 	{MCASP1_AXR3, (M14 | PIN_INPUT_PULLDOWN)},	/* mcasp1_axr3.gpio5_5 */
@@ -306,14 +306,14 @@ const struct pad_conf_entry dra74x_core_padconf_array[] = {
 	{MCASP1_AXR6, (M14 | PIN_INPUT_PULLDOWN)},	/* mcasp1_axr6.gpio5_8 */
 	{MCASP1_AXR7, (M14 | PIN_INPUT_PULLDOWN)},	/* mcasp1_axr7.gpio5_9 */
 	{MCASP1_AXR12, (M1 | PIN_INPUT_SLEW | VIRTUAL_MODE10)},	/* mcasp1_axr12.mcasp7_axr0 */
-	{MCASP1_AXR13, (M1 | PIN_INPUT_SLEW | VIRTUAL_MODE10)},	/* mcasp1_axr13.mcasp7_axr1 */
+	{MCASP1_AXR13, (M1 | PIN_INPUT_SLEW)},	/* mcasp1_axr13.mcasp7_axr1 */
 	{MCASP1_AXR14, (M1 | PIN_INPUT_SLEW | VIRTUAL_MODE10)},	/* mcasp1_axr14.mcasp7_aclkx */
 	{MCASP1_AXR15, (M1 | PIN_INPUT_SLEW | VIRTUAL_MODE10)},	/* mcasp1_axr15.mcasp7_fsx */
 	{MCASP2_ACLKR, (M0 | PIN_INPUT_PULLDOWN)},	/* mcasp2_aclkr.mcasp2_aclkr */
 	{MCASP3_ACLKX, (M0 | PIN_INPUT_PULLDOWN)},	/* mcasp3_aclkx.mcasp3_aclkx */
 	{MCASP3_FSX, (M0 | PIN_INPUT_SLEW)},	/* mcasp3_fsx.mcasp3_fsx */
 	{MCASP3_AXR0, (M0 | PIN_INPUT_SLEW)},	/* mcasp3_axr0.mcasp3_axr0 */
-	{MCASP3_AXR1, (M0 | PIN_INPUT_SLEW)},	/* mcasp3_axr1.mcasp3_axr1 */
+	{MCASP3_AXR1, (M0 | PIN_INPUT_SLEW | VIRTUAL_MODE6)},	/* mcasp3_axr1.mcasp3_axr1 */
 	{MMC1_CLK, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_clk.mmc1_clk */
 	{MMC1_CMD, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_cmd.mmc1_cmd */
 	{MMC1_DAT0, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_dat0.mmc1_dat0 */
