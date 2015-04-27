@@ -340,6 +340,7 @@ int board_usb_cleanup(int index, enum usb_init_type init)
 	default:
 		printf("Invalid Controller Index\n");
 	}
+	disable_usb_clocks(index);
 	return 0;
 }
 
@@ -459,6 +460,7 @@ int board_eth_init(bd_t *bis)
 #if defined(CONFIG_USB_XHCI_OMAP) || defined(CONFIG_USB_DWC3)
 int board_usb_init(int index, enum usb_init_type init)
 {
+	enable_usb_clocks(index);
 	switch (index) {
 	case 0:
 		if (init == USB_INIT_DEVICE) {
