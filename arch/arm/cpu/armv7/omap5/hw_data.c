@@ -456,8 +456,10 @@ void enable_basic_clocks(void)
 		(*prcm)->cm_l4per_gpio6_clkctrl,
 		(*prcm)->cm_l4per_gpio7_clkctrl,
 		(*prcm)->cm_l4per_gpio8_clkctrl,
+#if defined(CONFIG_DRA7XX) || defined(CONFIG_AM57XX)
 		(*prcm)->cm_l3main1_tptc1_clkctrl,
 		(*prcm)->cm_l3main1_tptc2_clkctrl,
+#endif
 #ifdef CONFIG_USB_DWC3
 		(*prcm)->cm_l3init_ocp2scp1_clkctrl,
 		(*prcm)->cm_l3init_usb_otg_ss1_clkctrl,
