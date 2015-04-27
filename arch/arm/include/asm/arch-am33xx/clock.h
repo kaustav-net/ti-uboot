@@ -118,5 +118,6 @@ void rtc_only_prcm_init(void);
 void rtc_only_enable_basic_clocks(void);
 
 void do_enable_clocks(u32 *const *, u32 *const *, u8);
+void do_disable_clocks(u32 *const *, u32 *const *, u8);
 
 #endif
