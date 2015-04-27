@@ -22,7 +22,7 @@ static int do_fastboot(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 	while (1) {
 		if (ctrlc())
 			break;
-		usb_gadget_handle_interrupts();
+		usb_gadget_handle_interrupts(0);
 	}
 
 	g_dnl_unregister();
