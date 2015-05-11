@@ -40,6 +40,9 @@
 #include <asm/4xx_pci.h>
 #endif
 
+#if !defined(CONFIG_SPL_BUILD) || \
+	(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_USB_HOST_SUPPORT))
+
 #define USB_BUFSIZ	512
 
 static struct usb_device usb_dev[USB_MAX_DEVICE];
@@ -1066,6 +1069,8 @@ int usb_new_device(struct usb_device *dev)
 	usb_hub_probe(dev, 0);
 	return 0;
 }
+
+#endif
 
 __weak
 int board_usb_init(int index, enum usb_init_type init)
