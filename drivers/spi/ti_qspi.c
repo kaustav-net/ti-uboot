@@ -360,6 +360,9 @@ void spi_flash_copy_mmap(void *data, void *offset, size_t len)
 		a_cnt_value = max_acnt;
 	}
 
+	/* Invalidate the area, so no writeback into the RAM races with DMA */
+	invalidate_dcache_range(addr, addr + len);
+
 	/* Compute QSPI address and size */
 	edma_param.opt      = 0;
 	edma_param.src_addr  = ((unsigned int) offset);
