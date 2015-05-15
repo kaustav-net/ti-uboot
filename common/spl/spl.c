@@ -85,7 +85,6 @@ void spl_parse_image_header(const struct image_header *header)
 		}
 		spl_image.os = image_get_os(header);
 		spl_image.name = image_get_name(header);
-		spl_image.size = roundup(spl_image.size, ARCH_DMA_MINALIGN);
 		debug("spl: payload image: %.*s load addr: 0x%x size: %d\n",
 			sizeof(spl_image.name), spl_image.name,
 			spl_image.load_addr, spl_image.size);
