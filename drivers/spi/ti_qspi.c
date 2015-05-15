@@ -367,7 +367,7 @@ void spi_flash_copy_mmap(void *data, void *offset, size_t len)
 	}
 
 	/* Invalidate the area, so no writeback into the RAM races with DMA */
-	invalidate_dcache_range(addr, addr + len);
+	invalidate_dcache_range(addr, addr + roundup(len, ARCH_DMA_MINALIGN));
 
 	/* Compute QSPI address and size */
 	edma_param.opt      = 0;
