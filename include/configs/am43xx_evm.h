@@ -309,7 +309,8 @@
 				"run usbargs;" \
 				"bootz ${loadaddr} - ${fdtaddr}; " \
 			"fi;" \
-		"fi\0" \
+		"fi;" \
+		"usb stop ${usbdev};\0" \
 	"netboot=echo Booting from network ...; " \
 		"setenv autoload no; " \
 		"dhcp; " \
