@@ -13,6 +13,8 @@
 #include <common.h>
 #include <asm/ti-common/ti-edma3.h>
 
+#define BIT(x)					(1 << (x))
+
 #define EDMA3_SL_BASE(slot)			(0x4000 + ((slot) << 5))
 #define EDMA3_SL_MAX_NUM			512
 #define EDMA3_SLOPT_FIFO_WIDTH_MASK		(0x7 << 8)
