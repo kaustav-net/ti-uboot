@@ -47,7 +47,7 @@
 #include <asm/arch/cpu.h>
 #include <asm/arch/omap.h>
 
-#include <configs/ti_armv7_common.h>
+#include <configs/ti_armv7_omap.h>
 
 /*
  * Hardware drivers
