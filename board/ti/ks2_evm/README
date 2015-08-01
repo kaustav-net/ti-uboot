@@ -81,6 +81,21 @@ To build u-boot-nand.gph
   >make k2hk_evm_defconfig
   >make u-boot-nand.gph
 
+To build u-boot.uart
+  >make k2hk_evm_defconfig
+  >make u-boot.uart
+
+Load and Run U-Boot on keystone EVMs using UART download
+========================================================
+
+Open BMC and regular UART terminals.
+
+1. On the regular UART port start xmodem transfer of the u-boot.uart
+2. Using BMC terminal set the ARM-UART bootmode and reboot the EVM
+   BMC> bootmode #4
+   MBC> reboot
+3. When xmodem is complete you should see the u-boot starts on the UART port
+
 Load and Run U-Boot on keystone EVMs using CCS
 =========================================
 
