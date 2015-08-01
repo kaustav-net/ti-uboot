@@ -249,6 +249,7 @@ typedef volatile unsigned int   *dv_reg_p;
 #define CPU_66AK2Hx	0xb981
 #define CPU_66AK2Ex	0xb9a6
 #define CPU_66AK2Lx	0xb9a7
+#define CPU_66AK2Gx	0xbb06
 
 /* DEVSPEED register */
 #define DEVSPEED_DEVSPEED_SHIFT	16
@@ -291,6 +292,11 @@ static inline u8 cpu_is_k2e(void)
 static inline u8 cpu_is_k2l(void)
 {
 	return get_part_number() == CPU_66AK2Lx;
+}
+
+static inline u8 cpu_is_k2g(void)
+{
+	return get_part_number() == CPU_66AK2Gx;
 }
 
 static inline u8 cpu_revision(void)
