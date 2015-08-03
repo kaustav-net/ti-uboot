@@ -30,7 +30,7 @@ u32 ddr3_init(void)
 	printf("Detected SO-DIMM [%s]\n", spd_cb.dimm_name);
 
 	if ((cpu_revision() > 1) ||
-	    (__raw_readl(KS2_PLL_CNTRL_BASE + KS2_RSTCTRL_RSTYPE) & 0x1)) {
+	    (__raw_readl(KS2_RSTCTRL_RSTYPE) & 0x1)) {
 		printf("DDR3 speed %d\n", spd_cb.ddrspdclock);
 		if (spd_cb.ddrspdclock == 1600)
 			init_pll(&ddr3a_400);
