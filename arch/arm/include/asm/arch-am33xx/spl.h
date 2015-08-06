@@ -21,6 +21,7 @@
 #define BOOT_DEVICE_SPI		10
 #define BOOT_DEVICE_USB     13
 #define BOOT_DEVICE_UART	65
+#define BOOT_DEVICE_USBETH	69
 #define BOOT_DEVICE_CPGMAC	71
 #else
 #define BOOT_DEVICE_XIP       	2
