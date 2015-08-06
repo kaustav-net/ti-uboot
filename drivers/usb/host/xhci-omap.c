@@ -156,4 +156,5 @@ void xhci_hcd_stop(int index)
 	struct omap_xhci *ctx = &omap;
 
 	omap_xhci_core_exit(ctx);
+	board_usb_cleanup(index, USB_INIT_HOST);
 }
