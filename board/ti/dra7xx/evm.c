@@ -85,17 +85,33 @@ void set_muxconf_regs_essential(void)
 #ifdef CONFIG_IODELAY_RECALIBRATION
 void recalibrate_iodelay(void)
 {
-	if (is_dra72x()) {
-		__recalibrate_iodelay(dra72x_core_padconf_array,
-				      ARRAY_SIZE(dra72x_core_padconf_array),
-				      iodelay_cfg_array,
-				      ARRAY_SIZE(iodelay_cfg_array));
-	} else {
-		__recalibrate_iodelay(dra74x_core_padconf_array,
-				      ARRAY_SIZE(dra74x_core_padconf_array),
-				      dra742_iodelay_cfg_array,
-				      ARRAY_SIZE(dra742_iodelay_cfg_array));
+	struct pad_conf_entry const *pads;
+	struct iodelay_cfg_entry const *iodelay;
+	int npads, niodelays;
+
+	switch (omap_revision()) {
+	case DRA722_ES1_0:
+		pads = dra72x_core_padconf_array;
+		npads = ARRAY_SIZE(dra72x_core_padconf_array);
+		iodelay = iodelay_cfg_array;
+		niodelays = ARRAY_SIZE(iodelay_cfg_array);
+		break;
+	case DRA752_ES1_0:
+	case DRA752_ES1_1:
+		pads = dra74x_core_padconf_array;
+		npads = ARRAY_SIZE(dra74x_core_padconf_array);
+		iodelay = dra742_es1_1_iodelay_cfg_array;
+		niodelays = ARRAY_SIZE(dra742_es1_1_iodelay_cfg_array);
+		break;
+	default:
+	case DRA752_ES2_0:
+		pads = dra74x_core_padconf_array;
+		npads = ARRAY_SIZE(dra74x_core_padconf_array);
+		iodelay = dra742_es2_0_iodelay_cfg_array;
+		niodelays = ARRAY_SIZE(dra742_es2_0_iodelay_cfg_array);
+		break;
 	}
+	__recalibrate_iodelay(pads, npads, iodelay, niodelays);
 }
 #endif
 
