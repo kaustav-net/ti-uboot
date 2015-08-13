@@ -16,6 +16,10 @@
 
 /* U-Boot general configuration */
 #define CONFIG_EXTRA_ENV_KS2_BOARD_SETTINGS				\
+	"bootpart=0:2\0"						\
+	"bootdir=/boot\0"						\
+	"mmcroot=/dev/mmcblk0p2 rw\0"					\
+	"mmcrootfstype=ext4 rootwait\0"					\
 	"addr_mon=0x0c040000\0"						\
 	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs "	\
 	"root=ubi0:rootfs rootflags=sync rw ubi.mtd=ubifs,2048\0"	\
@@ -23,6 +27,13 @@
 	"name_mon=skern-k2g.bin\0"					\
 	"name_ubi=k2g-evm-ubifs.ubi\0"					\
 	"name_uboot=u-boot-spi-k2g-evm.gph\0"				\
+	"init_mmc=run args_all args_mmc\0"				\
+	"get_fdt_mmc=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${name_fdt}\0"\
+	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
+		"${bootdir}/${name_kern}\0"				\
+	"get_mon_mmc=load mmc ${bootpart} ${addr_mon} ${bootdir}/${name_mon}\0"\
+	"args_mmc=setenv bootargs ${bootargs} root=${mmcroot} "		\
+		"rootfstype=${mmcrootfstype}\0"				\
 
 #include <configs/ti_armv7_keystone2.h>
 
