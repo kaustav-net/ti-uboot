@@ -367,7 +367,8 @@ static void rtc_only(void)
 	sdram_init();
 
 	resume_func = (void *)readl(&rtc->scratch0);
-	resume_func();
+	if (resume_func)
+		resume_func();
 }
 #endif
 
