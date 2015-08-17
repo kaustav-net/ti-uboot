@@ -1006,12 +1006,6 @@ u-boot-nand.gph: u-boot.bin FORCE
 	$(call if_changed,mkimage)
 	@dd if=/dev/zero bs=8 count=1 2>/dev/null >> $@
 
-u-boot.uart.pad:
-	@dd if=/dev/zero bs=4 count=1024 2>/dev/null > $@
-
-u-boot.uart: u-boot.uart.pad u-boot.bin FORCE
-	$(call if_changed,cat)
-
 # x86 uses a large ROM. We fill it with 0xff, put the 16-bit stuff (including
 # reset vector) at the top, Intel ME descriptor at the bottom, and U-Boot in
 # the middle.
