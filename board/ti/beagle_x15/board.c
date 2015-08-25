@@ -415,7 +415,9 @@ int board_usb_init(int index, enum usb_init_type init)
 {
 	setbits_le32((*prcm)->cm_l3init_usb_otg_ss_clkctrl,
 			OTG_SS_CLKCTRL_MODULEMODE_HW | OPTFCLKEN_REFCLK960M);
+	return 0;
 }
+#endif
 
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 /* VTT regulator enable */
