@@ -212,6 +212,7 @@ int arch_misc_init(void)
 	return 0;
 }
 
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT
 
 #if defined(CONFIG_SPL_AM33XX_ENABLE_RTC32K_OSC) || \
 	(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_RTC_ONLY_SUPPORT))
@@ -253,7 +254,6 @@ void update_rtc_magic(void)
 }
 #endif
 
-#ifndef CONFIG_SKIP_LOWLEVEL_INIT
 /*
  * In the case of non-SPL based booting we'll want to call these
  * functions a tiny bit later as it will require gd to be set and cleared
