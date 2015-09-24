@@ -180,9 +180,6 @@ const struct pad_conf_entry early_padconf[] = {
 #if (CONFIG_CONS_INDEX == 1)
 	{UART1_RXD, (PIN_INPUT_SLEW | M0)}, /* UART1_RXD */
 	{UART1_TXD, (PIN_INPUT_SLEW | M0)}, /* UART1_TXD */
-#elif (CONFIG_CONS_INDEX == 3)
-	{UART3_RXD, (PIN_INPUT_SLEW | M0)}, /* UART3_RXD */
-	{UART3_TXD, (PIN_INPUT_SLEW | M0)}, /* UART3_TXD */
 #endif
 	{I2C1_SDA, (PIN_INPUT | M0)},	/* I2C1_SDA */
 	{I2C1_SCL, (PIN_INPUT | M0)},	/* I2C1_SCL */
@@ -376,8 +373,10 @@ const struct pad_conf_entry dra74x_core_padconf_array[] = {
 	{SPI1_CS1, (M14 | PIN_OUTPUT)},		/* spi1_cs1.gpio7_11 */
 	{SPI1_CS2, (M14 | PIN_INPUT_PULLDOWN)},	/* spi1_cs2.gpio7_12 */
 	{SPI1_CS3, (M6 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* spi1_cs3.hdmi1_cec */
+#if CONFIG_CONS_INDEX != 3
 	{SPI2_SCLK, (M1 | PIN_INPUT_PULLDOWN)},	/* spi2_sclk.uart3_rxd */
 	{SPI2_D1, (M1 | PIN_INPUT_SLEW)},	/* spi2_d1.uart3_txd */
+#endif
 	{SPI2_D0, (M1 | PIN_INPUT_SLEW)},	/* spi2_d0.uart3_ctsn */
 	{SPI2_CS0, (M1 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* spi2_cs0.uart3_rtsn */
 	{DCAN1_TX, (M15 | PULL_UP)},	/* dcan1_tx.safe for dcan1_tx */
@@ -388,8 +387,10 @@ const struct pad_conf_entry dra74x_core_padconf_array[] = {
 	{UART1_RTSN, (M3 | PIN_INPUT_PULLUP)},	/* uart1_rtsn.mmc4_cmd */
 	{UART2_RXD, (M3 | PIN_INPUT_PULLUP)},	/* N/A.mmc4_dat0 */
 	{UART2_TXD, (M3 | PIN_INPUT_PULLUP)},	/* uart2_txd.mmc4_dat1 */
+#if CONFIG_CONS_INDEX != 3
 	{UART2_CTSN, (M3 | PIN_INPUT_PULLUP)},	/* uart2_ctsn.mmc4_dat2 */
 	{UART2_RTSN, (M3 | PIN_INPUT_PULLUP)},	/* uart2_rtsn.mmc4_dat3 */
+#endif
 	{I2C2_SDA, (M0 | PIN_INPUT_PULLUP)},	/* i2c2_sda.i2c2_sda */
 	{I2C2_SCL, (M0 | PIN_INPUT_PULLUP)},	/* i2c2_scl.i2c2_scl */
 	{WAKEUP0, (M15 | PULL_UP)},	/* Wakeup0.safe for dcan1_rx */
