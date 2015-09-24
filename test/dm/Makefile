@@ -15,6 +15,7 @@ obj-$(CONFIG_UT_DM) += test-uclass.o
 # subsystem you must add sandbox tests here.
 obj-$(CONFIG_UT_DM) += core.o
 ifneq ($(CONFIG_SANDBOX),)
+obj-$(CONFIG_REMOTEPROC) += remoteproc.o
 obj-$(CONFIG_DM_ETH) += eth.o
 obj-$(CONFIG_DM_GPIO) += gpio.o
 obj-$(CONFIG_DM_I2C) += i2c.o
