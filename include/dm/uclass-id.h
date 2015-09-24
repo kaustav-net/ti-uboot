@@ -41,6 +41,7 @@ enum uclass_id {
 	UCLASS_PCI_GENERIC,	/* Generic PCI bus device */
 	UCLASS_PMIC,		/* PMIC I/O device */
 	UCLASS_REGULATOR,	/* Regulator device */
+	UCLASS_REMOTEPROC,	/* Remote Processor device */
 	UCLASS_RTC,		/* Real time clock device */
 	UCLASS_SERIAL,		/* Serial UART */
 	UCLASS_SPI,		/* SPI bus */

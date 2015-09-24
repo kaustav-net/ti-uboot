@@ -52,6 +52,8 @@ source "drivers/dma/Kconfig"
 
 source "drivers/crypto/Kconfig"
 
+source "drivers/remoteproc/Kconfig"
+
 source "drivers/thermal/Kconfig"
 
 endmenu
