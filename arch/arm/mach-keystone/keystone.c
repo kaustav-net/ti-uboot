@@ -13,6 +13,8 @@
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/hardware.h>
+#include <remoteproc.h>
+#include <dm/platform_data/remoteproc_ti_power_proc.h>
 
 /**
  * cpu_to_bus - swap bytes of the 32-bit data if the device is BE
@@ -85,3 +87,22 @@ int misc_init_r(void)
 
 	return 0;
 }
+
+#if !(defined (CONFIG_SPL_BUILD) || defined (CONFIG_OF_CONTROL)) && \
+    defined (CONFIG_REMOTEPROC_TI_POWER)
+struct ti_powerproc_platdata  pmmc_driverdata = {
+	.slave_base = K2G_PMMC_SLAVE_BASE,
+	.module = KS2_LPSC_PMMC,
+};
+
+struct dm_rproc_uclass_pdata pmmc_data = {
+	.name = "PMMC",
+	.mem_type = RPROC_INTERNAL_MEMORY_MAPPED,
+	.driver_plat_data = &pmmc_driverdata,
+};
+
+U_BOOT_DEVICE(pmmc) = {
+	.name = "ti_power_proc",
+	.platdata = &pmmc_data,
+};
+#endif
