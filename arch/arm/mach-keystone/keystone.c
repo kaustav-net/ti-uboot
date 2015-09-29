@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <errno.h>
 #include <asm/io.h>
 #include <asm/arch/mon.h>
 #include <asm/arch/psc_defs.h>
