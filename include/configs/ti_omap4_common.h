@@ -91,12 +91,6 @@
 	"bootfile=zImage\0" \
 	"usbtty=cdc_acm\0" \
 	"vram=16M\0" \
-	"loadbootscript=load mmc ${mmcdev} ${loadaddr} boot.scr\0" \
-	"bootscript=echo Running bootscript from mmc${mmcdev} ...; " \
-		"source ${loadaddr}\0" \
-	"loadbootenv=load mmc ${mmcdev} ${loadaddr} uEnv.txt\0" \
-	"importbootenv=echo Importing environment from mmc${mmcdev} ...; " \
-		"env import -t ${loadaddr} ${filesize}\0" \
 	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"loaduimage=load mmc ${mmcdev} ${loadaddr} uImage\0" \
 	"mmcboot=echo Booting from mmc${mmcdev} ...; " \
@@ -122,19 +116,9 @@
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
+	"run envboot; " \
 	"mmc dev ${mmcdev}; if mmc rescan; then " \
 		"echo SD/MMC found on device ${mmcdev};" \
-		"if run loadbootscript; then " \
-			"run bootscript; " \
-		"else " \
-			"if run loadbootenv; then " \
-				"run importbootenv; " \
-			"fi;" \
-			"if test -n ${uenvcmd}; then " \
-				"echo Running uenvcmd ...;" \
-				"run uenvcmd;" \
-			"fi;" \
-		"fi;" \
 		"if run loadimage; then " \
 			"run loadfdt;" \
 			"run mmcboot; " \

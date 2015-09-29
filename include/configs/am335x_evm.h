@@ -92,13 +92,6 @@
 		"${optargs} " \
 		"root=${spiroot} " \
 		"rootfstype=${spirootfstype}\0" \
-	"bootenv=uEnv.txt\0" \
-	"loadbootscript=load mmc ${mmcdev} ${loadaddr} boot.scr\0" \
-	"bootscript=echo Running bootscript from mmc${mmcdev} ...; " \
-		"source ${loadaddr}\0" \
-	"loadbootenv=load mmc ${mmcdev} ${loadaddr} ${bootenv}\0" \
-	"importbootenv=echo Importing environment from mmc ...; " \
-		"env import -t -r $loadaddr $filesize\0" \
 	"ramargs=setenv bootargs console=${console} " \
 		"${optargs} " \
 		"root=${ramroot} " \
@@ -123,17 +116,6 @@
 	"mmcboot=mmc dev ${mmcdev}; " \
 		"if mmc rescan; then " \
 			"echo SD/MMC found on device ${mmcdev};" \
-			"if run loadbootscript; then " \
-				"run bootscript;" \
-			"else " \
-				"if run loadbootenv; then " \
-					"echo Loaded environment from ${bootenv};" \
-					"run importbootenv;" \
-				"fi;" \
-				"if test -n $uenvcmd; then " \
-					"echo Running uenvcmd ...;" \
-					"run uenvcmd;" \
-				"fi;" \
 				"if run loadimage; then " \
 					"run mmcloados;" \
 				"fi;" \
@@ -165,6 +147,7 @@
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
+	"run envboot; " \
 	"run mmcboot;" \
 	"setenv mmcdev 1; " \
 	"setenv bootpart 1:2; " \
