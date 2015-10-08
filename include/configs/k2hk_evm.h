@@ -25,6 +25,12 @@
 	"name_uboot=u-boot-spi-k2hk-evm.gph\0"				\
 	"name_fs=arago-console-image-k2hk-evm.cpio.gz\0"
 
+/* AEMIF */
+#define CONFIG_TI_AEMIF
+#define CONFIG_AEMIF_CNTRL_BASE		KS2_AEMIF_CNTRL_BASE
+/* Keystone2 Emif16 errata config */
+#define K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
+
 /* NAND Configuration */
 #define CONFIG_SYS_NAND_PAGE_2K
 #define CONFIG_NAND_DAVINCI
