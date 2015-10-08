@@ -16,10 +16,23 @@
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/clock.h>
 #include <asm/ti-common/ti-aemif.h>
+#include <asm/ti-common/ti-gpmc.h>
 #include <asm/ti-common/keystone_net.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#if defined(CONFIG_TI_GPMC)
+static struct ti_gpmc_config gpmc_config = {
+	.config1 = M_NAND_GPMC_CONFIG1,
+	.config2 = M_NAND_GPMC_CONFIG2,
+	.config3 = M_NAND_GPMC_CONFIG3,
+	.config4 = M_NAND_GPMC_CONFIG4,
+	.config5 = M_NAND_GPMC_CONFIG5,
+	.config6 = M_NAND_GPMC_CONFIG6,
+};
+#endif
+
+#if defined(CONFIG_TI_AEMIF)
 static struct aemif_config aemif_configs[] = {
 	{			/* CS0 */
 		.mode		= AEMIF_MODE_NAND,
@@ -33,6 +46,7 @@ static struct aemif_config aemif_configs[] = {
 		.width		= AEMIF_WIDTH_8,
 	},
 };
+#endif
 
 int dram_init(void)
 {
@@ -42,7 +56,6 @@ int dram_init(void)
 
 	gd->ram_size = get_ram_size((long *)CONFIG_SYS_SDRAM_BASE,
 				    CONFIG_MAX_RAM_BANK_SIZE);
-	aemif_init(ARRAY_SIZE(aemif_configs), aemif_configs);
 	if (ddr3_size)
 		ddr3_init_ecc(KS2_DDR3A_EMIF_CTRL_BASE, ddr3_size);
 	return 0;
@@ -52,6 +65,13 @@ int board_init(void)
 {
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
+#if defined(CONFIG_TI_GPMC)
+	ti_gpmc_init(&gpmc_config);
+#endif
+
+#if defined(CONFIG_TI_AEMIF)
+	aemif_init(ARRAY_SIZE(aemif_configs), aemif_configs);
+#endif
 	return 0;
 }
 

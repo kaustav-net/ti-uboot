@@ -74,4 +74,7 @@
 /* PMMC */
 #define K2G_PMMC_SLAVE_BASE		0x02900000
 
+/* GPMC */
+#define KS2_GPMC_BASE			0x21818000
+
 #endif /* __ASM_ARCH_HARDWARE_K2G_H */
