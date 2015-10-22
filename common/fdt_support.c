@@ -401,6 +401,9 @@ static int fdt_pack_reg(const void *fdt, void *buf, u64 *address, u64 *size,
 	char *p = buf;
 
 	for (i = 0; i < n; i++) {
+		if (size[i] == 0)
+			continue;
+
 		if (address_cells == 2)
 			*(fdt64_t *)p = cpu_to_fdt64(address[i]);
 		else
