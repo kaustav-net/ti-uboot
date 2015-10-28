@@ -123,11 +123,24 @@
 	"fdt ram 0x80f80000 0x80000;" \
 	"ramdisk ram 0x81000000 0x4000000\0"
 
+#define DFU_ALT_INFO_QSPI \
+	"dfu_alt_info_qspi=" \
+	"MLO raw 0x0 0x010000;" \
+	"MLO.backup1 raw 0x010000 0x010000;" \
+	"MLO.backup2 raw 0x020000 0x010000;" \
+	"MLO.backup3 raw 0x030000 0x010000;" \
+	"u-boot.img raw 0x040000 0x0100000;" \
+	"u-boot-spl-os raw 0x140000 0x080000;" \
+	"u-boot-env raw 0x1C0000 0x010000;" \
+	"u-boot-env.backup raw 0x1D0000 0x010000;" \
+	"kernel raw 0x1E0000 0x800000\0"
+
 #define DFUARGS \
 	"dfu_bufsiz=0x10000\0" \
 	DFU_ALT_INFO_MMC \
 	DFU_ALT_INFO_EMMC \
-	DFU_ALT_INFO_RAM
+	DFU_ALT_INFO_RAM \
+	DFU_ALT_INFO_QSPI
 
 #ifndef CONFIG_SPL_BUILD
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
