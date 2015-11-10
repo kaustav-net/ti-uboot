@@ -340,6 +340,7 @@ config TARGET_PCM051
 	select DM
 	select DM_SERIAL
 	select DM_GPIO
+	select CREATE_BOARD_SYMLINK
 
 config TARGET_DRACO
 	bool "Support draco"
@@ -389,6 +390,7 @@ config TARGET_AM335X_EVM
 	select DM
 	select DM_SERIAL
 	select DM_GPIO
+	select CREATE_BOARD_SYMLINK
 
 config TARGET_AM43XX_EVM
 	bool "Support am43xx_evm"

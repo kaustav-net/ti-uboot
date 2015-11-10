@@ -31,6 +31,7 @@
 #include <environment.h>
 #include <watchdog.h>
 #include <environment.h>
+#include <board-common/board_detect.h>
 #include "board.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -43,43 +44,9 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 /*
  * Read header information from EEPROM into global structure.
  */
-static int read_eeprom(struct am335x_baseboard_id *header)
+static int __maybe_unused read_eeprom(struct ti_am_eeprom **header)
 {
-	/* Check if baseboard eeprom is available */
-	if (i2c_probe(CONFIG_SYS_I2C_EEPROM_ADDR)) {
-		puts("Could not probe the EEPROM; something fundamentally "
-			"wrong on the I2C bus.\n");
-		return -ENODEV;
-	}
-
-	/* read the eeprom using i2c */
-	if (i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, 2, (uchar *)header,
-		     sizeof(struct am335x_baseboard_id))) {
-		puts("Could not read the EEPROM; something fundamentally"
-			" wrong on the I2C bus.\n");
-		return -EIO;
-	}
-
-	if (header->magic != 0xEE3355AA) {
-		/*
-		 * read the eeprom using i2c again,
-		 * but use only a 1 byte address
-		 */
-		if (i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, 1, (uchar *)header,
-			     sizeof(struct am335x_baseboard_id))) {
-			puts("Could not read the EEPROM; something "
-				"fundamentally wrong on the I2C bus.\n");
-			return -EIO;
-		}
-
-		if (header->magic != 0xEE3355AA) {
-			printf("Incorrect magic number (0x%x) in EEPROM\n",
-					header->magic);
-			return -EINVAL;
-		}
-	}
-
-	return 0;
+	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR, header);
 }
 
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT
@@ -220,7 +187,7 @@ const struct dpll_params dpll_ddr_bone_black = {
 
 void am33xx_spl_board_init(void)
 {
-	struct am335x_baseboard_id header;
+	struct ti_am_eeprom *header;
 	int mpu_vdd;
 
 	if (read_eeprom(&header) < 0)
@@ -229,7 +196,7 @@ void am33xx_spl_board_init(void)
 	/* Get the frequency */
 	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
 
-	if (board_is_bone(&header) || board_is_bone_lt(&header)) {
+	if (board_is_bone() || board_is_bone_lt()) {
 		/* BeagleBone PMIC Code */
 		int usb_cur_lim;
 
@@ -237,7 +204,7 @@ void am33xx_spl_board_init(void)
 		 * Only perform PMIC configurations if board rev > A1
 		 * on Beaglebone White
 		 */
-		if (board_is_bone(&header) && !strncmp(header.version,
+		if (board_is_bone() && !strncmp(header->version,
 						       "00A1", 4))
 			return;
 
@@ -248,7 +215,7 @@ void am33xx_spl_board_init(void)
 		 * On Beaglebone White we need to ensure we have AC power
 		 * before increasing the frequency.
 		 */
-		if (board_is_bone(&header)) {
+		if (board_is_bone()) {
 			uchar pmic_status_reg;
 			if (tps65217_reg_read(TPS65217_STATUS,
 					      &pmic_status_reg))
@@ -263,7 +230,7 @@ void am33xx_spl_board_init(void)
 		 * Override what we have detected since we know if we have
 		 * a Beaglebone Black it supports 1GHz.
 		 */
-		if (board_is_bone_lt(&header))
+		if (board_is_bone_lt())
 			dpll_mpu_opp100.m = MPUPLL_M_1000;
 
 		/*
@@ -304,7 +271,7 @@ void am33xx_spl_board_init(void)
 		 * Set LDO3, LDO4 output voltage to 3.3V for Beaglebone.
 		 * Set LDO3 to 1.8V and LDO4 to 3.3V for Beaglebone Black.
 		 */
-		if (board_is_bone(&header)) {
+		if (board_is_bone()) {
 			if (tps65217_reg_write(TPS65217_PROT_LEVEL_2,
 					       TPS65217_DEFLS1,
 					       TPS65217_LDO_VOLTAGE_OUT_3_3,
@@ -364,18 +331,18 @@ void am33xx_spl_board_init(void)
 
 const struct dpll_params *get_dpll_ddr_params(void)
 {
-	struct am335x_baseboard_id header;
+	struct ti_am_eeprom *header;
 
 	enable_i2c0_pin_mux();
 	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
 	if (read_eeprom(&header) < 0)
 		puts("Could not get board ID.\n");
 
-	if (board_is_evm_sk(&header))
+	if (board_is_evm_sk())
 		return &dpll_ddr_evm_sk;
-	else if (board_is_bone_lt(&header))
+	else if (board_is_bone_lt())
 		return &dpll_ddr_bone_black;
-	else if (board_is_evm_15_or_later(&header))
+	else if (board_is_evm_15_or_later(header))
 		return &dpll_ddr_evm_sk;
 	else
 		return &dpll_ddr;
@@ -400,12 +367,12 @@ void set_uart_mux_conf(void)
 
 void set_mux_conf_regs(void)
 {
-	__maybe_unused struct am335x_baseboard_id header;
+	__maybe_unused struct ti_am_eeprom *header;
 
 	if (read_eeprom(&header) < 0)
 		puts("Could not get board ID.\n");
 
-	enable_board_pin_mux(&header);
+	enable_board_pin_mux(header);
 }
 
 const struct ctrl_ioregs ioregs_evmsk = {
@@ -442,12 +409,12 @@ const struct ctrl_ioregs ioregs = {
 
 void sdram_init(void)
 {
-	__maybe_unused struct am335x_baseboard_id header;
+	__maybe_unused struct ti_am_eeprom *header;
 
 	if (read_eeprom(&header) < 0)
 		puts("Could not get board ID.\n");
 
-	if (board_is_evm_sk(&header)) {
+	if (board_is_evm_sk()) {
 		/*
 		 * EVM SK 1.2A and later use gpio0_7 to enable DDR3.
 		 * This is safe enough to do on older revs.
@@ -456,15 +423,15 @@ void sdram_init(void)
 		gpio_direction_output(GPIO_DDR_VTT_EN, 1);
 	}
 
-	if (board_is_evm_sk(&header))
+	if (board_is_evm_sk())
 		config_ddr(303, &ioregs_evmsk, &ddr3_data,
 			   &ddr3_cmd_ctrl_data, &ddr3_emif_reg_data, 0);
-	else if (board_is_bone_lt(&header))
+	else if (board_is_bone_lt())
 		config_ddr(400, &ioregs_bonelt,
 			   &ddr3_beagleblack_data,
 			   &ddr3_beagleblack_cmd_ctrl_data,
 			   &ddr3_beagleblack_emif_reg_data, 0);
-	else if (board_is_evm_15_or_later(&header))
+	else if (board_is_evm_15_or_later(header))
 		config_ddr(303, &ioregs_evm15, &ddr3_evm_data,
 			   &ddr3_evm_cmd_ctrl_data, &ddr3_evm_emif_reg_data, 0);
 	else
@@ -493,20 +460,14 @@ int board_init(void)
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	char safe_string[HDR_NAME_LEN + 1];
-	struct am335x_baseboard_id header;
+	struct ti_am_eeprom_printable p;
+	int rc;
 
-	if (read_eeprom(&header) < 0)
+	rc = ti_i2c_eeprom_am_get_print(-1, CONFIG_SYS_I2C_EEPROM_ADDR, &p);
+
+	if (rc)
 		puts("Could not get board ID.\n");
-
-	/* Now set variables based on the header. */
-	strncpy(safe_string, (char *)header.name, sizeof(header.name));
-	safe_string[sizeof(header.name)] = 0;
-	setenv("board_name", safe_string);
-
-	strncpy(safe_string, (char *)header.version, sizeof(header.version));
-	safe_string[sizeof(header.version)] = 0;
-	setenv("board_rev", safe_string);
+	set_board_info_env(p.name, p.version, p.serial);
 #endif
 
 	return 0;
@@ -576,7 +537,7 @@ int board_eth_init(bd_t *bis)
 	int rv, n = 0;
 	uint8_t mac_addr[6];
 	uint32_t mac_hi, mac_lo;
-	__maybe_unused struct am335x_baseboard_id header;
+	__maybe_unused struct ti_am_eeprom *header;
 
 	/* try reading mac address from efuse */
 	mac_lo = readl(&cdev->macid0l);
@@ -616,8 +577,8 @@ int board_eth_init(bd_t *bis)
 	if (read_eeprom(&header) < 0)
 		puts("Could not get board ID.\n");
 
-	if (board_is_bone(&header) || board_is_bone_lt(&header) ||
-	    board_is_idk(&header)) {
+	if (board_is_bone() || board_is_bone_lt() ||
+	    board_is_idk(header)) {
 		writel(MII_MODE_ENABLE, &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
 				PHY_INTERFACE_MODE_MII;
@@ -646,7 +607,7 @@ int board_eth_init(bd_t *bis)
 #define AR8051_DEBUG_RGMII_CLK_DLY_REG	0x5
 #define AR8051_RGMII_TX_CLK_DLY		0x100
 
-	if (board_is_evm_sk(&header) || board_is_gp_evm(&header)) {
+	if (board_is_evm_sk() || board_is_gp_evm()) {
 		const char *devname;
 		devname = miiphy_get_current_dev();
 
