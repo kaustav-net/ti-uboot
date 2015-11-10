@@ -95,6 +95,16 @@ int arch_cpu_init(void)
 }
 #endif /* CONFIG_ARCH_CPU_INIT */
 
+/**
+ * do_board_detect() - Detect board description
+ *
+ * Function to detect board description. This is expected to be
+ * overridden in the SoC family board file where desired.
+ */
+void __weak do_board_detect(void)
+{
+}
+
 /*
  * Routine: s_init
  * Description: Does early system init of watchdog, muxing,  andclocks
@@ -126,6 +136,7 @@ void s_init(void)
 	do_io_settings();
 #endif
 	setup_early_clocks();
+	do_board_detect();
 	prcm_init();
 }
 
