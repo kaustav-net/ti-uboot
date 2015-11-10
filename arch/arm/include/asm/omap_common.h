@@ -616,6 +616,9 @@ void enable_edma3_clocks(void);
 void disable_edma3_clocks(void);
 #endif
 
+/* Initialize general purpose I2C(0) on the SoC */
+void gpi2c_init(void);
+
 /* ABB */
 #define OMAP_ABB_NOMINAL_OPP		0
 #define OMAP_ABB_FAST_OPP		1
