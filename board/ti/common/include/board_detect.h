@@ -114,4 +114,21 @@ bool board_am_rev_is(char *rev_tag, int cmp_len);
 void set_board_info_env(char *name, char *revision,
 			char *serial);
 
+/**
+ * ti_i2c_eeprom_am_set() - Setup the eeprom data with predefined values
+ * @name:	Name of the board
+ * @rev:	Revision of the board
+ *
+ * In some cases such as in RTC-only mode, we are able to skip reading eeprom
+ * and wasting i2c based initialization time by using predefined flags for
+ * detecting what platform we are booting on. For those platforms, provide
+ * a handy function to pre-program information.
+ *
+ * NOTE: many eeprom information such as serial number, mac address etc is not
+ * available.
+ *
+ * Return: 0 if all went fine, else return error.
+ */
+int ti_i2c_eeprom_am_set(const char *name, const char *rev);
+
 #endif	/* __BOARD_DETECT_H */

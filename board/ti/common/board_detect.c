@@ -146,6 +146,30 @@ int __maybe_unused ti_i2c_eeprom_am_get_print(int bus_addr, int dev_addr,
 	return 0;
 }
 
+int __maybe_unused ti_i2c_eeprom_am_set(const char *name, const char *rev)
+{
+	struct ti_am_eeprom *ep;
+
+	if (!name || !rev)
+		return -1;
+
+	ep = TI_AM_EEPROM_DATA;
+	if (ep->header == TI_EEPROM_HEADER_MAGIC)
+		goto already_set;
+
+	/* Set to 0 all fields */
+	memset(ep, 0, sizeof(*ep));
+	strncpy(ep->name, name, TI_EEPROM_HDR_NAME_LEN);
+	strncpy(ep->version, rev, TI_EEPROM_HDR_REV_LEN);
+	/* Some dummy serial number to identify the platform */
+	strncpy(ep->serial, "0000", TI_EEPROM_HDR_SERIAL_LEN);
+	/* Mark it with a valid header */
+	ep->header = TI_EEPROM_HEADER_MAGIC;
+
+already_set:
+	return 0;
+}
+
 bool __maybe_unused board_am_is(char *name_tag)
 {
 	struct ti_am_eeprom *ep = TI_AM_EEPROM_DATA;
