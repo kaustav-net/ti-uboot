@@ -182,6 +182,8 @@
 			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
 		"if test $board_name = am57xx_evm; then " \
 			"setenv fdtfile am57xx-evm.dtb; fi;" \
+		"if test $board_name = am572x_idk; then " \
+			"setenv fdtfile am572x-idk.dtb; fi;" \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
 	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
