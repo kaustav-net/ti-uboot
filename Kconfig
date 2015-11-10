@@ -193,6 +193,8 @@ endmenu		# Boot images
 
 source "common/Kconfig"
 
+source "board/Kconfig"
+
 source "dts/Kconfig"
 
 source "net/Kconfig"

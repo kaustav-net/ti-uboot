@@ -123,6 +123,23 @@ else
 	fi;								\
 	ln -fsn $$dest arch/$(ARCH)/include/asm/arch
 endif
+ifdef CONFIG_CREATE_BOARD_SYMLINK
+ifneq ($(KBUILD_SRC),)
+	$(Q)if [ -d $(KBUILD_SRC)/board/$(VENDOR)/common/include ]; then \
+		dest=board/$(VENDOR)/common/include;			\
+	else								\
+		dest=board/$(VENDOR)/common;				\
+	fi;								\
+	ln -fsn $(KBUILD_SRC)/$$dest include/board-common
+else
+	$(Q)if [ -d board/$(VENDOR)/common/include ]; then		\
+		dest=board/$(VENDOR)/common/include;			\
+	else								\
+		dest=board/$(VENDOR)/common;				\
+	fi;								\
+	ln -fsn ../$$dest include/board-common
+endif
+endif
 
 PHONY += FORCE
 FORCE:
