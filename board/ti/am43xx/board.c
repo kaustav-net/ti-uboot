@@ -19,6 +19,7 @@
 #include <asm/arch/ddr_defs.h>
 #include <asm/arch/gpio.h>
 #include <asm/emif.h>
+#include <board-common/board_detect.h>
 #include "board.h"
 #include <power/pmic.h>
 #include <power/tps65218.h>
@@ -37,48 +38,9 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 /*
  * Read header information from EEPROM into global structure.
  */
-static int read_eeprom(struct am43xx_board_id *header)
+static int __maybe_unused read_eeprom(struct ti_am_eeprom **header)
 {
-	/* Check if baseboard eeprom is available */
-	if (i2c_probe(CONFIG_SYS_I2C_EEPROM_ADDR)) {
-		printf("Could not probe the EEPROM at 0x%x\n",
-		       CONFIG_SYS_I2C_EEPROM_ADDR);
-		return -ENODEV;
-	}
-
-	/* read the eeprom using i2c */
-	if (i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, 2, (uchar *)header,
-		     sizeof(struct am43xx_board_id))) {
-		printf("Could not read the EEPROM\n");
-		return -EIO;
-	}
-
-	if (header->magic != 0xEE3355AA) {
-		/*
-		 * read the eeprom using i2c again,
-		 * but use only a 1 byte address
-		 */
-		if (i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, 1, (uchar *)header,
-			     sizeof(struct am43xx_board_id))) {
-			printf("Could not read the EEPROM at 0x%x\n",
-			       CONFIG_SYS_I2C_EEPROM_ADDR);
-			return -EIO;
-		}
-
-		if (header->magic != 0xEE3355AA) {
-			printf("Incorrect magic number (0x%x) in EEPROM\n",
-			       header->magic);
-			return -EINVAL;
-		}
-	}
-
-	strncpy(am43xx_board_name, (char *)header->name, sizeof(header->name));
-	am43xx_board_name[sizeof(header->name)] = 0;
-
-	strncpy(am43xx_board_rev, (char *)header->version, sizeof(header->version));
-	am43xx_board_rev[sizeof(header->version)] = 0;
-
-	return 0;
+	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR, header);
 }
 
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT
@@ -373,6 +335,10 @@ static u32 get_sys_clk_index(void)
 const struct dpll_params *get_dpll_ddr_params(void)
 {
 	int ind = get_sys_clk_index();
+	struct ti_am_eeprom *header;
+
+	if (read_eeprom(&header) < 0)
+		return NULL;
 
 	if (board_is_eposevm())
 		return &epos_evm_dpll_ddr[ind];
@@ -381,7 +347,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 	else if (board_is_idk())
 		return &idk_dpll_ddr;
 
-	printf(" Board '%s' not supported\n", am43xx_board_name);
+	printf(" Board '%s' not supported\n", header->name);
 	return NULL;
 }
 
@@ -512,13 +478,17 @@ void scale_vcores_idk(u32 m)
 	}
 }
 
+void gpi2c_init(void)
+{
+	enable_i2c0_pin_mux();
+	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
+}
+
 void scale_vcores(void)
 {
 	const struct dpll_params *mpu_params;
-	struct am43xx_board_id header;
+	struct ti_am_eeprom *header;
 
-	enable_i2c0_pin_mux();
-	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
 	if (read_eeprom(&header) < 0)
 		puts("Could not get board ID.\n");
 
@@ -593,17 +563,22 @@ void rtc_only_update_board_type(u32 btype)
 		name = "AM43__SK";
 		break;
 	}
-	strcpy(am43xx_board_name, name);
-	strcpy(am43xx_board_rev, rev);
+	ti_i2c_eeprom_am_set(name, rev);
 }
 
 u32 rtc_only_get_board_type(void)
 {
+	struct ti_am_eeprom *header;
+
+	/* Should not read the eeprom since we already set up properties */
+	if (read_eeprom(&header) < 0)
+		return -1;
+
 	if (board_is_eposevm())
 		return RTC_BOARD_EPOS;
-	else if (board_is_evm_14_or_later())
+	else if (board_is_evm_14_or_later(header))
 		return RTC_BOARD_EVM14;
-	else if (board_is_evm_12_or_later())
+	else if (board_is_evm_12_or_later(header))
 		return RTC_BOARD_EVM12;
 	else if (board_is_gpevm())
 		return RTC_BOARD_GPEVM;
@@ -615,6 +590,10 @@ u32 rtc_only_get_board_type(void)
 
 void sdram_init(void)
 {
+	struct ti_am_eeprom *header;
+
+	if (read_eeprom(&header) < 0)
+		return;
 	/*
 	 * EPOS EVM has 1GB LPDDR2 connected to EMIF.
 	 * GP EMV has 1GB DDR3 connected to EMIF
@@ -622,11 +601,11 @@ void sdram_init(void)
 	 */
 	if (board_is_eposevm()) {
 		config_ddr(0, &ioregs_lpddr2, NULL, NULL, &emif_regs_lpddr2, 0);
-	} else if (board_is_evm_14_or_later()) {
+	} else if (board_is_evm_14_or_later(header)) {
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz_production, 0);
-	} else if (board_is_evm_12_or_later()) {
+	} else if (board_is_evm_12_or_later(header)) {
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz_beta, 0);
@@ -712,20 +691,14 @@ int board_init(void)
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	char safe_string[HDR_NAME_LEN + 1];
-	struct am43xx_board_id header;
+	struct ti_am_eeprom_printable p;
+	int rc;
 
-	if (read_eeprom(&header) < 0)
+	rc = ti_i2c_eeprom_am_get_print(-1, CONFIG_SYS_I2C_EEPROM_ADDR, &p);
+
+	if (rc)
 		puts("Could not get board ID.\n");
-
-	/* Now set variables based on the header. */
-	strncpy(safe_string, (char *)header.name, sizeof(header.name));
-	safe_string[sizeof(header.name)] = 0;
-	setenv("board_name", safe_string);
-
-	strncpy(safe_string, (char *)header.version, sizeof(header.version));
-	safe_string[sizeof(header.version)] = 0;
-	setenv("board_rev", safe_string);
+	set_board_info_env(p.name, p.version, p.serial);
 #endif
 	return 0;
 }
