@@ -246,12 +246,22 @@
 #define VDD_CORE_DRA752		1060
 #define VDD_IVA_DRA752		1060
 
+/* DRA74x/75x voltage settings in mv for OPP_HIGH per DM */
+#define VDD_EVE_DRA752_HIGH	1250
+#define VDD_GPU_DRA752_HIGH	1250
+#define VDD_IVA_DRA752_HIGH	1250
+
 /* DRA72x voltage settings in mv for OPP_NOM per DM */
 #define VDD_MPU_DRA72x		1100
 #define VDD_EVE_DRA72x		1060
 #define VDD_GPU_DRA72x		1060
 #define VDD_CORE_DRA72x		1060
 #define VDD_IVA_DRA72x		1060
+
+/* DRA72x voltage settings in mv for OPP_HIGH per DM */
+#define VDD_EVE_DRA72x_HIGH	1250
+#define VDD_GPU_DRA72x_HIGH	1250
+#define VDD_IVA_DRA72x_HIGH	1250
 
 /* Efuse register offsets for DRA7xx platform */
 #define DRA752_EFUSE_BASE	0x4A002000

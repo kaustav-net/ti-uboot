@@ -369,8 +369,8 @@ struct vcores_data dra752_volts = {
 	.mpu.addr	= TPS659038_REG_ADDR_SMPS12,
 	.mpu.pmic	= &tps659038,
 
-	.eve.value	= VDD_EVE_DRA752,
-	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.value	= VDD_EVE_DRA752_HIGH,
+	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_HIGH,
 	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.eve.addr	= TPS659038_REG_ADDR_SMPS45,
 	.eve.pmic	= &tps659038,
@@ -387,8 +387,8 @@ struct vcores_data dra752_volts = {
 	.core.addr	= TPS659038_REG_ADDR_SMPS7,
 	.core.pmic	= &tps659038,
 
-	.iva.value	= VDD_IVA_DRA752,
-	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.value	= VDD_IVA_DRA752_HIGH,
+	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_HIGH,
 	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.iva.addr	= TPS659038_REG_ADDR_SMPS8,
 	.iva.pmic	= &tps659038,
@@ -411,20 +411,20 @@ struct vcores_data dra722_volts = {
 	 * The DSPEVE, GPU and IVA rails are usually grouped on DRA72x
 	 * designs and powered by TPS65917 SMPS3, as on the J6Eco EVM.
 	 */
-	.gpu.value	= VDD_GPU_DRA72x,
+	.gpu.value	= VDD_GPU_DRA72x_HIGH,
 	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.gpu.addr	= TPS65917_REG_ADDR_SMPS3,
 	.gpu.pmic	= &tps659038,
 
-	.eve.value	= VDD_EVE_DRA72x,
-	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.value	= VDD_EVE_DRA72x_HIGH,
+	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_HIGH,
 	.eve.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.eve.addr	= TPS65917_REG_ADDR_SMPS3,
 	.eve.pmic	= &tps659038,
 
-	.iva.value	= VDD_IVA_DRA72x,
-	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.value	= VDD_IVA_DRA72x_HIGH,
+	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_HIGH,
 	.iva.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.iva.addr	= TPS65917_REG_ADDR_SMPS3,
 	.iva.pmic	= &tps659038,
