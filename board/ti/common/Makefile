@@ -3,4 +3,9 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-obj-${CONFIG_I2C} += board_detect.o
+# Necessary for a default builtin.o
+obj- = __dummy__.o
+
+ifdef CONFIG_CREATE_BOARD_SYMLINK
+	obj-${CONFIG_I2C} += board_detect.o
+endif
