@@ -13,7 +13,6 @@
 #include <asm/arch/mon.h>
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/hardware.h>
-#include <asm/arch/hardware.h>
 #include <remoteproc.h>
 #include <dm/platform_data/remoteproc_ti_power_proc.h>
 
