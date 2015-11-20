@@ -208,7 +208,7 @@
 	"dev_pmmc=0\0"							\
 	"get_pmmc_net=dhcp ${loadaddr} ${tftp_root}/${name_pmmc}\0"	\
 	"get_pmmc_mmc=load mmc ${bootpart} ${loadaddr} ${bootdir}/${name_pmmc}\0"\
-	"get_pmmc_ubi=ubifsload ${loadaddr} ${name_pmmc}\0"		\
+	"get_pmmc_ubi=ubifsload ${loadaddr} ${bootdir}/${name_pmmc}\0"	\
 	"run_pmmc=rproc init; rproc list; "				\
 		"rproc load ${dev_pmmc} ${loadaddr} 0x${filesize}; "	\
 		"rproc start ${dev_pmmc}\0"				\
