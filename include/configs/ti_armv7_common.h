@@ -164,12 +164,15 @@
 #define CONFIG_SYS_MAXARGS		64
 
 /* Console I/O Buffer Size */
-#define CONFIG_SYS_CBSIZE		512
+#define CONFIG_SYS_CBSIZE		1024
 /* Print Buffer Size */
 #define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE \
 					+ sizeof(CONFIG_SYS_PROMPT) + 16)
 /* Boot Argument Buffer Size */
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
+
+/* Safe version of printf */
+#define CONFIG_SYS_VSNPRINTF
 
 /*
  * When we have SPI, NOR or NAND flash we expect to be making use of
