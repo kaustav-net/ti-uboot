@@ -28,6 +28,7 @@
 	"name_mon=skern-k2g.bin\0"					\
 	"name_ubi=k2g-evm-ubifs.ubi\0"					\
 	"name_uboot=u-boot-spi-k2g-evm.gph\0"				\
+	"soc_variant=k2g\0"						\
 	"init_mmc=run args_all args_mmc\0"				\
 	"get_fdt_mmc=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${name_fdt}\0"\
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\

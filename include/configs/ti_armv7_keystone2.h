@@ -204,7 +204,7 @@
 #define CONFIG_TI_EDMA3
 
 #define DEFAULT_PMMC_BOOT_ENV						\
-	"name_pmmc=pmmc-firmware.bin\0"					\
+	"name_pmmc=ti-sci-firmware-${soc_variant}.bin\0"		\
 	"dev_pmmc=0\0"							\
 	"get_pmmc_net=dhcp ${loadaddr} ${tftp_root}/${name_pmmc}\0"	\
 	"get_pmmc_mmc=load mmc ${bootpart} ${loadaddr} ${bootdir}/${name_pmmc}\0"\
