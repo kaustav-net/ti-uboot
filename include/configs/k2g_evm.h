@@ -21,6 +21,7 @@
 	"console=ttyS0,115200n8\0"					\
 	"bootpart=0:2\0"						\
 	"bootdir=/boot\0"						\
+	"rd_spec=-\0"							\
 	"addr_mon=0x0c040000\0"						\
 	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs "	\
 	"root=ubi0:rootfs rootflags=sync rw ubi.mtd=ubifs,2048\0"	\
