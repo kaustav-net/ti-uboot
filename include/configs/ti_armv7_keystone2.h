@@ -216,6 +216,7 @@
 	"name_pmmc=ti-sci-firmware-${soc_variant}.bin\0"		\
 	"dev_pmmc=0\0"							\
 	"get_pmmc_net=dhcp ${loadaddr} ${tftp_root}/${name_pmmc}\0"	\
+	"get_pmmc_ramfs=run get_pmmc_net\0"				\
 	"get_pmmc_mmc=load mmc ${bootpart} ${loadaddr} ${bootdir}/${name_pmmc}\0"\
 	"get_pmmc_ubi=ubifsload ${loadaddr} ${bootdir}/${name_pmmc}\0"	\
 	"run_pmmc=rproc init; rproc list; "				\
