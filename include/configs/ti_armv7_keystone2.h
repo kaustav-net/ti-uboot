@@ -213,7 +213,7 @@
 		"run set_rd_spec\0"					\
 
 #define DEFAULT_PMMC_BOOT_ENV						\
-	"name_pmmc=ti-sci-firmware-${soc_variant}.bin\0"		\
+	"set_name_pmmc=setenv name_pmmc ti-sci-firmware-${soc_variant}.bin\0" \
 	"dev_pmmc=0\0"							\
 	"get_pmmc_net=dhcp ${loadaddr} ${tftp_root}/${name_pmmc}\0"	\
 	"get_pmmc_ramfs=run get_pmmc_net\0"				\

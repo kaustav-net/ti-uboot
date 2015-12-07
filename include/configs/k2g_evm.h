@@ -38,7 +38,7 @@
 
 #define CONFIG_BOOTCOMMAND						\
 	"run envboot; "							\
-	"run init_${boot} get_pmmc_${boot} run_pmmc "			\
+	"run set_name_pmmc init_${boot} get_pmmc_${boot} run_pmmc "	\
 	"get_fdt_${boot} get_mon_${boot} get_kern_${boot} "		\
 	"run_mon run_kern"
 
