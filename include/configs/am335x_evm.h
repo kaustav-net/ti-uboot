@@ -116,10 +116,10 @@
 	"mmcboot=mmc dev ${mmcdev}; " \
 		"if mmc rescan; then " \
 			"echo SD/MMC found on device ${mmcdev};" \
-				"if run loadimage; then " \
-					"run mmcloados;" \
-				"fi;" \
-			"fi ;" \
+			"run envboot; " \
+			"if run loadimage; then " \
+				"run mmcloados;" \
+			"fi;" \
 		"fi;\0" \
 	"spiboot=echo Booting from spi ...; " \
 		"run spiargs; " \
@@ -147,7 +147,6 @@
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
-	"run envboot; " \
 	"run mmcboot;" \
 	"setenv mmcdev 1; " \
 	"setenv bootpart 1:2; " \
