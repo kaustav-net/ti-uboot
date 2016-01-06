@@ -480,13 +480,13 @@ void scale_vcores_idk(u32 m)
 
 void gpi2c_init(void)
 {
-	static bool init;
+	static bool first_time = true;
 
-	if (!init) {
+	if (first_time) {
 		enable_i2c0_pin_mux();
 		i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
 
-		init = true;
+		first_time = false;
 	}
 }
 
