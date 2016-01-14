@@ -47,8 +47,10 @@ DECLARE_GLOBAL_DATA_PTR;
 /* GPIO 7_11 */
 #define GPIO_DDR_VTT_EN 203
 
+#define SYSINFO_BOARD_NAME_MAX_LEN	45
+
 const struct omap_sysinfo sysinfo = {
-	"Board: UNKNOWN(BeagleBoard X15?)\n"
+	"Board: UNKNOWN(BeagleBoard X15?) REV UNKNOWN\n"
 };
 
 static const struct dmm_lisa_map_regs beagle_x15_lisa_regs = {
@@ -291,8 +293,8 @@ void do_board_detect(void)
 		bname = "AM571x IDK";
 
 	if (bname)
-		snprintf(sysinfo.board_string, sizeof(sysinfo.board_string),
-			 "Board: %s\n", bname);
+		snprintf(sysinfo.board_string, SYSINFO_BOARD_NAME_MAX_LEN,
+			 "Board: %s REV %s\n", bname, board_ti_get_rev());
 }
 
 static void setup_board_eeprom_env(void)
