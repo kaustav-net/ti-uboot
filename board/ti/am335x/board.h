@@ -26,9 +26,9 @@ static inline int board_is_evm_sk(void)
 	return board_am_is("A335X_SK");
 }
 
-static inline int board_is_idk(struct ti_am_eeprom *header)
+static inline int board_is_idk(void)
 {
-	return !strncmp(header->config, "SKU#02", 6);
+	return !strncmp(board_am_get_config(), "SKU#02", 6);
 }
 
 static inline int board_is_gp_evm(void)
@@ -36,10 +36,10 @@ static inline int board_is_gp_evm(void)
 	return board_am_is("A33515BB");
 }
 
-static inline int board_is_evm_15_or_later(struct ti_am_eeprom *header)
+static inline int board_is_evm_15_or_later(void)
 {
 	return (board_is_gp_evm() &&
-		strncmp("1.5", header->version, 3) <= 0);
+		strncmp("1.5", board_am_get_rev(), 3) <= 0);
 }
 
 /*
@@ -55,5 +55,5 @@ void enable_uart3_pin_mux(void);
 void enable_uart4_pin_mux(void);
 void enable_uart5_pin_mux(void);
 void enable_i2c0_pin_mux(void);
-void enable_board_pin_mux(struct ti_am_eeprom *header);
+void enable_board_pin_mux(void);
 #endif

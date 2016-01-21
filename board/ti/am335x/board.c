@@ -44,9 +44,9 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 /*
  * Read header information from EEPROM into global structure.
  */
-static int __maybe_unused read_eeprom(struct ti_am_eeprom **header)
+static int __maybe_unused read_eeprom(void)
 {
-	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR, header);
+	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR);
 }
 
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT
@@ -187,10 +187,9 @@ const struct dpll_params dpll_ddr_bone_black = {
 
 void am33xx_spl_board_init(void)
 {
-	struct ti_am_eeprom *header;
 	int mpu_vdd;
 
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
 	/* Get the frequency */
@@ -204,8 +203,7 @@ void am33xx_spl_board_init(void)
 		 * Only perform PMIC configurations if board rev > A1
 		 * on Beaglebone White
 		 */
-		if (board_is_bone() && !strncmp(header->version,
-						       "00A1", 4))
+		if (board_is_bone() && !strncmp(board_am_get_rev(), "00A1", 4))
 			return;
 
 		if (i2c_probe(TPS65217_CHIP_PM))
@@ -331,18 +329,16 @@ void am33xx_spl_board_init(void)
 
 const struct dpll_params *get_dpll_ddr_params(void)
 {
-	struct ti_am_eeprom *header;
-
 	enable_i2c0_pin_mux();
 	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
 	if (board_is_evm_sk())
 		return &dpll_ddr_evm_sk;
 	else if (board_is_bone_lt())
 		return &dpll_ddr_bone_black;
-	else if (board_is_evm_15_or_later(header))
+	else if (board_is_evm_15_or_later())
 		return &dpll_ddr_evm_sk;
 	else
 		return &dpll_ddr;
@@ -367,12 +363,10 @@ void set_uart_mux_conf(void)
 
 void set_mux_conf_regs(void)
 {
-	__maybe_unused struct ti_am_eeprom *header;
-
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
-	enable_board_pin_mux(header);
+	enable_board_pin_mux();
 }
 
 const struct ctrl_ioregs ioregs_evmsk = {
@@ -409,9 +403,7 @@ const struct ctrl_ioregs ioregs = {
 
 void sdram_init(void)
 {
-	__maybe_unused struct ti_am_eeprom *header;
-
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
 	if (board_is_evm_sk()) {
@@ -431,7 +423,7 @@ void sdram_init(void)
 			   &ddr3_beagleblack_data,
 			   &ddr3_beagleblack_cmd_ctrl_data,
 			   &ddr3_beagleblack_emif_reg_data, 0);
-	else if (board_is_evm_15_or_later(header))
+	else if (board_is_evm_15_or_later())
 		config_ddr(303, &ioregs_evm15, &ddr3_evm_data,
 			   &ddr3_evm_cmd_ctrl_data, &ddr3_evm_emif_reg_data, 0);
 	else
@@ -460,14 +452,7 @@ int board_init(void)
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	struct ti_am_eeprom_printable p;
-	int rc;
-
-	rc = ti_i2c_eeprom_am_get_print(-1, CONFIG_SYS_I2C_EEPROM_ADDR, &p);
-
-	if (rc)
-		puts("Could not get board ID.\n");
-	set_board_info_env(p.name, p.version, p.serial);
+	set_board_info_env(NULL);
 #endif
 
 	return 0;
@@ -537,7 +522,6 @@ int board_eth_init(bd_t *bis)
 	int rv, n = 0;
 	uint8_t mac_addr[6];
 	uint32_t mac_hi, mac_lo;
-	__maybe_unused struct ti_am_eeprom *header;
 
 	/* try reading mac address from efuse */
 	mac_lo = readl(&cdev->macid0l);
@@ -574,11 +558,10 @@ int board_eth_init(bd_t *bis)
 			eth_setenv_enetaddr("eth1addr", mac_addr);
 	}
 
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
-	if (board_is_bone() || board_is_bone_lt() ||
-	    board_is_idk(header)) {
+	if (board_is_bone() || board_is_bone_lt() || board_is_idk()) {
 		writel(MII_MODE_ENABLE, &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
 				PHY_INTERFACE_MODE_MII;

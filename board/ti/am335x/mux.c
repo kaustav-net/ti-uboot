@@ -313,7 +313,7 @@ static unsigned short detect_daughter_board_profile(void)
 	return (1 << (val & PROFILE_MASK));
 }
 
-void enable_board_pin_mux(struct ti_am_eeprom *header)
+void enable_board_pin_mux(void)
 {
 	/* Do board-specific muxes. */
 	if (board_is_bone()) {
@@ -345,7 +345,7 @@ void enable_board_pin_mux(struct ti_am_eeprom *header)
 			configure_module_pin_mux(mmc1_pin_mux);
 			configure_module_pin_mux(spi0_pin_mux);
 		}
-	} else if (board_is_idk(header)) {
+	} else if (board_is_idk()) {
 		/* Industrial Motor Control (IDK) */
 		configure_module_pin_mux(mii1_pin_mux);
 		configure_module_pin_mux(mmc0_no_cd_pin_mux);

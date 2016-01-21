@@ -38,9 +38,9 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 /*
  * Read header information from EEPROM into global structure.
  */
-static int __maybe_unused read_eeprom(struct ti_am_eeprom **header)
+static int __maybe_unused read_eeprom(void)
 {
-	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR, header);
+	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR);
 }
 
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT
@@ -335,9 +335,8 @@ static u32 get_sys_clk_index(void)
 const struct dpll_params *get_dpll_ddr_params(void)
 {
 	int ind = get_sys_clk_index();
-	struct ti_am_eeprom *header;
 
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		return NULL;
 
 	if (board_is_eposevm())
@@ -347,7 +346,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 	else if (board_is_idk())
 		return &idk_dpll_ddr;
 
-	printf(" Board '%s' not supported\n", header->name);
+	printf(" Board '%s' not supported\n", board_am_get_name());
 	return NULL;
 }
 
@@ -493,9 +492,8 @@ void gpi2c_init(void)
 void scale_vcores(void)
 {
 	const struct dpll_params *mpu_params;
-	struct ti_am_eeprom *header;
 
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
 	/* Init i2c for PMIC config */
@@ -577,17 +575,15 @@ void rtc_only_update_board_type(u32 btype)
 
 u32 rtc_only_get_board_type(void)
 {
-	struct ti_am_eeprom *header;
-
 	/* Should not read the eeprom since we already set up properties */
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		return -1;
 
 	if (board_is_eposevm())
 		return RTC_BOARD_EPOS;
-	else if (board_is_evm_14_or_later(header))
+	else if (board_is_evm_14_or_later())
 		return RTC_BOARD_EVM14;
-	else if (board_is_evm_12_or_later(header))
+	else if (board_is_evm_12_or_later())
 		return RTC_BOARD_EVM12;
 	else if (board_is_gpevm())
 		return RTC_BOARD_GPEVM;
@@ -599,9 +595,7 @@ u32 rtc_only_get_board_type(void)
 
 void sdram_init(void)
 {
-	struct ti_am_eeprom *header;
-
-	if (read_eeprom(&header) < 0)
+	if (read_eeprom() < 0)
 		return;
 	/*
 	 * EPOS EVM has 1GB LPDDR2 connected to EMIF.
@@ -610,11 +604,11 @@ void sdram_init(void)
 	 */
 	if (board_is_eposevm()) {
 		config_ddr(0, &ioregs_lpddr2, NULL, NULL, &emif_regs_lpddr2, 0);
-	} else if (board_is_evm_14_or_later(header)) {
+	} else if (board_is_evm_14_or_later()) {
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz_production, 0);
-	} else if (board_is_evm_12_or_later(header)) {
+	} else if (board_is_evm_12_or_later()) {
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz_beta, 0);
@@ -700,14 +694,7 @@ int board_init(void)
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	struct ti_am_eeprom_printable p;
-	int rc;
-
-	rc = ti_i2c_eeprom_am_get_print(-1, CONFIG_SYS_I2C_EEPROM_ADDR, &p);
-
-	if (rc)
-		puts("Could not get board ID.\n");
-	set_board_info_env(p.name, p.version, p.serial);
+	set_board_info_env(NULL);
 #endif
 	return 0;
 }

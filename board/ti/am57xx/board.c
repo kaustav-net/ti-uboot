@@ -261,11 +261,10 @@ static inline void setup_board_eeprom_env(void) { }
 /* Override function to read eeprom information */
 void do_board_detect(void)
 {
-	struct ti_am_eeprom *ep;
 	int rc;
 
 	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
-				  CONFIG_EEPROM_CHIP_ADDRESS, &ep);
+				  CONFIG_EEPROM_CHIP_ADDRESS);
 	if (rc)
 		printf("ti_i2c_eeprom_init failed %d\n", rc);
 }
@@ -274,12 +273,11 @@ void do_board_detect(void)
 
 void do_board_detect(void)
 {
-	struct ti_am_eeprom *ep;
 	char *bname = NULL;
 	int rc;
 
 	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
-				  CONFIG_EEPROM_CHIP_ADDRESS, &ep);
+				  CONFIG_EEPROM_CHIP_ADDRESS);
 	if (rc)
 		printf("ti_i2c_eeprom_init failed %d\n", rc);
 
@@ -300,16 +298,6 @@ void do_board_detect(void)
 static void setup_board_eeprom_env(void)
 {
 	char *name = "beagle_x15";
-	int rc;
-	struct ti_am_eeprom_printable p;
-
-	rc = ti_i2c_eeprom_am_get_print(CONFIG_EEPROM_BUS_ADDRESS,
-					CONFIG_EEPROM_CHIP_ADDRESS, &p);
-	if (rc) {
-		printf("Invalid EEPROM data(@0x%p). Default to X15\n",
-		       TI_AM_EEPROM_DATA);
-		goto invalid_eeprom;
-	}
 
 	if (board_is_x15())
 		name = "beagle_x15";
@@ -321,10 +309,9 @@ static void setup_board_eeprom_env(void)
 		name = "am571x_idk";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
-		       p.name);
+		       board_am_get_name());
 
-invalid_eeprom:
-	set_board_info_env(name, p.version, p.serial);
+	set_board_info_env(name);
 }
 
 /* Eeprom is alread read by SPL.. nothing more to do here.. */

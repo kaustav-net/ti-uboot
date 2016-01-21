@@ -61,12 +61,11 @@ struct ti_am_eeprom_printable {
  * ti_i2c_eeprom_am_get() - Consolidated eeprom data collection for AM* TI EVMs
  * @bus_addr:	I2C bus address
  * @dev_addr:	I2C slave address
- * @epp:	Pointer to eeprom structure
  *
- * *epp is populated by the this AM generic function that consolidates
+ * ep in SRAM is populated by the this AM generic function that consolidates
  * the basic initialization logic common accross all AM* platforms.
  */
-int ti_i2c_eeprom_am_get(int bus_addr, int dev_addr, struct ti_am_eeprom **epp);
+int ti_i2c_eeprom_am_get(int bus_addr, int dev_addr);
 
 /**
  * ti_i2c_eeprom_am_get_print() - Get a printable representation of eeprom data
@@ -103,16 +102,36 @@ bool board_am_is(char *name_tag);
 bool board_am_rev_is(char *rev_tag, int cmp_len);
 
 /**
+ * board_am_get_rev() - Get board revision for TI EVMs
+ *
+ * Return: NULL if eeprom was'nt read.
+ *	   Board revision otherwise
+ */
+char *board_am_get_rev(void);
+
+/**
+ * board_am_get_config() - Get board config for TI EVMs
+ *
+ * Return: NULL if eeprom was'nt read.
+ *	   Board config otherwise
+ */
+char *board_am_get_config(void);
+
+/**
+ * board_am_get_name() - Get board name for TI EVMs
+ *
+ * Return: NULL if eeprom was'nt read.
+ *	   Board name otherwise
+ */
+char *board_am_get_name(void);
+
+/**
  * set_board_info_env() - Setup commonly used board information environment vars
  * @name:	Name of the board
- * @revision:	Revision of the board
- * @serial:	Serial Number of the board
  *
- * In case of NULL revision or serial information "unknown" is setup.
  * If name is NULL, default_name is used.
  */
-void set_board_info_env(char *name, char *revision,
-			char *serial);
+void set_board_info_env(char *name);
 
 /**
  * ti_i2c_eeprom_am_set() - Setup the eeprom data with predefined values

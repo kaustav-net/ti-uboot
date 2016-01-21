@@ -73,14 +73,10 @@ __weak void gpi2c_init(void)
 {
 }
 
-int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr,
-					struct ti_am_eeprom **epp)
+int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr)
 {
 	int rc;
 	struct ti_am_eeprom *ep;
-
-	if (!epp)
-		return -1;
 
 	ep = TI_AM_EEPROM_DATA;
 	if (ep->header == TI_EEPROM_HEADER_MAGIC)
@@ -114,8 +110,6 @@ int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr,
 		return -1;
 
 already_read:
-	*epp = ep;
-
 	return 0;
 }
 
@@ -125,12 +119,13 @@ int __maybe_unused ti_i2c_eeprom_am_get_print(int bus_addr, int dev_addr,
 	struct ti_am_eeprom *ep;
 	int rc;
 
+	ep = TI_AM_EEPROM_DATA;
 	/* Incase of invalid eeprom contents */
 	p->name[0] = 0x00;
 	p->version[0] = 0x00;
 	p->serial[0] = 0x00;
 
-	rc = ti_i2c_eeprom_am_get(bus_addr, dev_addr, &ep);
+	rc = ti_i2c_eeprom_am_get(bus_addr, dev_addr);
 	if (rc)
 		return rc;
 
@@ -191,23 +186,55 @@ bool __maybe_unused board_am_rev_is(char *rev_tag, int cmp_len)
 	return !strncmp(ep->version, rev_tag, l);
 }
 
-void __maybe_unused set_board_info_env(char *name, char *revision,
-				       char *serial)
+char * __maybe_unused board_am_get_rev(void)
+{
+	struct ti_am_eeprom *ep = TI_AM_EEPROM_DATA;
+
+	if (ep->header == 0xADEAD12C)
+		return NULL;
+
+	return ep->version;
+}
+
+char * __maybe_unused board_am_get_config(void)
+{
+	struct ti_am_eeprom *ep = TI_AM_EEPROM_DATA;
+
+	if (ep->header == 0xADEAD12C)
+		return NULL;
+
+	return ep->config;
+}
+
+char * __maybe_unused board_am_get_name(void)
+{
+	struct ti_am_eeprom *ep = TI_AM_EEPROM_DATA;
+
+	if (ep->header == 0xADEAD12C)
+		return NULL;
+
+	return ep->name;
+}
+
+void __maybe_unused set_board_info_env(char *name)
 {
 	char *unknown = "unknown";
+	struct ti_am_eeprom *ep = TI_AM_EEPROM_DATA;
 
 	if (name)
 		setenv("board_name", name);
+	else if (ep->name)
+		setenv("board_name", ep->name);
 	else
 		setenv("board_name", unknown);
 
-	if (revision)
-		setenv("board_rev", revision);
+	if (ep->version)
+		setenv("board_rev", ep->version);
 	else
 		setenv("board_rev", unknown);
 
-	if (serial)
-		setenv("board_serial", serial);
+	if (ep->serial)
+		setenv("board_serial", ep->serial);
 	else
 		setenv("board_serial", unknown);
 }
