@@ -19,32 +19,32 @@
 
 static inline int board_is_eposevm(void)
 {
-	return board_am_is("AM43EPOS");
+	return board_ti_is("AM43EPOS");
 }
 
 static inline int board_is_gpevm(void)
 {
-	return board_am_is("AM43__GP");
+	return board_ti_is("AM43__GP");
 }
 
 static inline int board_is_sk(void)
 {
-	return board_am_is("AM43__SK");
+	return board_ti_is("AM43__SK");
 }
 
 static inline int board_is_idk(void)
 {
-	return board_am_is("AM43_IDK");
+	return board_ti_is("AM43_IDK");
 }
 
 static inline int board_is_evm_14_or_later(void)
 {
-	return board_is_gpevm() && strncmp("1.4", board_am_get_rev(), 3) <= 0;
+	return board_is_gpevm() && strncmp("1.4", board_ti_get_rev(), 3) <= 0;
 }
 
 static inline int board_is_evm_12_or_later(void)
 {
-	return board_is_gpevm() && strncmp("1.2", board_am_get_rev(), 3) <= 0;
+	return board_is_gpevm() && strncmp("1.2", board_ti_get_rev(), 3) <= 0;
 }
 
 void enable_uart0_pin_mux(void);

@@ -175,7 +175,7 @@ already_set:
 	return 0;
 }
 
-bool __maybe_unused board_am_is(char *name_tag)
+bool __maybe_unused board_ti_is(char *name_tag)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
@@ -184,7 +184,7 @@ bool __maybe_unused board_am_is(char *name_tag)
 	return !strncmp(ep->name, name_tag, TI_EEPROM_HDR_NAME_LEN);
 }
 
-bool __maybe_unused board_am_rev_is(char *rev_tag, int cmp_len)
+bool __maybe_unused board_ti_rev_is(char *rev_tag, int cmp_len)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 	int l;
@@ -196,7 +196,7 @@ bool __maybe_unused board_am_rev_is(char *rev_tag, int cmp_len)
 	return !strncmp(ep->version, rev_tag, l);
 }
 
-char * __maybe_unused board_am_get_rev(void)
+char * __maybe_unused board_ti_get_rev(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
@@ -206,7 +206,7 @@ char * __maybe_unused board_am_get_rev(void)
 	return ep->version;
 }
 
-char * __maybe_unused board_am_get_config(void)
+char * __maybe_unused board_ti_get_config(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
@@ -216,7 +216,7 @@ char * __maybe_unused board_am_get_config(void)
 	return ep->config;
 }
 
-char * __maybe_unused board_am_get_name(void)
+char * __maybe_unused board_ti_get_name(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 

@@ -346,7 +346,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 	else if (board_is_idk())
 		return &idk_dpll_ddr;
 
-	printf(" Board '%s' not supported\n", board_am_get_name());
+	printf(" Board '%s' not supported\n", board_ti_get_name());
 	return NULL;
 }
 

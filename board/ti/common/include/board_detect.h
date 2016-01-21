@@ -72,16 +72,16 @@ struct ti_common_eeprom {
 int ti_i2c_eeprom_am_get(int bus_addr, int dev_addr);
 
 /**
- * board_am_is() - Board detection logic for TI AM* EVMs
+ * board_ti_is() - Board detection logic for TI EVMs
  * @name_tag:	Tag used in eeprom for the board
  *
  * Return: false if board information does not match OR eeprom wasn't read.
  *	   true otherwise
  */
-bool board_am_is(char *name_tag);
+bool board_ti_is(char *name_tag);
 
 /**
- * board_am_rev_is() - Compare board revision for AM* TI EVMs
+ * board_ti_rev_is() - Compare board revision for TI EVMs
  * @rev_tag:	Revision tag to check in eeprom
  * @cmp_len:	How many chars to compare?
  *
@@ -90,31 +90,31 @@ bool board_am_is(char *name_tag);
  * Return: false if board information does not match OR eeprom was'nt read.
  *	   true otherwise
  */
-bool board_am_rev_is(char *rev_tag, int cmp_len);
+bool board_ti_rev_is(char *rev_tag, int cmp_len);
 
 /**
- * board_am_get_rev() - Get board revision for TI EVMs
+ * board_ti_get_rev() - Get board revision for TI EVMs
  *
  * Return: NULL if eeprom was'nt read.
  *	   Board revision otherwise
  */
-char *board_am_get_rev(void);
+char *board_ti_get_rev(void);
 
 /**
- * board_am_get_config() - Get board config for TI EVMs
+ * board_ti_get_config() - Get board config for TI EVMs
  *
  * Return: NULL if eeprom was'nt read.
  *	   Board config otherwise
  */
-char *board_am_get_config(void);
+char *board_ti_get_config(void);
 
 /**
- * board_am_get_name() - Get board name for TI EVMs
+ * board_ti_get_name() - Get board name for TI EVMs
  *
  * Return: NULL if eeprom was'nt read.
  *	   Board name otherwise
  */
-char *board_am_get_name(void);
+char *board_ti_get_name(void);
 
 /**
  * set_board_info_env() - Setup commonly used board information environment vars

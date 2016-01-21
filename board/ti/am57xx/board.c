@@ -33,10 +33,10 @@
 #include "mux_data.h"
 #include <board-common/board_detect.h>
 
-#define board_is_x15()		board_am_is("BBRDX15_")
-#define board_is_am572x_evm()	board_am_is("AM572PM_")
-#define board_is_am572x_idk()	board_am_is("AM572IDK")
-#define board_is_am571x_idk()	board_am_is("AM571IDK")
+#define board_is_x15()		board_ti_is("BBRDX15_")
+#define board_is_am572x_evm()	board_ti_is("AM572PM_")
+#define board_is_am572x_idk()	board_ti_is("AM572IDK")
+#define board_is_am571x_idk()	board_ti_is("AM571IDK")
 
 #ifdef CONFIG_DRIVER_TI_CPSW
 #include <cpsw.h>
@@ -309,7 +309,7 @@ static void setup_board_eeprom_env(void)
 		name = "am571x_idk";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
-		       board_am_get_name());
+		       board_ti_get_name());
 
 	set_board_info_env(name);
 }
