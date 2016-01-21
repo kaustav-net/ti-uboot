@@ -11,6 +11,7 @@
 
 /* TI EEPROM MAGIC Header identifier */
 #define TI_EEPROM_HEADER_MAGIC	0xEE3355AA
+#define TI_DEAD_EEPROM_MAGIC	0xADEAD12C
 
 #define TI_EEPROM_HDR_NAME_LEN		8
 #define TI_EEPROM_HDR_REV_LEN		4
@@ -44,17 +45,20 @@ struct ti_am_eeprom {
 } __attribute__ ((__packed__));
 
 /**
- * struct ti_am_eeprom_printable - Null terminated, printable EEPROM contents
+ * struct ti_common_eeprom - Null terminated, usable EEPROM contents.
+ * header:	Magic number
  * @name:	NULL terminated name
  * @version:	NULL terminated version
  * @serial:	NULL terminated serial number
  */
-struct ti_am_eeprom_printable {
+struct ti_common_eeprom {
+	u32 header;
 	char name[TI_EEPROM_HDR_NAME_LEN + 1];
 	char version[TI_EEPROM_HDR_REV_LEN + 1];
 	char serial[TI_EEPROM_HDR_SERIAL_LEN + 1];
+	char config[TI_EEPROM_HDR_CONFIG_LEN];
 };
-#define TI_AM_EEPROM_DATA ((struct ti_am_eeprom *)\
+#define TI_EEPROM_DATA ((struct ti_common_eeprom *)\
 				OMAP_SRAM_SCRATCH_BOARD_EEPROM_START)
 
 /**
@@ -66,19 +70,6 @@ struct ti_am_eeprom_printable {
  * the basic initialization logic common accross all AM* platforms.
  */
 int ti_i2c_eeprom_am_get(int bus_addr, int dev_addr);
-
-/**
- * ti_i2c_eeprom_am_get_print() - Get a printable representation of eeprom data
- * @bus_addr:	I2C bus address
- * @dev_addr:	I2C slave address
- * @p:		Pointer to eeprom structure
- *
- * This reads the eeprom and converts the data into a printable string for
- * further processing for AM* platforms.
- */
-int ti_i2c_eeprom_am_get_print(int bus_addr, int dev_addr,
-			       struct ti_am_eeprom_printable *p);
-
 
 /**
  * board_am_is() - Board detection logic for TI AM* EVMs
