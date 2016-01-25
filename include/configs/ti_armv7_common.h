@@ -316,4 +316,6 @@
 #define NETARGS ""
 #endif
 
+#define CONFIG_CMD_TIME
+
 #endif	/* __CONFIG_TI_ARMV7_COMMON_H__ */
