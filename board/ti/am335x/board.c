@@ -16,6 +16,7 @@
 #include <asm/arch/omap.h>
 #include <asm/arch/ddr_defs.h>
 #include <asm/arch/clock.h>
+#include <asm/arch/clk_synthesizer.h>
 #include <asm/arch/gpio.h>
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/sys_proto.h>
@@ -37,8 +38,13 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 /* GPIO that controls power to DDR on EVM-SK */
-#define GPIO_DDR_VTT_EN		7
-#define ICE_GPIO_DDR_VTT_EN	18
+#define GPIO_TO_PIN(bank, gpio)		(32 * (bank) + (gpio))
+#define GPIO_DDR_VTT_EN		GPIO_TO_PIN(0, 7)
+#define ICE_GPIO_DDR_VTT_EN	GPIO_TO_PIN(0, 18)
+#define GPIO_PR1_MII_CTRL	GPIO_TO_PIN(3, 4)
+#define GPIO_MUX_MII_CTRL	GPIO_TO_PIN(3, 10)
+#define GPIO_FET_SWITCH_CTRL	GPIO_TO_PIN(0, 7)
+#define GPIO_PHY_RESET		GPIO_TO_PIN(2, 5)
 
 static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 
@@ -540,6 +546,52 @@ static struct cpsw_platform_data cpsw_data = {
 };
 #endif
 
+#if ((defined(CONFIG_SPL_ETH_SUPPORT) || defined(CONFIG_SPL_USBETH_SUPPORT)) \
+		&& defined(CONFIG_SPL_BUILD)) || \
+	((defined(CONFIG_DRIVER_TI_CPSW) || \
+	  defined(CONFIG_USB_ETHER) && defined(CONFIG_MUSB_GADGET)) && \
+	 !defined(CONFIG_SPL_BUILD))
+
+static void request_and_set_gpio(int gpio, char *name)
+{
+	int ret;
+
+	ret = gpio_request(gpio, name);
+	if (ret < 0) {
+		printf("%s: Unable to request %s\n", __func__, name);
+		return;
+	}
+
+	ret = gpio_direction_output(gpio, 0);
+	if (ret < 0) {
+		printf("%s: Unable to set %s  as output\n", __func__, name);
+		goto err_free_gpio;
+	}
+
+	gpio_set_value(gpio, 1);
+
+	return;
+
+err_free_gpio:
+	gpio_free(gpio);
+}
+
+#define REQUEST_AND_SET_GPIO(N)	request_and_set_gpio(N, #N);
+
+/**
+ * RMII mode on ICEv2 board needs 50MHz clock. Given the clock
+ * synthesizer With a capacitor of 18pF, and 25MHz input clock cycle
+ * PLL1 gives an output of 100MHz. So, configuring the div2/3 as 2 to
+ * give 50MHz output for Eth0 and 1.
+ */
+static struct clk_synth cdce913_data = {
+	.id = 0x81,
+	.capacitor = 0x90,
+	.mux = 0x6d,
+	.pdiv2 = 0x2,
+	.pdiv3 = 0x2,
+};
+
 /*
  * This function will:
  * Read the eFuse for MAC addresses, and set ethaddr/eth1addr/usbnet_devaddr
@@ -551,11 +603,6 @@ static struct cpsw_platform_data cpsw_data = {
  * Build in only these cases to avoid warnings about unused variables
  * when we build an SPL that has neither option but full U-Boot will.
  */
-#if ((defined(CONFIG_SPL_ETH_SUPPORT) || defined(CONFIG_SPL_USBETH_SUPPORT)) \
-		&& defined(CONFIG_SPL_BUILD)) || \
-	((defined(CONFIG_DRIVER_TI_CPSW) || \
-	  defined(CONFIG_USB_ETHER) && defined(CONFIG_MUSB_GADGET)) && \
-	 !defined(CONFIG_SPL_BUILD))
 int board_eth_init(bd_t *bis)
 {
 	int rv, n = 0;
@@ -597,6 +644,19 @@ int board_eth_init(bd_t *bis)
 			eth_setenv_enetaddr("eth1addr", mac_addr);
 	}
 
+	if (board_is_icev2()) {
+		REQUEST_AND_SET_GPIO(GPIO_PR1_MII_CTRL);
+		REQUEST_AND_SET_GPIO(GPIO_MUX_MII_CTRL);
+		REQUEST_AND_SET_GPIO(GPIO_FET_SWITCH_CTRL);
+		REQUEST_AND_SET_GPIO(GPIO_PHY_RESET);
+
+		rv = setup_clock_synthesizer(&cdce913_data);
+		if (rv) {
+			printf("Clock synthesizer setup failed %d\n", rv);
+			return rv;
+		}
+	}
+
 	if (read_eeprom() < 0)
 		puts("Could not get board ID.\n");
 
@@ -604,6 +664,12 @@ int board_eth_init(bd_t *bis)
 		writel(MII_MODE_ENABLE, &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
 				PHY_INTERFACE_MODE_MII;
+	} else if (board_is_icev2()) {
+		writel(RMII_MODE_ENABLE | RMII_CHIPCKL_ENABLE, &cdev->miisel);
+		cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RMII;
+		cpsw_slaves[1].phy_if = PHY_INTERFACE_MODE_RMII;
+		cpsw_slaves[0].phy_addr = 1;
+		cpsw_slaves[1].phy_addr = 3;
 	} else {
 		writel((RGMII_MODE_ENABLE | RGMII_INT_DELAY), &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
