@@ -376,8 +376,15 @@ void recalibrate_iodelay(void)
 		/* Common for X15/GPEVM */
 		pconf = core_padconf_array_essential_x15;
 		pconf_sz = ARRAY_SIZE(core_padconf_array_essential_x15);
-		iod = iodelay_cfg_array_x15;
-		iod_sz = ARRAY_SIZE(iodelay_cfg_array_x15);
+		/* There never was an SR1.0 X15.. So.. */
+		if (omap_revision() == DRA752_ES1_1) {
+			iod = iodelay_cfg_array_x15_sr1_1;
+			iod_sz = ARRAY_SIZE(iodelay_cfg_array_x15_sr1_1);
+		} else {
+			/* Since full production should switch to SR2.0  */
+			iod = iodelay_cfg_array_x15_sr2_0;
+			iod_sz = ARRAY_SIZE(iodelay_cfg_array_x15_sr2_0);
+		}
 	}
 
 	__recalibrate_iodelay(pconf, pconf_sz, iod, iod_sz);

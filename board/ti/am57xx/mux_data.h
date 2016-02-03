@@ -714,7 +714,7 @@ const struct pad_conf_entry early_padconf[] = {
 };
 
 #ifdef CONFIG_IODELAY_RECALIBRATION
-const struct iodelay_cfg_entry iodelay_cfg_array_x15[] = {
+const struct iodelay_cfg_entry iodelay_cfg_array_x15_sr1_1[] = {
 	{0x0114, 2980, 0},	/* CFG_GPMC_A0_IN */
 	{0x0120, 2648, 0},	/* CFG_GPMC_A10_IN */
 	{0x012C, 2918, 0},	/* CFG_GPMC_A11_IN */
@@ -767,6 +767,61 @@ const struct iodelay_cfg_entry iodelay_cfg_array_x15[] = {
 	{0x0AE0, 189, 1462},	/* CFG_VIN2A_D21_IN */
 	{0x0AEC, 232, 1278},	/* CFG_VIN2A_D22_IN */
 	{0x0AF8, 0, 1397},	/* CFG_VIN2A_D23_IN */
+};
+
+const struct iodelay_cfg_entry iodelay_cfg_array_x15_sr2_0[] = {
+	{0x0114, 2519, 702},	/* CFG_GPMC_A0_IN */
+	{0x0120, 2435, 411},	/* CFG_GPMC_A10_IN */
+	{0x012C, 2379, 755},	/* CFG_GPMC_A11_IN */
+	{0x0198, 2384, 778},	/* CFG_GPMC_A1_IN */
+	{0x0204, 2499, 1127},	/* CFG_GPMC_A2_IN */
+	{0x0210, 2455, 1181},	/* CFG_GPMC_A3_IN */
+	{0x021C, 2486, 1039},	/* CFG_GPMC_A4_IN */
+	{0x0228, 2456, 938},	/* CFG_GPMC_A5_IN */
+	{0x0234, 2463, 573},	/* CFG_GPMC_A6_IN */
+	{0x0240, 2608, 783},	/* CFG_GPMC_A7_IN */
+	{0x024C, 2430, 656},	/* CFG_GPMC_A8_IN */
+	{0x0258, 2465, 850},	/* CFG_GPMC_A9_IN */
+	{0x0264, 2316, 301},	/* CFG_GPMC_AD0_IN */
+	{0x0270, 2324, 406},	/* CFG_GPMC_AD10_IN */
+	{0x027C, 2278, 352},	/* CFG_GPMC_AD11_IN */
+	{0x0288, 2297, 160},	/* CFG_GPMC_AD12_IN */
+	{0x0294, 2278, 108},	/* CFG_GPMC_AD13_IN */
+	{0x02A0, 2035, 0},	/* CFG_GPMC_AD14_IN */
+	{0x02AC, 2279, 378},	/* CFG_GPMC_AD15_IN */
+	{0x02B8, 2440, 70},	/* CFG_GPMC_AD1_IN */
+	{0x02C4, 2404, 446},	/* CFG_GPMC_AD2_IN */
+	{0x02D0, 2343, 212},	/* CFG_GPMC_AD3_IN */
+	{0x02DC, 2355, 322},	/* CFG_GPMC_AD4_IN */
+	{0x02E8, 2337, 192},	/* CFG_GPMC_AD5_IN */
+	{0x02F4, 2270, 314},	/* CFG_GPMC_AD6_IN */
+	{0x0300, 2339, 259},	/* CFG_GPMC_AD7_IN */
+	{0x030C, 2308, 577},	/* CFG_GPMC_AD8_IN */
+	{0x0318, 2334, 166},	/* CFG_GPMC_AD9_IN */
+	{0x06F0, 471, 0},	/* CFG_RGMII0_RXC_IN */
+	{0x06FC, 30, 1919},	/* CFG_RGMII0_RXCTL_IN */
+	{0x0708, 74, 1688},	/* CFG_RGMII0_RXD0_IN */
+	{0x0714, 94, 1697},	/* CFG_RGMII0_RXD1_IN */
+	{0x0720, 0, 1703},	/* CFG_RGMII0_RXD2_IN */
+	{0x072C, 70, 1804},	/* CFG_RGMII0_RXD3_IN */
+	{0x0740, 90, 70},	/* CFG_RGMII0_TXC_OUT */
+	{0x074C, 70, 70},	/* CFG_RGMII0_TXCTL_OUT */
+	{0x0758, 180, 70},	/* CFG_RGMII0_TXD0_OUT */
+	{0x0764, 35, 70},	/* CFG_RGMII0_TXD1_OUT */
+	{0x0770, 0, 0},		/* CFG_RGMII0_TXD2_OUT */
+	{0x077C, 180, 70},	/* CFG_RGMII0_TXD3_OUT */
+	{0x0A70, 65, 70},	/* CFG_VIN2A_D12_OUT */
+	{0x0A7C, 125, 70},	/* CFG_VIN2A_D13_OUT */
+	{0x0A88, 0, 70},	/* CFG_VIN2A_D14_OUT */
+	{0x0A94, 0, 70},	/* CFG_VIN2A_D15_OUT */
+	{0x0AA0, 65, 70},	/* CFG_VIN2A_D16_OUT */
+	{0x0AAC, 0, 0},		/* CFG_VIN2A_D17_OUT */
+	{0x0AB0, 612, 0},	/* CFG_VIN2A_D18_IN */
+	{0x0ABC, 4, 927},	/* CFG_VIN2A_D19_IN */
+	{0x0AD4, 136, 1340},	/* CFG_VIN2A_D20_IN */
+	{0x0AE0, 130, 1450},	/* CFG_VIN2A_D21_IN */
+	{0x0AEC, 144, 1269},	/* CFG_VIN2A_D22_IN */
+	{0x0AF8, 0, 1330},	/* CFG_VIN2A_D23_IN */
 };
 
 const struct iodelay_cfg_entry iodelay_cfg_array_am572x_idk[] = {
