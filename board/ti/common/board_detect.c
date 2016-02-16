@@ -315,3 +315,21 @@ void __maybe_unused set_board_info_env(char *name)
 	else
 		setenv("board_serial", unknown);
 }
+
+void __maybe_unused board_ti_get_eth_mac_addr(int index,
+					      u8 mac_addr[TI_EEPROM_HDR_ETH_ALEN])
+{
+	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
+
+	if (ep->header == TI_DEAD_EEPROM_MAGIC)
+		goto fail;
+
+	if (index < 0 || index >= TI_EEPROM_HDR_NO_OF_MAC_ADDR)
+		goto fail;
+
+	memcpy(mac_addr, ep->mac_addr[index], TI_EEPROM_HDR_ETH_ALEN);
+	return;
+
+fail:
+	memset(mac_addr, 0, TI_EEPROM_HDR_ETH_ALEN);
+}

@@ -200,4 +200,13 @@ void set_board_info_env(char *name);
  */
 int ti_i2c_eeprom_am_set(const char *name, const char *rev);
 
+/**
+ * board_ti_get_eth_mac_addr() - Get Ethernet MAC address from EEPROM MAC list
+ * @index:	0 based index within the list of MAC addresses
+ * @mac_addr:	MAC address contained at the index is returned here
+ *
+ * Does not sanity check the mac_addr. Whatever is stored in EEPROM is returned.
+ */
+void board_ti_get_eth_mac_addr(int index, u8 mac_addr[TI_EEPROM_HDR_ETH_ALEN]);
+
 #endif	/* __BOARD_DETECT_H */
