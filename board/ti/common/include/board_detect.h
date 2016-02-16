@@ -83,7 +83,8 @@ struct dra7_eeprom {
  * @serial:	NULL terminated serial number
  * @config: Board specific config options
  * @emif1_size:	Size of the ddr available on emif1
- * @emif2_size:	Size of the ddr available on emif2
+ * @emif2_size:	Size of the ddr available on emif2a
+ * @mac_addr:	MAC addresses
  */
 struct ti_common_eeprom {
 	u32 header;
@@ -93,6 +94,7 @@ struct ti_common_eeprom {
 	char config[TI_EEPROM_HDR_CONFIG_LEN];
 	u64 emif1_size;
 	u64 emif2_size;
+	char mac_addr[TI_EEPROM_HDR_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
 };
 #define TI_EEPROM_DATA ((struct ti_common_eeprom *)\
 				OMAP_SRAM_SCRATCH_BOARD_EEPROM_START)

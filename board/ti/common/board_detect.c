@@ -147,6 +147,9 @@ int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr)
 	strlcpy(ep->config, am_ep.config, TI_EEPROM_HDR_CONFIG_LEN + 1);
 	ti_eeprom_string_cleanup(ep->config);
 
+	memcpy(ep->mac_addr, am_ep.mac_addr,
+	       TI_EEPROM_HDR_NO_OF_MAC_ADDR * TI_EEPROM_HDR_ETH_ALEN);
+
 already_read:
 	return 0;
 }
