@@ -59,6 +59,13 @@ struct watchdog {
 #define TCLR_AR			(0x1 << 1)
 #define TCLR_PRE		(0x1 << 5)
 
+/* device type */
+#define DEVICE_MASK         (BIT(8) | BIT(9) | BIT(10))
+#define TST_DEVICE          0x0
+#define EMU_DEVICE          0x1
+#define HS_DEVICE           0x2
+#define GP_DEVICE           0x3
+
 /* I2C base */
 #define I2C_BASE1		(OMAP44XX_L4_PER_BASE + 0x70000)
 #define I2C_BASE2		(OMAP44XX_L4_PER_BASE + 0x72000)
