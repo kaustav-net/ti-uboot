@@ -15,6 +15,9 @@
 #define CONFIG_DRA7XX
 #define CONFIG_BOARD_EARLY_INIT_F
 
+/* Linux interfacing, DTB/FDT fixups */
+#define CONFIG_OF_BOARD_SETUP
+
 #ifdef CONFIG_SPL_BUILD
 #define CONFIG_IODELAY_RECALIBRATION
 #endif

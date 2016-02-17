@@ -20,6 +20,9 @@
 
 #define CONFIG_BOARD_EARLY_INIT_F
 
+/* Linux interfacing, DTB/FDT fixups */
+#define CONFIG_OF_BOARD_SETUP
+
 #define CONFIG_NR_DRAM_BANKS		2
 
 #define CONFIG_ENV_SIZE			(64 << 10)
