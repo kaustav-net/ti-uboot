@@ -9,8 +9,6 @@
 #ifndef __CONFIG_AM43XX_EVM_H
 #define __CONFIG_AM43XX_EVM_H
 
-#define CONFIG_AM43XX
-
 #define CONFIG_CMD_FAT
 
 #define CONFIG_BOARD_LATE_INIT
