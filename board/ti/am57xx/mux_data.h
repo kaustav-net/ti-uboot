@@ -691,7 +691,7 @@ const struct pad_conf_entry core_padconf_array_essential_am571x_idk[] = {
 	{DCAN1_RX, (M0 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* dcan1_rx.dcan1_rx */
 	{UART1_RXD, (M14 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* uart1_rxd.gpio7_22 */
 	{UART1_CTSN, (M14 | PIN_INPUT_PULLDOWN)},	/* uart1_ctsn.gpio7_24 */
-	{UART1_RTSN, (M0 | PIN_INPUT_PULLDOWN)},	/* uart1_rtsn.gpio7_25 */
+	{UART1_RTSN, (M14 | PIN_INPUT_PULLDOWN)},	/* uart1_rtsn.gpio7_25 */
 	{UART2_RXD, (M0 | PIN_INPUT_PULLUP)},	/* uart2_rxd.uart2_rxd */
 	{UART2_TXD, (M0 | PIN_INPUT_PULLUP)},	/* uart2_txd.uart2_txd */
 	{UART2_CTSN, (M2 | PIN_INPUT_PULLUP)},	/* uart2_ctsn.uart3_rxd */
