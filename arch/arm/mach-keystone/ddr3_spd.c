@@ -442,7 +442,7 @@ int ddr3_get_dimm_params_from_spd(struct ddr3_spd_cb *spd_cb)
 	struct ddr3_sodimm spd;
 	ddr3_spd_eeprom_t spd_params;
 
-	memset(&spd, sizeof(spd), 0);
+	memset(&spd, 0, sizeof(spd));
 
 	if (ddr3_read_spd(&spd_params))
 		return 1;
