@@ -42,16 +42,19 @@ static inline int board_is_hsevm(void)
 	return board_ti_is("AM43XXHS");
 }
 
+static inline int board_is_evm(void)
+{
+	return board_is_gpevm() || board_is_hsevm();
+}
+
 static inline int board_is_evm_14_or_later(void)
 {
-	return (board_is_gpevm() || board_is_hsevm()) &&
-		strncmp("1.4", board_ti_get_rev(), 3) <= 0;
+	return board_is_evm() && strncmp("1.4", board_ti_get_rev(), 3) <= 0;
 }
 
 static inline int board_is_evm_12_or_later(void)
 {
-	return (board_is_gpevm() || board_is_hsevm()) &&
-		strncmp("1.2", board_ti_get_rev(), 3) <= 0;
+	return board_is_evm() && strncmp("1.2", board_ti_get_rev(), 3) <= 0;
 }
 
 void enable_uart0_pin_mux(void);

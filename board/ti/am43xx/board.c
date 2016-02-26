@@ -341,7 +341,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 
 	if (board_is_eposevm())
 		return &epos_evm_dpll_ddr[ind];
-	else if (board_is_gpevm() || board_is_sk())
+	else if (board_is_evm() || board_is_sk())
 		return &gp_evm_dpll_ddr;
 	else if (board_is_idk())
 		return &idk_dpll_ddr;
@@ -585,7 +585,7 @@ u32 rtc_only_get_board_type(void)
 		return RTC_BOARD_EVM14;
 	else if (board_is_evm_12_or_later())
 		return RTC_BOARD_EVM12;
-	else if (board_is_gpevm())
+	else if (board_is_evm())
 		return RTC_BOARD_GPEVM;
 	else if (board_is_sk())
 		return RTC_BOARD_SK;
@@ -612,7 +612,7 @@ void sdram_init(void)
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz_beta, 0);
-	} else if (board_is_gpevm()) {
+	} else if (board_is_evm()) {
 		enable_vtt_regulator();
 		config_ddr(0, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_emif_regs_400Mhz, 0);
