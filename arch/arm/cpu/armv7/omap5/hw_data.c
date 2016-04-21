@@ -351,6 +351,7 @@ struct vcores_data omap5430_volts_es2 = {
 	.mpu.value = VDD_MPU_ES2,
 	.mpu.addr = SMPS_REG_ADDR_12_MPU,
 	.mpu.pmic = &palmas,
+	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
 
 	.core.value = VDD_CORE_ES2,
 	.core.addr = SMPS_REG_ADDR_8_CORE,
@@ -367,6 +368,7 @@ struct vcores_data dra752_volts = {
 	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.mpu.addr	= TPS659038_REG_ADDR_SMPS12,
 	.mpu.pmic	= &tps659038,
+	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
 
 	.eve.value	= VDD_EVE_DRA752,
 	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
@@ -399,6 +401,7 @@ struct vcores_data dra722_volts = {
 	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.mpu.addr	= 0x23,
 	.mpu.pmic	= &tps659038,
+	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
 
 	.eve.value	= 1000,
 	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,

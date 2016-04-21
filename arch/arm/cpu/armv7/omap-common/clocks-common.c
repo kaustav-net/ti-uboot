@@ -544,7 +544,7 @@ void scale_vcores(struct vcores_data const *vcores)
 		  (*prcm)->prm_abbldo_mpu_setup,
 		  (*prcm)->prm_abbldo_mpu_ctrl,
 		  (*prcm)->prm_irqstatus_mpu_2,
-		  OMAP_ABB_MPU_TXDONE_MASK,
+		  vcores->mpu.abb_tx_done_mask,
 		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->mm);
