@@ -561,12 +561,36 @@ void scale_vcores(struct vcores_data const *vcores)
 
 	val = optimize_vcore_voltage(&vcores->gpu);
 	do_scale_vcore(vcores->gpu.addr, val, vcores->gpu.pmic);
+	/* Configure GPU ABB LDO after scale */
+	abb_setup(vcores->gpu.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_gpu_voltage_ctrl,
+		  (*prcm)->prm_abbldo_gpu_setup,
+		  (*prcm)->prm_abbldo_gpu_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->gpu.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->eve);
 	do_scale_vcore(vcores->eve.addr, val, vcores->eve.pmic);
+	/* Configure EVE ABB LDO after scale */
+	abb_setup(vcores->eve.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_eve_voltage_ctrl,
+		  (*prcm)->prm_abbldo_eve_setup,
+		  (*prcm)->prm_abbldo_eve_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->eve.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->iva);
 	do_scale_vcore(vcores->iva.addr, val, vcores->iva.pmic);
+	/* Configure IVA ABB LDO after scale */
+	abb_setup(vcores->iva.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_iva_voltage_ctrl,
+		  (*prcm)->prm_abbldo_iva_setup,
+		  (*prcm)->prm_abbldo_iva_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->iva.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 }
 
 static inline void enable_clock_domain(u32 const clkctrl_reg, u32 enable_mode)

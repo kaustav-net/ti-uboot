@@ -376,12 +376,14 @@ struct vcores_data dra752_volts = {
 	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.eve.addr	= TPS659038_REG_ADDR_SMPS45,
 	.eve.pmic	= &tps659038,
+	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
 
 	.gpu.value	= VDD_GPU_DRA752,
 	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.gpu.addr	= TPS659038_REG_ADDR_SMPS6,
 	.gpu.pmic	= &tps659038,
+	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
 
 	.core.value	= VDD_CORE_DRA752,
 	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
@@ -394,6 +396,7 @@ struct vcores_data dra752_volts = {
 	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.iva.addr	= TPS659038_REG_ADDR_SMPS8,
 	.iva.pmic	= &tps659038,
+	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
 };
 
 struct vcores_data dra722_volts = {
@@ -409,12 +412,14 @@ struct vcores_data dra722_volts = {
 	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.eve.addr	= 0x2f,
 	.eve.pmic	= &tps659038,
+	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
 
 	.gpu.value	= 1000,
 	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.gpu.addr	= 0x2f,
 	.gpu.pmic	= &tps659038,
+	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
 
 	.core.value	= 1000,
 	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
@@ -427,6 +432,7 @@ struct vcores_data dra722_volts = {
 	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.iva.addr	= 0x2f,
 	.iva.pmic	= &tps659038,
+	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
 };
 
 /*
