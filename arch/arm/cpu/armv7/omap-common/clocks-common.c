@@ -539,7 +539,7 @@ void scale_vcores(struct vcores_data const *vcores)
 	do_scale_vcore(vcores->mpu.addr, val, vcores->mpu.pmic);
 
 	/* Configure MPU ABB LDO after scale */
-	abb_setup((*ctrl)->control_std_fuse_opp_vdd_mpu_2,
+	abb_setup(vcores->mpu.efuse.reg,
 		  (*ctrl)->control_wkup_ldovbb_mpu_voltage_ctrl,
 		  (*prcm)->prm_abbldo_mpu_setup,
 		  (*prcm)->prm_abbldo_mpu_ctrl,
