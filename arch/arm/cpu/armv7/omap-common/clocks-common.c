@@ -539,25 +539,58 @@ void scale_vcores(struct vcores_data const *vcores)
 	do_scale_vcore(vcores->mpu.addr, val, vcores->mpu.pmic);
 
 	/* Configure MPU ABB LDO after scale */
-	abb_setup((*ctrl)->control_std_fuse_opp_vdd_mpu_2,
+	abb_setup(vcores->mpu.efuse.reg,
 		  (*ctrl)->control_wkup_ldovbb_mpu_voltage_ctrl,
 		  (*prcm)->prm_abbldo_mpu_setup,
 		  (*prcm)->prm_abbldo_mpu_ctrl,
 		  (*prcm)->prm_irqstatus_mpu_2,
-		  OMAP_ABB_MPU_TXDONE_MASK,
+		  vcores->mpu.abb_tx_done_mask,
 		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->mm);
 	do_scale_vcore(vcores->mm.addr, val, vcores->mm.pmic);
 
+	/* Configure MM ABB LDO after scale */
+	abb_setup(vcores->mm.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_mm_voltage_ctrl,
+		  (*prcm)->prm_abbldo_mm_setup,
+		  (*prcm)->prm_abbldo_mm_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->mm.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
+
 	val = optimize_vcore_voltage(&vcores->gpu);
 	do_scale_vcore(vcores->gpu.addr, val, vcores->gpu.pmic);
+	/* Configure GPU ABB LDO after scale */
+	abb_setup(vcores->gpu.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_gpu_voltage_ctrl,
+		  (*prcm)->prm_abbldo_gpu_setup,
+		  (*prcm)->prm_abbldo_gpu_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->gpu.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->eve);
 	do_scale_vcore(vcores->eve.addr, val, vcores->eve.pmic);
+	/* Configure EVE ABB LDO after scale */
+	abb_setup(vcores->eve.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_eve_voltage_ctrl,
+		  (*prcm)->prm_abbldo_eve_setup,
+		  (*prcm)->prm_abbldo_eve_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->eve.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 
 	val = optimize_vcore_voltage(&vcores->iva);
 	do_scale_vcore(vcores->iva.addr, val, vcores->iva.pmic);
+	/* Configure IVA ABB LDO after scale */
+	abb_setup(vcores->iva.efuse.reg,
+		  (*ctrl)->control_wkup_ldovbb_iva_voltage_ctrl,
+		  (*prcm)->prm_abbldo_iva_setup,
+		  (*prcm)->prm_abbldo_iva_ctrl,
+		  (*prcm)->prm_irqstatus_mpu,
+		  vcores->iva.abb_tx_done_mask,
+		  OMAP_ABB_FAST_OPP);
 }
 
 static inline void enable_clock_domain(u32 const clkctrl_reg, u32 enable_mode)
