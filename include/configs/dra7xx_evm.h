@@ -15,9 +15,7 @@
 #define CONFIG_DRA7XX
 #define CONFIG_BOARD_EARLY_INIT_F
 
-#ifdef CONFIG_SPL_BUILD
 #define CONFIG_IODELAY_RECALIBRATION
-#endif
 
 /* MMC ENV related defines */
 #ifdef CONFIG_ENV_IS_IN_MMC
