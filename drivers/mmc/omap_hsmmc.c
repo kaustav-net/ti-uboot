@@ -35,6 +35,7 @@
 #include <asm/io.h>
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/sys_proto.h>
+#include <errno.h>
 
 #ifndef BIT
 #define BIT(x) (1 << (x))
@@ -92,6 +93,7 @@ static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 			unsigned int siz);
 static void omap_hsmmc_start_clock(struct hsmmc *mmc_base);
 static void omap_hsmmc_stop_clock(struct hsmmc *mmc_base);
+static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit);
 
 #ifdef OMAP_HSMMC_USE_GPIO
 static int omap_mmc_setup_gpio_in(int gpio, const char *label)
@@ -316,6 +318,124 @@ static void omap_hsmmc_set_capabilities(struct mmc *mmc)
 
 	writel(val, &mmc_base->capa);
 }
+
+#ifdef HIGH_SPEED_SUPPORT
+static void omap_hsmmc_disable_tuning(struct mmc *mmc)
+{
+	int val;
+	struct hsmmc *mmc_base;
+
+	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
+	val = readl(&mmc_base->ac12);
+	val &= ~(AC12_SCLK_SEL);
+	writel(val, &mmc_base->ac12);
+
+	val = readl(&mmc_base->dll);
+	val &= ~(DLL_FORCE_VALUE | DLL_SWT);
+	writel(val, &mmc_base->dll);
+}
+
+static void omap_hsmmc_set_dll(struct mmc *mmc, int count)
+{
+	int i;
+	u32 val;
+	struct hsmmc *mmc_base;
+
+	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
+	val = readl(&mmc_base->dll);
+	val |= DLL_FORCE_VALUE;
+	val &= ~(DLL_FORCE_SR_C_MASK << DLL_FORCE_SR_C_SHIFT);
+	val |= (count << DLL_FORCE_SR_C_SHIFT);
+	writel(val, &mmc_base->dll);
+
+	val |= DLL_CALIB;
+	writel(val, &mmc_base->dll);
+	for (i = 0; i < 1000; i++) {
+		if (readl(&mmc_base->dll) & DLL_CALIB)
+			break;
+	}
+	val &= ~DLL_CALIB;
+	writel(val, &mmc_base->dll);
+}
+
+static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
+{
+	struct hsmmc *mmc_base;
+
+	u32 val;
+	u8 cur_match, prev_match = 0;
+	int ret;
+	u32 phase_delay = 0;
+	u32 start_window = 0, max_window = 0;
+	u32 length = 0, max_len = 0;
+
+	/* clock tuning is not needed for upto 52MHz */
+	if (mmc->clock <= 52000000)
+		return 0;
+
+	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
+
+	val = readl(&mmc_base->ac12);
+	val |= AC12_V1V8_SIGEN;
+	writel(val, &mmc_base->ac12);
+	val = readl(&mmc_base->dll);
+	val |= DLL_SWT;
+	writel(val, &mmc_base->dll);
+	while (phase_delay <= MAX_PHASE_DELAY) {
+		omap_hsmmc_set_dll(mmc, phase_delay);
+
+		cur_match = !mmc_send_tuning(mmc, opcode, NULL);
+
+		if (cur_match) {
+			if (prev_match) {
+				length++;
+			} else {
+				start_window = phase_delay;
+				length = 1;
+			}
+		}
+
+		if (length > max_len) {
+			max_window = start_window;
+			max_len = length;
+		}
+
+		prev_match = cur_match;
+		phase_delay += 4;
+		udelay(100);
+	val = readl(&mmc_base->dll);
+	val &= ~DLL_FORCE_VALUE;
+	writel(val, &mmc_base->dll);
+	}
+
+	if (!max_len) {
+		ret = -EIO;
+		goto tuning_error;
+	}
+
+	val = readl(&mmc_base->ac12);
+	if (!(val & AC12_SCLK_SEL)) {
+		ret = -EIO;
+		goto tuning_error;
+	}
+
+	phase_delay = max_window + 4 * (max_len >> 1);
+	omap_hsmmc_set_dll(mmc, phase_delay);
+
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRC);
+
+	return 0;
+
+tuning_error:
+
+	omap_hsmmc_disable_tuning(mmc);
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRC);
+
+	return ret;
+}
+#endif
 
 static int omap_hsmmc_init_setup(struct mmc *mmc)
 {
@@ -785,6 +905,9 @@ static const struct mmc_ops omap_hsmmc_ops = {
 #ifdef OMAP_HSMMC_USE_GPIO
 	.getcd		= omap_hsmmc_getcd,
 	.getwp		= omap_hsmmc_getwp,
+#endif
+#ifdef HIGH_SPEED_SUPPORT
+	.execute_tuning = omap_hsmmc_execute_tuning,
 #endif
 };
 
