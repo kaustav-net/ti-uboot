@@ -36,6 +36,10 @@
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/sys_proto.h>
 
+#ifndef BIT
+#define BIT(x) (1 << (x))
+#endif
+
 /* simplify defines to OMAP_HSMMC_USE_GPIO */
 #if (defined(CONFIG_OMAP_GPIO) && !defined(CONFIG_SPL_BUILD)) || \
 	(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_GPIO_SUPPORT))
@@ -57,10 +61,24 @@ struct omap_hsmmc_data {
 	int cd_gpio;
 	int wp_gpio;
 #endif
+
+	uint iov;
+	u8 controller_flags;
 };
+
+#ifndef CONFIG_HSMMC1_IOV
+#define CONFIG_HSMMC1_IOV	IOV_1V8
+#endif
+#ifndef CONFIG_HSMMC2_IOV
+#define CONFIG_HSMMC2_IOV	IOV_1V8
+#endif
+#ifndef CONFIG_HSMMC3_IOV
+#define CONFIG_HSMMC3_IOV	IOV_1V8
+#endif
 
 /* If we fail after 1 second wait, something is really bad */
 #define MAX_RETRY_MS	1000
+#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
 
 static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size);
 static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
@@ -205,6 +223,59 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 	writel(readl(&mmc_base->con) & ~INIT_INITSTREAM, &mmc_base->con);
 }
 
+static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
+{
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	u32 val;
+
+	mmc_base = priv->base_addr;
+
+	val = readl(&mmc_base->hctl) & ~SDVS_MASK;
+
+	switch (priv->iov) {
+	case IOV_3V3:
+		val |= SDVS_3V3;
+		break;
+	case IOV_3V0:
+		val |= SDVS_3V0;
+		break;
+	case IOV_1V8:
+		val |= SDVS_1V8;
+		break;
+	}
+
+	writel(val, &mmc_base->hctl);
+}
+
+static void omap_hsmmc_set_capabilities(struct mmc *mmc)
+{
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	u32 val;
+
+	mmc_base = priv->base_addr;
+	val = readl(&mmc_base->capa);
+
+	if (priv->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+		val |= (VS30_3V0SUP | VS18_1V8SUP);
+		priv->iov = IOV_3V0;
+	} else {
+		switch (priv->iov) {
+		case IOV_3V3:
+			val |= VS33_3V3SUP;
+			break;
+		case IOV_3V0:
+			val |= VS30_3V0SUP;
+			break;
+		case IOV_1V8:
+			val |= VS18_1V8SUP;
+			break;
+		}
+	}
+
+	writel(val, &mmc_base->capa);
+}
 
 static int omap_hsmmc_init_setup(struct mmc *mmc)
 {
@@ -234,9 +305,9 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 			return TIMEOUT;
 		}
 	}
-	writel(DTW_1_BITMODE | SDBP_PWROFF | SDVS_3V0, &mmc_base->hctl);
-	writel(readl(&mmc_base->capa) | VS30_3V0SUP | VS18_1V8SUP,
-		&mmc_base->capa);
+
+	omap_hsmmc_set_capabilities(mmc);
+	omap_hsmmc_conf_bus_power(mmc);
 
 	reg_val = readl(&mmc_base->con) & RESERVED_MASK;
 
@@ -714,6 +785,23 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
 		return 1;
 	}
+
+#ifndef CONFIG_NO_HSMMC_DUALT_VOLT
+	priv_data->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+#endif
+
+	switch (dev_index) {
+	case 0:
+		priv_data->iov = CONFIG_HSMMC1_IOV;
+		break;
+	case 1:
+		priv_data->iov = CONFIG_HSMMC2_IOV;
+		break;
+	case 2:
+		priv_data->iov = CONFIG_HSMMC3_IOV;
+		break;
+	}
+
 #ifdef OMAP_HSMMC_USE_GPIO
 	/* on error gpio values are set to -1, which is what we want */
 	priv_data->cd_gpio = omap_mmc_setup_gpio_in(cd_gpio, "mmc_cd");
