@@ -115,6 +115,7 @@ struct omap_hsmmc_adma_desc {
 #endif
 /* If we fail after 1 second wait, something is really bad */
 #define MAX_RETRY_MS	1000
+#define MMC_TIMEOUT_MS	20
 #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
 #define OMAP_HSMMC_USE_ADMA			BIT(1)
 
@@ -589,8 +590,9 @@ static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit)
 	defined(CONFIG_AM33XX)
 	if (!(readl(&mmc_base->sysctl) & bit)) {
 		start = get_timer(0);
+		/* To check why this bit is never set in DRA7xx */
 		while (!(readl(&mmc_base->sysctl) & bit)) {
-			if (get_timer(0) - start > MAX_RETRY_MS)
+			if (get_timer(0) - start > MMC_TIMEOUT_MS)
 				return;
 		}
 	}
