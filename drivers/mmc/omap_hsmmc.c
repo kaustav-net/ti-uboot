@@ -242,7 +242,7 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 
 	dsor = 240;
 	mmc_reg_out(&mmc_base->sysctl, (ICE_MASK | DTO_MASK | CEN_MASK),
-		(ICE_STOP | DTO_15THDTO | CEN_DISABLE));
+		(ICE_STOP | DTO_15THDTO));
 	mmc_reg_out(&mmc_base->sysctl, ICE_MASK | CLKD_MASK,
 		(dsor << CLKD_OFFSET) | ICE_OSCILLATE);
 	start = get_timer(0);
@@ -365,7 +365,8 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 
 	/* enable default flags */
 	flags =	flags | (CMD_TYPE_NORMAL | CICE_NOCHECK | CCCE_NOCHECK |
-			MSBS_SGLEBLK | ACEN_DISABLE | BCE_DISABLE | DE_DISABLE);
+			MSBS_SGLEBLK);
+	flags &= ~(ACEN_ENABLE | BCE_ENABLE | DE_ENABLE);
 
 	if (cmd->resp_type & MMC_RSP_CRC)
 		flags |= CCCE_CHECK;
@@ -580,7 +581,7 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 	}
 
 	mmc_reg_out(&mmc_base->sysctl, (ICE_MASK | DTO_MASK | CEN_MASK),
-				(ICE_STOP | DTO_15THDTO | CEN_DISABLE));
+				(ICE_STOP | DTO_15THDTO));
 
 	mmc_reg_out(&mmc_base->sysctl, ICE_MASK | CLKD_MASK,
 				(dsor << CLKD_OFFSET) | ICE_OSCILLATE);
