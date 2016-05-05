@@ -225,6 +225,12 @@
 #define PART_SUPPORT		(0x1)
 #define PART_ENH_ATTRIB		(0x1f)
 
+#define MMC_TIMING_LEGACY	0
+#define MMC_TIMING_MMC_HS	1
+#define MMC_TIMING_SD_HS	2
+#define MMC_TIMING_MMC_DDR52	3
+#define MMC_TIMING_MMC_HS200	4
+
 /* Maximum block size for MMC */
 #define MMC_MAX_BLOCK_LEN	512
 
@@ -293,6 +299,7 @@ struct mmc {
 	int high_capacity;
 	uint bus_width;
 	uint clock;
+	uint timing;
 	uint card_caps;
 	uint ocr;
 	uint dsr;

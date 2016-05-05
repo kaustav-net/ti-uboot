@@ -20,6 +20,7 @@
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
+static void mmc_set_timing(struct mmc *mmc, uint timing);
 
 int __weak board_mmc_getwp(struct mmc *mmc)
 {
@@ -545,6 +546,8 @@ static int mmc_change_freq(struct mmc *mmc)
 		/* No high-speed support */
 		if (!ext_csd[EXT_CSD_HS_TIMING])
 			return 0;
+
+		mmc_set_timing(mmc, MMC_TIMING_MMC_HS);
 	}
 
 	return 0;
@@ -820,6 +823,12 @@ void mmc_set_clock(struct mmc *mmc, uint clock)
 
 	mmc->clock = clock;
 
+	mmc_set_ios(mmc);
+}
+
+static void mmc_set_timing(struct mmc *mmc, uint timing)
+{
+	mmc->timing = timing;
 	mmc_set_ios(mmc);
 }
 
@@ -1106,10 +1115,12 @@ static int mmc_startup(struct mmc *mmc)
 			mmc_set_bus_width(mmc, 4);
 		}
 
-		if (mmc->card_caps & MMC_MODE_HS)
+		if (mmc->card_caps & MMC_MODE_HS) {
+			mmc_set_timing(mmc, MMC_TIMING_SD_HS);
 			mmc->tran_speed = 50000000;
-		else
+		} else {
 			mmc->tran_speed = 25000000;
+		}
 	} else if (mmc->version >= MMC_VERSION_4) {
 		/* Only version 4 of MMC supports wider bus widths */
 		int idx;
@@ -1199,6 +1210,7 @@ static int mmc_startup(struct mmc *mmc)
 
 	/* Fix the block length for DDR mode */
 	if (mmc->ddr_mode) {
+		mmc_set_timing(mmc, MMC_TIMING_MMC_DDR52);
 		mmc->read_bl_len = MMC_MAX_BLOCK_LEN;
 		mmc->write_bl_len = MMC_MAX_BLOCK_LEN;
 	}
@@ -1344,6 +1356,7 @@ int mmc_start_init(struct mmc *mmc)
 	mmc->ddr_mode = 0;
 	mmc_set_bus_width(mmc, 1);
 	mmc_set_clock(mmc, 1);
+	mmc_set_timing(mmc, MMC_TIMING_LEGACY);
 
 	/* Reset the Card */
 	err = mmc_go_idle(mmc);
