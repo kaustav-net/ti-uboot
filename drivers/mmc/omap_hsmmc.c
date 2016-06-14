@@ -938,6 +938,10 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		/* Enable 8-bit interface for eMMC on OMAP4/5 or DRA7XX */
 		host_caps_val |= MMC_MODE_8BIT;
 #endif
+#if defined(CONFIG_DRA7XX)
+		if (is_dra7xx() || is_dra72x())
+			host_caps_val |= MMC_MODE_HS200 | MMC_MODE_DDR_52MHz;
+#endif
 		break;
 #endif
 #ifdef OMAP_HSMMC3_BASE
