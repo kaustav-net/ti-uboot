@@ -48,6 +48,10 @@
 #undef OMAP_HSMMC_USE_GPIO
 #endif
 
+#if !defined(CONFIG_SPL_BUILD) && !defined(CONFIG_MMC_NO_HIGH_SPEED)
+#define HIGH_SPEED_SUPPORT
+#endif
+
 /* common definitions for all OMAPs */
 #define SYSCTL_SRC	(1 << 25)
 #define SYSCTL_SRD	(1 << 26)
@@ -64,6 +68,9 @@ struct omap_hsmmc_data {
 
 	uint iov;
 	u8 controller_flags;
+#ifdef HIGH_SPEED_SUPPORT
+	uint timing;
+#endif
 };
 
 #ifndef CONFIG_HSMMC1_IOV
@@ -222,6 +229,37 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 	}
 	writel(readl(&mmc_base->con) & ~INIT_INITSTREAM, &mmc_base->con);
 }
+
+#ifdef HIGH_SPEED_SUPPORT
+static void omap_hsmmc_set_timing(struct mmc *mmc)
+{
+	u32 val;
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	mmc_base = priv->base_addr;
+
+	val = readl(&mmc_base->ac12);
+	val &= ~AC12_UHSMC_MASK;
+	switch (mmc->timing) {
+	case MMC_TIMING_MMC_HS200:
+		val |= AC12_UHSMC_SDR104;
+		break;
+	case MMC_TIMING_SD_HS:
+	case MMC_TIMING_MMC_HS:
+		val |= AC12_UHSMC_RES;
+		break;
+	case MMC_TIMING_MMC_DDR52:
+		val |= AC12_UHSMC_RES;
+		break;
+	default:
+		val |= AC12_UHSMC_RES;
+		break;
+	}
+	writel(val, &mmc_base->ac12);
+	priv->timing = mmc->timing;
+}
+#endif
 
 static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
 {
@@ -703,6 +741,11 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 
 	if (priv_data->clock != mmc->clock)
 		omap_hsmmc_set_clock(mmc);
+
+#ifdef HIGH_SPEED_SUPPORT
+	if (priv_data->timing != mmc->timing)
+		omap_hsmmc_set_timing(mmc);
+#endif
 }
 
 #ifdef OMAP_HSMMC_USE_GPIO
