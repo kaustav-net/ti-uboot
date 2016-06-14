@@ -94,6 +94,7 @@ static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 static void omap_hsmmc_start_clock(struct hsmmc *mmc_base);
 static void omap_hsmmc_stop_clock(struct hsmmc *mmc_base);
 static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit);
+static int omap_hsmmc_platform_fixup(struct mmc *mmc);
 
 #ifdef OMAP_HSMMC_USE_GPIO
 static int omap_mmc_setup_gpio_in(int gpio, const char *label)
@@ -1014,6 +1015,23 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	mmc = mmc_create(cfg, priv_data);
 	if (mmc == NULL)
 		return -1;
+
+	omap_hsmmc_platform_fixup(mmc);
+	return 0;
+}
+
+__weak int platform_fixup_disable_uhs_mode(void)
+{
+	return 0;
+}
+
+static int omap_hsmmc_platform_fixup(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	struct mmc_config *cfg = &priv->cfg;
+
+	if (platform_fixup_disable_uhs_mode())
+		cfg->host_caps &= ~(MMC_MODE_DDR_52MHz | MMC_MODE_HS200);
 
 	return 0;
 }
