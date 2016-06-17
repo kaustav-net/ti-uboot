@@ -35,6 +35,10 @@
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <asm/arch/mmc_host_def.h>
+#ifdef CONFIG_OMAP54XX
+#include <asm/arch/mux_dra7xx.h>
+#include <asm/arch/dra7xx_iodelay.h>
+#endif
 #include <asm/arch/sys_proto.h>
 #include <errno.h>
 
@@ -58,6 +62,10 @@
 #define HIGH_SPEED_SUPPORT
 #endif
 
+#ifndef HIGH_SPEED_SUPPORT
+#undef CONFIG_IODELAY_RECALIBRATION
+#endif
+
 /* common definitions for all OMAPs */
 #define SYSCTL_SRC	(1 << 25)
 #define SYSCTL_SRD	(1 << 26)
@@ -67,6 +75,8 @@ struct omap_hsmmc_data {
 	struct mmc_config cfg;
 	uint bus_width;
 	uint clock;
+	unsigned int dev_index;
+
 #ifdef OMAP_HSMMC_USE_GPIO
 	int cd_gpio;
 	int wp_gpio;
@@ -80,6 +90,12 @@ struct omap_hsmmc_data {
 #ifdef ADMA_SUPPORT
 	struct omap_hsmmc_adma_desc *adma_desc_table;
 	uint desc_slot;
+#endif
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	struct omap_hsmmc_pinctrl_state *default_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *hs_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *hs200_1_8v_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *ddr_1_8v_pinctrl_state;
 #endif
 };
 
@@ -118,6 +134,7 @@ struct omap_hsmmc_adma_desc {
 #define MMC_TIMEOUT_MS	20
 #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
 #define OMAP_HSMMC_USE_ADMA			BIT(1)
+#define OMAP_HSMMC_REQUIRE_IODELAY		BIT(2)
 
 static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size);
 static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
@@ -126,6 +143,9 @@ static void omap_hsmmc_start_clock(struct hsmmc *mmc_base);
 static void omap_hsmmc_stop_clock(struct hsmmc *mmc_base);
 static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit);
 static int omap_hsmmc_platform_fixup(struct mmc *mmc);
+#ifdef CONFIG_IODELAY_RECALIBRATION
+static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc);
+#endif
 
 #ifdef OMAP_HSMMC_USE_GPIO
 static int omap_mmc_setup_gpio_in(int gpio, const char *label)
@@ -265,93 +285,65 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 }
 
 #ifdef HIGH_SPEED_SUPPORT
+#ifdef CONFIG_IODELAY_RECALIBRATION
 static void omap_hsmmc_set_timing(struct mmc *mmc)
 {
 	u32 val;
 	struct hsmmc *mmc_base;
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	struct omap_hsmmc_pinctrl_state *pinctrl_state = priv->default_pinctrl_state;
 
 	mmc_base = priv->base_addr;
 
 	writel(readl(&mmc_base->con) & ~DDR, &mmc_base->con);
+	omap_hsmmc_stop_clock(mmc_base);
 	val = readl(&mmc_base->ac12);
 	val &= ~AC12_UHSMC_MASK;
 	switch (mmc->timing) {
 	case MMC_TIMING_MMC_HS200:
 		val |= AC12_UHSMC_SDR104;
+		pinctrl_state = priv->hs200_1_8v_pinctrl_state;
 		break;
 	case MMC_TIMING_SD_HS:
 	case MMC_TIMING_MMC_HS:
 		val |= AC12_UHSMC_RES;
+		pinctrl_state = priv->hs_pinctrl_state;
 		break;
 	case MMC_TIMING_MMC_DDR52:
 		val |= AC12_UHSMC_RES;
 		writel(readl(&mmc_base->con) | DDR, &mmc_base->con);
+		pinctrl_state = priv->ddr_1_8v_pinctrl_state;
 		break;
 	default:
 		val |= AC12_UHSMC_RES;
+		pinctrl_state = priv->default_pinctrl_state;
 		break;
 	}
 	writel(val, &mmc_base->ac12);
+
+
+	if (!pinctrl_state) {
+		printf("pinctrl state for timing 0x%x not found."
+		       " Using default pinctrl state\n", mmc->timing);
+		pinctrl_state = priv->default_pinctrl_state;
+	}
+	if (priv->controller_flags & OMAP_HSMMC_REQUIRE_IODELAY) {
+		if (pinctrl_state->iodelay)
+			late_recalibrate_iodelay(pinctrl_state->padconf,
+						 pinctrl_state->npads,
+						 pinctrl_state->iodelay,
+						 pinctrl_state->niodelays);
+		else
+			do_set_mux32((*ctrl)->control_padconf_core_base,
+				     pinctrl_state->padconf,
+				     pinctrl_state->npads);
+	}
+
+	omap_hsmmc_start_clock(mmc_base);
 	priv->timing = mmc->timing;
 }
 #endif
 
-static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
-{
-	struct hsmmc *mmc_base;
-	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
-	u32 val;
-
-	mmc_base = priv->base_addr;
-
-	val = readl(&mmc_base->hctl) & ~SDVS_MASK;
-
-	switch (priv->iov) {
-	case IOV_3V3:
-		val |= SDVS_3V3;
-		break;
-	case IOV_3V0:
-		val |= SDVS_3V0;
-		break;
-	case IOV_1V8:
-		val |= SDVS_1V8;
-		break;
-	}
-
-	writel(val, &mmc_base->hctl);
-}
-
-static void omap_hsmmc_set_capabilities(struct mmc *mmc)
-{
-	struct hsmmc *mmc_base;
-	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
-	u32 val;
-
-	mmc_base = priv->base_addr;
-	val = readl(&mmc_base->capa);
-
-	if (priv->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
-		val |= (VS30_3V0SUP | VS18_1V8SUP);
-		priv->iov = IOV_3V0;
-	} else {
-		switch (priv->iov) {
-		case IOV_3V3:
-			val |= VS33_3V3SUP;
-			break;
-		case IOV_3V0:
-			val |= VS30_3V0SUP;
-			break;
-		case IOV_1V8:
-			val |= VS18_1V8SUP;
-			break;
-		}
-	}
-
-	writel(val, &mmc_base->capa);
-}
-
-#ifdef HIGH_SPEED_SUPPORT
 static void omap_hsmmc_disable_tuning(struct mmc *mmc)
 {
 	int val;
@@ -468,6 +460,60 @@ tuning_error:
 	return ret;
 }
 #endif
+
+static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
+{
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	u32 val;
+
+	mmc_base = priv->base_addr;
+
+	val = readl(&mmc_base->hctl) & ~SDVS_MASK;
+
+	switch (priv->iov) {
+	case IOV_3V3:
+		val |= SDVS_3V3;
+		break;
+	case IOV_3V0:
+		val |= SDVS_3V0;
+		break;
+	case IOV_1V8:
+		val |= SDVS_1V8;
+		break;
+	}
+
+	writel(val, &mmc_base->hctl);
+}
+
+static void omap_hsmmc_set_capabilities(struct mmc *mmc)
+{
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	u32 val;
+
+	mmc_base = priv->base_addr;
+	val = readl(&mmc_base->capa);
+
+	if (priv->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+		val |= (VS30_3V0SUP | VS18_1V8SUP);
+		priv->iov = IOV_3V0;
+	} else {
+		switch (priv->iov) {
+		case IOV_3V3:
+			val |= VS33_3V3SUP;
+			break;
+		case IOV_3V0:
+			val |= VS30_3V0SUP;
+			break;
+		case IOV_1V8:
+			val |= VS18_1V8SUP;
+			break;
+		}
+	}
+
+	writel(val, &mmc_base->capa);
+}
 
 static void mmc_enable_irq(struct mmc *mmc, struct mmc_cmd *cmd)
 {
@@ -1074,8 +1120,10 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 		omap_hsmmc_set_clock(mmc);
 
 #ifdef HIGH_SPEED_SUPPORT
+#ifdef CONFIG_IODELAY_RECALIBRATION
 	if (priv_data->timing != mmc->timing)
 		omap_hsmmc_set_timing(mmc);
+#endif
 #endif
 }
 
@@ -1127,6 +1175,9 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	struct omap_hsmmc_data *priv_data;
 	struct mmc_config *cfg;
 	uint host_caps_val;
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	int rc;
+#endif
 
 	priv_data = malloc(sizeof(*priv_data));
 	if (priv_data == NULL)
@@ -1134,6 +1185,7 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 
 	host_caps_val = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS;
 
+	priv_data->dev_index = dev_index;
 	switch (dev_index) {
 	case 0:
 		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
@@ -1169,6 +1221,9 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 
 #ifndef CONFIG_NO_HSMMC_DUALT_VOLT
 	priv_data->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+#endif
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	priv_data->controller_flags |= OMAP_HSMMC_REQUIRE_IODELAY;
 #endif
 
 	switch (dev_index) {
@@ -1228,8 +1283,74 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		return -1;
 
 	omap_hsmmc_platform_fixup(mmc);
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	rc = omap_hsmmc_get_pinctrl_state(mmc);
+	if (rc < 0)
+		return rc;
+#endif
 	return 0;
 }
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+__weak struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
+				(unsigned int dev_index, const char *mode)
+{
+	static struct omap_hsmmc_pinctrl_state empty = {
+		.padconf = NULL,
+		.npads = 0,
+		.iodelay = NULL,
+		.niodelays = 0,
+	};
+	return &empty;
+}
+
+static struct omap_hsmmc_pinctrl_state *
+omap_hsmmc_get_pinctrl_by_mode(struct mmc *mmc, char *mode)
+{
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	return platform_fixup_get_pinctrl_by_mode(priv->dev_index, mode);
+}
+
+#define OMAP_HSMMC_SETUP_PINCTRL(capmask, mode)			\
+	do {							\
+		struct omap_hsmmc_pinctrl_state *s;			\
+		if (!(cfg->host_caps & capmask))		\
+			break;					\
+								\
+		s = omap_hsmmc_get_pinctrl_by_mode(mmc, #mode);	\
+		if (!s) {					\
+			printf("no pinctrl for %s\n", #mode);	\
+			cfg->host_caps &= ~(capmask);		\
+		} else {						\
+			priv->mode##_pinctrl_state = s;		\
+		}						\
+	} while (0)
+
+static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	struct mmc_config *cfg = &priv->cfg;
+	struct omap_hsmmc_pinctrl_state *default_pinctrl;
+
+	if (!(priv->controller_flags & OMAP_HSMMC_REQUIRE_IODELAY))
+		return 0;
+
+	default_pinctrl = omap_hsmmc_get_pinctrl_by_mode(mmc, "default");
+	if (!default_pinctrl) {
+		printf("no pinctrl state for default mode\n");
+		return -EINVAL;
+	}
+	priv->default_pinctrl_state = default_pinctrl;
+
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_HS200, hs200_1_8v);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_DDR_52MHz, ddr_1_8v);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_HS, hs);
+
+	return 0;
+}
+#endif
 
 __weak int platform_fixup_disable_uhs_mode(void)
 {

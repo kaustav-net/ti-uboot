@@ -213,8 +213,23 @@ struct hsmmc {
 		IE_DTO | IE_CIE | IE_CEB | IE_CCRC | IE_ADMAE | IE_CTO |\
 		IE_BRR | IE_BWR | IE_TC | IE_CC)
 
+#ifdef CONFIG_IODELAY_RECALIBRATION
+struct omap_hsmmc_pinctrl_state {
+	struct pad_conf_entry *padconf;
+	int npads;
+	struct iodelay_cfg_entry *iodelay;
+	int niodelays;
+};
+#endif
+
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		int wp_gpio);
 
 int platform_fixup_disable_uhs_mode(void);
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
+	(unsigned int dev_index, const char *mode);
+#endif
+
 #endif /* OMAP_MMC_H_ */
