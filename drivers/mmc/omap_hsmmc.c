@@ -1178,12 +1178,15 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		cfg->f_max = f_max;
 	else {
 		if (cfg->host_caps & MMC_MODE_HS) {
-			if (cfg->host_caps & MMC_MODE_HS_52MHz)
+			if (cfg->host_caps & MMC_MODE_HS200)
+				cfg->f_max = 200000000;
+			else if (cfg->host_caps & MMC_MODE_HS_52MHz)
 				cfg->f_max = 52000000;
 			else
 				cfg->f_max = 26000000;
 		} else
 			cfg->f_max = 20000000;
+		cfg->f_max = min(cfg->f_max, MMC_CLOCK_REFERENCE * 1000000);
 	}
 
 	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
