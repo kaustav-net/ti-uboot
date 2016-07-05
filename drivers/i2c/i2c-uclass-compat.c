@@ -9,7 +9,14 @@
 #include <errno.h>
 #include <i2c.h>
 
-static int cur_busnum;
+/*
+ * This code in here may execute before the DRAM is initialised, so
+ * we should make sure that it doesn't touch BSS, which some boards
+ * put in DRAM.
+ */
+#define NO_BSS __attribute__((section(".data")))
+
+static int cur_busnum NO_BSS;
 
 static int i2c_compat_get_device(uint chip_addr, int alen,
 				 struct udevice **devp)
