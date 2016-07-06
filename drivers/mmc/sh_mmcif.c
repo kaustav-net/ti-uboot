@@ -579,7 +579,7 @@ static struct mmc_config sh_mmcif_cfg = {
 	.name		= DRIVER_NAME,
 	.ops		= &sh_mmcif_ops,
 	.host_caps	= MMC_MODE_HS | MMC_MODE_HS_52MHz | MMC_MODE_4BIT |
-			  MMC_MODE_8BIT | MMC_MODE_HC,
+			  MMC_MODE_8BIT,
 	.voltages	= MMC_VDD_32_33 | MMC_VDD_33_34,
 	.f_min		= CLKDEV_MMC_INIT,
 	.f_max		= CLKDEV_EMMC_DATA,

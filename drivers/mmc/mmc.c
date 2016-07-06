@@ -17,9 +17,12 @@
 #include <linux/list.h>
 #include <div64.h>
 #include "mmc_private.h"
+#include <linux/compat.h>
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
+static void mmc_set_timing(struct mmc *mmc, uint timing);
+static int mmc_select_bus_width(struct mmc *mmc);
 
 int __weak board_mmc_getwp(struct mmc *mmc)
 {
@@ -161,7 +164,7 @@ int mmc_set_blocklen(struct mmc *mmc, int len)
 {
 	struct mmc_cmd cmd;
 
-	if (mmc->card_caps & MMC_MODE_DDR_52MHz)
+	if (mmc->ddr_mode)
 		return 0;
 
 	cmd.cmdidx = MMC_CMD_SET_BLOCKLEN;
@@ -188,6 +191,79 @@ struct mmc *find_mmc_device(int dev_num)
 #endif
 
 	return NULL;
+}
+
+static const u8 tuning_blk_pattern_4bit[] = {
+	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+};
+
+static const u8 tuning_blk_pattern_8bit[] = {
+	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+};
+
+int mmc_send_tuning(struct mmc *mmc, u32 opcode, int *cmd_error)
+{
+	struct mmc_cmd cmd;
+	struct mmc_data data;
+	const u8 *tuning_block_pattern;
+	int size, err = 0;
+	u8 *data_buf;
+
+	if (mmc->bus_width == MMC_BUS_WIDTH_8) {
+		tuning_block_pattern = tuning_blk_pattern_8bit;
+		size = sizeof(tuning_blk_pattern_8bit);
+	} else if (mmc->bus_width == MMC_BUS_WIDTH_4) {
+		tuning_block_pattern = tuning_blk_pattern_4bit;
+		size = sizeof(tuning_blk_pattern_4bit);
+	} else {
+		return -EINVAL;
+	}
+
+	data_buf = malloc(size);
+	if (!data_buf)
+		return -ENOMEM;
+
+	cmd.cmdidx = opcode;
+	cmd.cmdarg = 0;
+	cmd.resp_type = MMC_RSP_R1;
+
+	data.dest = (void *)data_buf;
+	data.blocks = 1;
+	data.blocksize = size;
+	data.flags = MMC_DATA_READ;
+
+	err = mmc_send_cmd(mmc, &cmd, &data);
+	if (err)
+		goto free_buf;
+
+	if (memcmp(data_buf, tuning_block_pattern, size))
+		err = -EIO;
+
+free_buf:
+	kfree(data_buf);
+	return err;
 }
 
 static int mmc_read_blocks(struct mmc *mmc, void *dst, lbaint_t start,
@@ -361,15 +437,12 @@ static int mmc_send_op_cond_iter(struct mmc *mmc, struct mmc_cmd *cmd,
 	cmd->cmdidx = MMC_CMD_SEND_OP_COND;
 	cmd->resp_type = MMC_RSP_R3;
 	cmd->cmdarg = 0;
-	if (use_arg && !mmc_host_is_spi(mmc)) {
-		cmd->cmdarg =
+	if (use_arg && !mmc_host_is_spi(mmc))
+		cmd->cmdarg = OCR_HCS |
 			(mmc->cfg->voltages &
 			(mmc->op_cond_response & OCR_VOLTAGE_MASK)) |
 			(mmc->op_cond_response & OCR_ACCESS_MODE);
 
-		if (mmc->cfg->host_caps & MMC_MODE_HC)
-			cmd->cmdarg |= OCR_HCS;
-	}
 	err = mmc_send_cmd(mmc, cmd, NULL);
 	if (err)
 		return err;
@@ -482,6 +555,38 @@ static int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
 
 }
 
+static void mmc_select_card_type(struct mmc *mmc, char card_type)
+{
+	u32 caps = mmc->cfg->host_caps;
+	uint hs_max_dtr = mmc->tran_speed;
+
+	if (caps & MMC_MODE_HS &&
+	    card_type & EXT_CSD_CARD_TYPE_26) {
+		hs_max_dtr = MMC_HIGH_26_MAX_DTR;
+		mmc->card_caps |= MMC_MODE_HS;
+	}
+
+	if (caps & MMC_MODE_HS &&
+	    card_type & EXT_CSD_CARD_TYPE_52) {
+		hs_max_dtr = MMC_HIGH_52_MAX_DTR;
+		mmc->card_caps |= MMC_MODE_HS_52MHz;
+	}
+
+	if (caps & MMC_MODE_DDR_52MHz &&
+	    card_type & EXT_CSD_CARD_TYPE_DDR_1_8V) {
+		hs_max_dtr = MMC_HIGH_DDR_MAX_DTR;
+		mmc->card_caps |= MMC_MODE_DDR_52MHz;
+	}
+
+	if (caps & MMC_MODE_HS200 &&
+	    card_type & EXT_CSD_CARD_TYPE_HS200_1_8V) {
+		hs_max_dtr = MMC_HS200_MAX_DTR;
+		mmc->card_caps |= MMC_MODE_HS200;
+	}
+
+	mmc->tran_speed = hs_max_dtr;
+}
+
 static int mmc_change_freq(struct mmc *mmc)
 {
 	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
@@ -497,35 +602,44 @@ static int mmc_change_freq(struct mmc *mmc)
 	if (mmc->version < MMC_VERSION_4)
 		return 0;
 
+	mmc->card_caps |= MMC_MODE_4BIT | MMC_MODE_8BIT;
+
 	err = mmc_send_ext_csd(mmc, ext_csd);
 
 	if (err)
 		return err;
 
-	cardtype = ext_csd[EXT_CSD_CARD_TYPE] & 0xf;
+	cardtype = ext_csd[EXT_CSD_CARD_TYPE] & 0x3f;
 
-	err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING, 1);
+	mmc_select_card_type(mmc, cardtype);
 
-	if (err)
-		return err == SWITCH_ERR ? 0 : err;
+	if (mmc->card_caps & MMC_MODE_HS200) {
+		err = mmc_select_bus_width(mmc);
+		if (err)
+			return err;
 
-	/* Now check to see that it worked */
-	err = mmc_send_ext_csd(mmc, ext_csd);
+		err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL,
+				 EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS200);
+		if (err)
+			return err;
 
-	if (err)
-		return err;
+		mmc_set_timing(mmc, MMC_TIMING_MMC_HS200);
+	} else if (mmc->card_caps & MMC_MODE_HS) {
+		err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+				 1);
+		if (err)
+			return err == SWITCH_ERR ? 0 : err;
 
-	/* No high-speed support */
-	if (!ext_csd[EXT_CSD_HS_TIMING])
-		return 0;
+		/* Now check to see that it worked */
+		err = mmc_send_ext_csd(mmc, ext_csd);
+		if (err)
+			return err;
 
-	/* High Speed is set, there are two types: 52MHz and 26MHz */
-	if (cardtype & EXT_CSD_CARD_TYPE_52) {
-		if (cardtype & EXT_CSD_CARD_TYPE_DDR_52)
-			mmc->card_caps |= MMC_MODE_DDR_52MHz;
-		mmc->card_caps |= MMC_MODE_HS_52MHz | MMC_MODE_HS;
-	} else {
-		mmc->card_caps |= MMC_MODE_HS;
+		/* No high-speed support */
+		if (!ext_csd[EXT_CSD_HS_TIMING])
+			return 0;
+
+		mmc_set_timing(mmc, MMC_TIMING_MMC_HS);
 	}
 
 	return 0;
@@ -804,11 +918,124 @@ void mmc_set_clock(struct mmc *mmc, uint clock)
 	mmc_set_ios(mmc);
 }
 
+static void mmc_set_timing(struct mmc *mmc, uint timing)
+{
+	mmc->timing = timing;
+	mmc_set_ios(mmc);
+}
+
 static void mmc_set_bus_width(struct mmc *mmc, uint width)
 {
 	mmc->bus_width = width;
 
 	mmc_set_ios(mmc);
+}
+
+static int mmc_select_hs_ddr(struct mmc *mmc)
+{
+	u32 ext_csd_bits;
+	int err = 0;
+	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
+	ALLOC_CACHE_ALIGN_BUFFER(u8, test_csd, MMC_MAX_BLOCK_LEN);
+
+	if (!(mmc->card_caps & MMC_MODE_DDR_52MHz))
+		return 0;
+
+	if (mmc->bus_width == MMC_BUS_WIDTH_1)
+		return 0;
+
+	err = mmc_send_ext_csd(mmc, ext_csd);
+	if (err)
+		return err;
+
+	ext_csd_bits = (mmc->bus_width == MMC_BUS_WIDTH_8) ?
+		EXT_CSD_DDR_BUS_WIDTH_8 : EXT_CSD_DDR_BUS_WIDTH_4;
+
+	err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL,
+			 EXT_CSD_BUS_WIDTH,
+			 ext_csd_bits);
+	if (err)
+		return err;
+
+	mmc_set_timing(mmc, MMC_TIMING_MMC_DDR52);
+	mmc->ddr_mode = true;
+
+	err = mmc_send_ext_csd(mmc, test_csd);
+	if (err)
+		return err;
+
+	/* Only compare read only fields */
+	if (!(ext_csd[EXT_CSD_PARTITIONING_SUPPORT]
+		== test_csd[EXT_CSD_PARTITIONING_SUPPORT] &&
+	    ext_csd[EXT_CSD_HC_WP_GRP_SIZE]
+		== test_csd[EXT_CSD_HC_WP_GRP_SIZE] &&
+	    ext_csd[EXT_CSD_REV]
+		== test_csd[EXT_CSD_REV] &&
+	    ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE]
+		== test_csd[EXT_CSD_HC_ERASE_GRP_SIZE] &&
+	    memcmp(&ext_csd[EXT_CSD_SEC_CNT],
+		   &test_csd[EXT_CSD_SEC_CNT], 4) == 0))
+		err = SWITCH_ERR;
+
+	return err;
+}
+
+static int mmc_select_bus_width(struct mmc *mmc)
+{
+	static unsigned ext_csd_bits[] = {
+		EXT_CSD_BUS_WIDTH_8,
+		EXT_CSD_BUS_WIDTH_4,
+	};
+	static unsigned bus_widths[] = {
+		MMC_BUS_WIDTH_8,
+		MMC_BUS_WIDTH_4,
+	};
+	const struct mmc_config *cfg = mmc->cfg;
+	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
+	ALLOC_CACHE_ALIGN_BUFFER(u8, test_csd, MMC_MAX_BLOCK_LEN);
+	unsigned idx = 0, bus_width = 0;
+	int err = 0;
+
+	if (!(cfg->host_caps & (MMC_MODE_8BIT | MMC_MODE_4BIT)))
+		return 0;
+
+	idx = (cfg->host_caps & MMC_MODE_8BIT) ? 0 : 1;
+
+	err = mmc_send_ext_csd(mmc, ext_csd);
+	if (err)
+		return err;
+
+	for (; idx < ARRAY_SIZE(bus_widths); idx++) {
+		err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL,
+				 EXT_CSD_BUS_WIDTH,
+				 ext_csd_bits[idx]);
+		if (err)
+			continue;
+
+		bus_width = bus_widths[idx];
+		mmc_set_bus_width(mmc, bus_width);
+
+		err = mmc_send_ext_csd(mmc, test_csd);
+		if (err)
+			return err;
+
+		/* Only compare read only fields */
+		if (ext_csd[EXT_CSD_PARTITIONING_SUPPORT]
+			== test_csd[EXT_CSD_PARTITIONING_SUPPORT] &&
+		    ext_csd[EXT_CSD_HC_WP_GRP_SIZE]
+			== test_csd[EXT_CSD_HC_WP_GRP_SIZE] &&
+		    ext_csd[EXT_CSD_REV]
+			== test_csd[EXT_CSD_REV] &&
+		    ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE]
+			== test_csd[EXT_CSD_HC_ERASE_GRP_SIZE] &&
+		    memcmp(&ext_csd[EXT_CSD_SEC_CNT],
+			   &test_csd[EXT_CSD_SEC_CNT], 4) == 0)
+			break;
+		else
+			err = SWITCH_ERR;
+	}
+
+	return err;
 }
 
 static int mmc_startup(struct mmc *mmc)
@@ -818,7 +1045,6 @@ static int mmc_startup(struct mmc *mmc)
 	u64 cmult, csize, capacity;
 	struct mmc_cmd cmd;
 	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
-	ALLOC_CACHE_ALIGN_BUFFER(u8, test_csd, MMC_MAX_BLOCK_LEN);
 	int timeout = 1000;
 
 #ifdef CONFIG_MMC_SPI_CRC_ON
@@ -1017,6 +1243,8 @@ static int mmc_startup(struct mmc *mmc)
 
 			if (err)
 				return err;
+			else
+				ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
 
 			/* Read out group size from ext_csd */
 			mmc->erase_grp_size =
@@ -1085,80 +1313,37 @@ static int mmc_startup(struct mmc *mmc)
 			mmc_set_bus_width(mmc, 4);
 		}
 
-		if (mmc->card_caps & MMC_MODE_HS)
-			mmc->tran_speed = 50000000;
-		else
-			mmc->tran_speed = 25000000;
-	} else {
-		int idx;
-
-		/* An array of possible bus widths in order of preference */
-		static unsigned ext_csd_bits[] = {
-			EXT_CSD_DDR_BUS_WIDTH_8,
-			EXT_CSD_DDR_BUS_WIDTH_4,
-			EXT_CSD_BUS_WIDTH_8,
-			EXT_CSD_BUS_WIDTH_4,
-			EXT_CSD_BUS_WIDTH_1,
-		};
-
-		/* An array to map CSD bus widths to host cap bits */
-		static unsigned ext_to_hostcaps[] = {
-			[EXT_CSD_DDR_BUS_WIDTH_4] = MMC_MODE_DDR_52MHz,
-			[EXT_CSD_DDR_BUS_WIDTH_8] = MMC_MODE_DDR_52MHz,
-			[EXT_CSD_BUS_WIDTH_4] = MMC_MODE_4BIT,
-			[EXT_CSD_BUS_WIDTH_8] = MMC_MODE_8BIT,
-		};
-
-		/* An array to map chosen bus width to an integer */
-		static unsigned widths[] = {
-			8, 4, 8, 4, 1,
-		};
-
-		for (idx=0; idx < ARRAY_SIZE(ext_csd_bits); idx++) {
-			unsigned int extw = ext_csd_bits[idx];
-
-			/*
-			 * Check to make sure the controller supports
-			 * this bus width, if it's more than 1
-			 */
-			if (extw != EXT_CSD_BUS_WIDTH_1 &&
-					!(mmc->cfg->host_caps & ext_to_hostcaps[extw]))
-				continue;
-
-			err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL,
-					EXT_CSD_BUS_WIDTH, extw);
-
-			if (err)
-				continue;
-
-			mmc_set_bus_width(mmc, widths[idx]);
-
-			err = mmc_send_ext_csd(mmc, test_csd);
-			if (!err && ext_csd[EXT_CSD_PARTITIONING_SUPPORT] \
-				    == test_csd[EXT_CSD_PARTITIONING_SUPPORT]
-				 && ext_csd[EXT_CSD_ERASE_GROUP_DEF] \
-				    == test_csd[EXT_CSD_ERASE_GROUP_DEF] \
-				 && ext_csd[EXT_CSD_REV] \
-				    == test_csd[EXT_CSD_REV]
-				 && ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] \
-				    == test_csd[EXT_CSD_HC_ERASE_GRP_SIZE]
-				 && memcmp(&ext_csd[EXT_CSD_SEC_CNT], \
-					&test_csd[EXT_CSD_SEC_CNT], 4) == 0) {
-
-				mmc->card_caps |= ext_to_hostcaps[extw];
-				break;
-			}
-		}
-
 		if (mmc->card_caps & MMC_MODE_HS) {
-			if (mmc->card_caps & MMC_MODE_HS_52MHz)
-				mmc->tran_speed = 52000000;
-			else
-				mmc->tran_speed = 26000000;
+			mmc_set_timing(mmc, MMC_TIMING_SD_HS);
+			mmc->tran_speed = 50000000;
+		} else {
+			mmc->tran_speed = 25000000;
+		}
+		mmc_set_clock(mmc, mmc->tran_speed);
+	} else if (mmc->version >= MMC_VERSION_4) {
+		mmc_set_clock(mmc, mmc->tran_speed);
+		if (mmc->timing == MMC_TIMING_MMC_HS200) {
+			err = mmc->cfg->ops->execute_tuning(mmc,
+						MMC_SEND_TUNING_BLOCK_HS200);
+			if (err)
+				return err;
+		} else if (mmc->timing == MMC_TIMING_MMC_HS) {
+			err = mmc_select_bus_width(mmc);
+			if (err)
+				return err;
+
+			err = mmc_select_hs_ddr(mmc);
+			if (err)
+				return err;
 		}
 	}
 
-	mmc_set_clock(mmc, mmc->tran_speed);
+	/* Fix the block length for DDR mode */
+	if (mmc->ddr_mode) {
+		mmc_set_timing(mmc, MMC_TIMING_MMC_DDR52);
+		mmc->read_bl_len = MMC_MAX_BLOCK_LEN;
+		mmc->write_bl_len = MMC_MAX_BLOCK_LEN;
+	}
 
 	/* fill in device description */
 	mmc->block_dev.lun = 0;
@@ -1298,8 +1483,10 @@ int mmc_start_init(struct mmc *mmc)
 	if (err)
 		return err;
 
+	mmc->ddr_mode = 0;
 	mmc_set_bus_width(mmc, 1);
 	mmc_set_clock(mmc, 1);
+	mmc_set_timing(mmc, MMC_TIMING_LEGACY);
 
 	/* Reset the Card */
 	err = mmc_go_idle(mmc);

@@ -592,7 +592,7 @@ int fsl_esdhc_initialize(bd_t *bis, struct fsl_esdhc_cfg *cfg)
 		return -1;
 	}
 
-	cfg->cfg.host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT | MMC_MODE_HC;
+	cfg->cfg.host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT;
 
 	if (cfg->max_bus_width > 0) {
 		if (cfg->max_bus_width < 8)

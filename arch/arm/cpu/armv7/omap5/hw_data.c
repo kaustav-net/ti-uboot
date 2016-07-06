@@ -495,17 +495,17 @@ void enable_basic_clocks(void)
 	setbits_le32((*prcm)->cm_l4per_gpio4_clkctrl,
 			GPIO4_CLKCTRL_OPTFCLKEN_MASK);
 
-	/* Enable 96 MHz clock for MMC1 & MMC2 */
+	/* Enable 192 MHz clock for MMC1 & MMC2 */
 	setbits_le32((*prcm)->cm_l3init_hsmmc1_clkctrl,
 			HSMMC_CLKCTRL_CLKSEL_MASK);
 	setbits_le32((*prcm)->cm_l3init_hsmmc2_clkctrl,
 			HSMMC_CLKCTRL_CLKSEL_MASK);
 
 	/* Set the correct clock dividers for mmc */
-	setbits_le32((*prcm)->cm_l3init_hsmmc1_clkctrl,
-			HSMMC_CLKCTRL_CLKSEL_DIV_MASK);
-	setbits_le32((*prcm)->cm_l3init_hsmmc2_clkctrl,
-			HSMMC_CLKCTRL_CLKSEL_DIV_MASK);
+	clrsetbits_le32((*prcm)->cm_l3init_hsmmc1_clkctrl,
+			HSMMC_CLKCTRL_CLKSEL_DIV_MASK, 0);
+	clrsetbits_le32((*prcm)->cm_l3init_hsmmc2_clkctrl,
+			HSMMC_CLKCTRL_CLKSEL_DIV_MASK, 0);
 
 	/* Select 32KHz clock as the source of GPTIMER1 */
 	setbits_le32((*prcm)->cm_wkup_gptimer1_clkctrl,

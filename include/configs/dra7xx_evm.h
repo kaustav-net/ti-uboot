@@ -15,9 +15,7 @@
 #define CONFIG_DRA7XX
 #define CONFIG_BOARD_EARLY_INIT_F
 
-#ifdef CONFIG_SPL_BUILD
 #define CONFIG_IODELAY_RECALIBRATION
-#endif
 
 /* MMC ENV related defines */
 #ifdef CONFIG_ENV_IS_IN_MMC
@@ -53,6 +51,8 @@
 #define CONFIG_EFI_PARTITION
 #define CONFIG_PARTITION_UUIDS
 #define CONFIG_CMD_PART
+#define CONFIG_HSMMC2_8BIT
+#define CONFIG_IODELAY_RECALIBRATION
 
 /* CPSW Ethernet */
 #define CONFIG_CMD_NET			/* 'bootp' and 'tftp' */
