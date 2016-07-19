@@ -1124,12 +1124,18 @@ static void omap_hsmmc_set_bus_width(struct mmc *mmc)
 static int omap_hsmmc_set_ios(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv_data = mmc->priv;
+	struct hsmmc *mmc_base = priv_data->base_addr;
 
 	if (priv_data->bus_width != mmc->bus_width)
 		omap_hsmmc_set_bus_width(mmc);
 
 	if (priv_data->clock != mmc->clock)
 		omap_hsmmc_set_clock(mmc);
+
+	if (mmc->clk_disable)
+		omap_hsmmc_stop_clock(mmc_base);
+	else
+		omap_hsmmc_start_clock(mmc_base);
 
 #ifdef CONFIG_DM_MMC
 #ifdef CONFIG_IODELAY_RECALIBRATION
