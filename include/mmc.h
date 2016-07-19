@@ -362,6 +362,7 @@ struct mmc_ops {
 			struct mmc_cmd *cmd, struct mmc_data *data);
 	int (*set_ios)(struct mmc *mmc);
 	int (*init)(struct mmc *mmc);
+	int (*set_vdd)(struct mmc *mmc, int enable);
 	int (*getcd)(struct mmc *mmc);
 	int (*getwp)(struct mmc *mmc);
 	int (*execute_tuning)(struct mmc *mmc, uint opcode);

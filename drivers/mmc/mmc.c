@@ -27,6 +27,7 @@ static int mmc_set_timing(struct mmc *mmc, uint timing);
 static int mmc_set_bus_width(struct mmc *mmc, uint width);
 static int mmc_select_bus_width(struct mmc *mmc);
 static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage);
+static int mmc_set_vdd(struct mmc *mmc, int enable);
 
 __weak int board_mmc_getwp(struct mmc *mmc)
 {
@@ -1176,6 +1177,16 @@ static const int multipliers[] = {
 	80,
 };
 
+static int mmc_set_vdd(struct mmc *mmc, int enable)
+{
+	int ret = 0;
+
+	if (mmc->cfg->ops->set_vdd)
+		ret = mmc->cfg->ops->set_vdd(mmc, enable);
+
+	return ret;
+}
+
 static int mmc_set_ios(struct mmc *mmc)
 {
 	int ret = 0;
@@ -1823,7 +1834,7 @@ int mmc_start_init(struct mmc *mmc)
 		return err;
 
 	mmc->ddr_mode = 0;
-
+	mmc_set_vdd(mmc, true);
 	/* First try to set 3.3V. If it fails set to 1.8V */
 	err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_330);
 	if (err != 0)
