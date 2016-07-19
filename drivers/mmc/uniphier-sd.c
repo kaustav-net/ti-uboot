@@ -581,7 +581,7 @@ static void uniphier_sd_set_clk_rate(struct uniphier_sd_priv *priv,
 	writel(tmp, priv->regbase + UNIPHIER_SD_CLKCTL);
 }
 
-static void uniphier_sd_set_ios(struct mmc *mmc)
+static int uniphier_sd_set_ios(struct mmc *mmc)
 {
 	struct uniphier_sd_priv *priv = mmc->priv;
 
@@ -593,6 +593,8 @@ static void uniphier_sd_set_ios(struct mmc *mmc)
 	uniphier_sd_set_clk_rate(priv, mmc);
 
 	udelay(1000);
+
+	return 0;
 }
 
 static int uniphier_sd_init(struct mmc *mmc)

@@ -227,7 +227,7 @@ static int mmc_config_clock(struct mmc *mmc)
 	return 0;
 }
 
-static void sunxi_mmc_set_ios(struct mmc *mmc)
+static int sunxi_mmc_set_ios(struct mmc *mmc)
 {
 	struct sunxi_mmc_host *mmchost = mmc->priv;
 
@@ -247,6 +247,8 @@ static void sunxi_mmc_set_ios(struct mmc *mmc)
 		writel(0x1, &mmchost->reg->width);
 	else
 		writel(0x0, &mmchost->reg->width);
+
+	return 0;
 }
 
 static int sunxi_mmc_core_init(struct mmc *mmc)

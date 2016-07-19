@@ -396,7 +396,7 @@ out:
 	host->clock = clock;
 }
 
-static void tegra_mmc_set_ios(struct mmc *mmc)
+static int tegra_mmc_set_ios(struct mmc *mmc)
 {
 	struct mmc_host *host = mmc->priv;
 	unsigned char ctrl;
@@ -426,6 +426,7 @@ static void tegra_mmc_set_ios(struct mmc *mmc)
 
 	writeb(ctrl, &host->reg->hostctl);
 	debug("mmc_set_ios: hostctl = %08X\n", ctrl);
+	return 0;
 }
 
 static void mmc_reset(struct mmc_host *host, struct mmc *mmc)

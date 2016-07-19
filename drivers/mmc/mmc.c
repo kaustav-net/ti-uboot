@@ -23,8 +23,8 @@
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
-static void mmc_set_timing(struct mmc *mmc, uint timing);
-static void mmc_set_bus_width(struct mmc *mmc, uint width);
+static int mmc_set_timing(struct mmc *mmc, uint timing);
+static int mmc_set_bus_width(struct mmc *mmc, uint width);
 static int mmc_select_bus_width(struct mmc *mmc);
 
 __weak int board_mmc_getwp(struct mmc *mmc)
@@ -1175,13 +1175,17 @@ static const int multipliers[] = {
 	80,
 };
 
-static void mmc_set_ios(struct mmc *mmc)
+static int mmc_set_ios(struct mmc *mmc)
 {
+	int ret = 0;
+
 	if (mmc->cfg->ops->set_ios)
-		mmc->cfg->ops->set_ios(mmc);
+		ret = mmc->cfg->ops->set_ios(mmc);
+
+	return ret;
 }
 
-void mmc_set_clock(struct mmc *mmc, uint clock)
+int mmc_set_clock(struct mmc *mmc, uint clock)
 {
 	if (clock > mmc->cfg->f_max)
 		clock = mmc->cfg->f_max;
@@ -1191,20 +1195,20 @@ void mmc_set_clock(struct mmc *mmc, uint clock)
 
 	mmc->clock = clock;
 
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
 }
 
-static void mmc_set_timing(struct mmc *mmc, uint timing)
+static int mmc_set_timing(struct mmc *mmc, uint timing)
 {
 	mmc->timing = timing;
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
 }
 
-static void mmc_set_bus_width(struct mmc *mmc, uint width)
+static int mmc_set_bus_width(struct mmc *mmc, uint width)
 {
 	mmc->bus_width = width;
 
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
 }
 
 static int mmc_select_hs_ddr(struct mmc *mmc)

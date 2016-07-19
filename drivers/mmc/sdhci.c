@@ -388,7 +388,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
 }
 
-static void sdhci_set_ios(struct mmc *mmc)
+static int sdhci_set_ios(struct mmc *mmc)
 {
 	u32 ctrl;
 	struct sdhci_host *host = mmc->priv;
@@ -425,6 +425,8 @@ static void sdhci_set_ios(struct mmc *mmc)
 		ctrl &= ~SDHCI_CTRL_HISPD;
 
 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+
+	return 0;
 }
 
 static int sdhci_init(struct mmc *mmc)

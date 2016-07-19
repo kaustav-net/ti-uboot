@@ -373,7 +373,7 @@ static int dwmci_setup_bus(struct dwmci_host *host, u32 freq)
 	return 0;
 }
 
-static void dwmci_set_ios(struct mmc *mmc)
+static int dwmci_set_ios(struct mmc *mmc)
 {
 	struct dwmci_host *host = (struct dwmci_host *)mmc->priv;
 	u32 ctype, regs;
@@ -405,6 +405,8 @@ static void dwmci_set_ios(struct mmc *mmc)
 
 	if (host->clksel)
 		host->clksel(host);
+
+	return 0;
 }
 
 static int dwmci_init(struct mmc *mmc)

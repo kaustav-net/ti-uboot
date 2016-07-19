@@ -607,7 +607,7 @@ static int sh_sdhi_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 	return ret;
 }
 
-static void sh_sdhi_set_ios(struct mmc *mmc)
+static int sh_sdhi_set_ios(struct mmc *mmc)
 {
 	int ret;
 	struct sh_sdhi_host *host = mmc_priv(mmc);
@@ -624,6 +624,7 @@ static void sh_sdhi_set_ios(struct mmc *mmc)
 			       sh_sdhi_readw(host, SDHI_OPTION));
 
 	debug("clock = %d, buswidth = %d\n", mmc->clock, mmc->bus_width);
+	return 0;
 }
 
 static int sh_sdhi_initialize(struct mmc *mmc)
