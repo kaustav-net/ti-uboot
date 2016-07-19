@@ -24,6 +24,7 @@
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
 static void mmc_set_timing(struct mmc *mmc, uint timing);
+static void mmc_set_bus_width(struct mmc *mmc, uint width);
 static int mmc_select_bus_width(struct mmc *mmc);
 
 __weak int board_mmc_getwp(struct mmc *mmc)
@@ -974,6 +975,40 @@ static int sd_switch(struct mmc *mmc, int mode, int group, u8 value, u8 *resp)
 	return mmc_send_cmd(mmc, &cmd, &data);
 }
 
+static int mmc_app_set_bus_width(struct mmc *mmc, int width)
+{
+	int err;
+	struct mmc_cmd cmd;
+
+	cmd.cmdidx = MMC_CMD_APP_CMD;
+	cmd.resp_type = MMC_RSP_R1;
+	cmd.cmdarg = mmc->rca << 16;
+
+	err = mmc_send_cmd(mmc, &cmd, NULL);
+	if (err)
+		return err;
+
+	cmd.cmdidx = SD_CMD_APP_SET_BUS_WIDTH;
+	cmd.resp_type = MMC_RSP_R1;
+	switch (width) {
+	case MMC_BUS_WIDTH_1:
+		cmd.cmdarg = SD_BUS_WIDTH_1;
+		break;
+	case MMC_BUS_WIDTH_4:
+		cmd.cmdarg = SD_BUS_WIDTH_4;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	err = mmc_send_cmd(mmc, &cmd, NULL);
+	if (err)
+		return err;
+
+	mmc_set_bus_width(mmc, width);
+
+	return 0;
+}
 
 static int sd_change_freq(struct mmc *mmc)
 {
@@ -1578,22 +1613,9 @@ static int mmc_startup(struct mmc *mmc)
 
 	if (IS_SD(mmc)) {
 		if (mmc->card_caps & MMC_MODE_4BIT) {
-			cmd.cmdidx = MMC_CMD_APP_CMD;
-			cmd.resp_type = MMC_RSP_R1;
-			cmd.cmdarg = mmc->rca << 16;
-
-			err = mmc_send_cmd(mmc, &cmd, NULL);
+			err = mmc_app_set_bus_width(mmc, MMC_BUS_WIDTH_4);
 			if (err)
 				return err;
-
-			cmd.cmdidx = SD_CMD_APP_SET_BUS_WIDTH;
-			cmd.resp_type = MMC_RSP_R1;
-			cmd.cmdarg = 2;
-			err = mmc_send_cmd(mmc, &cmd, NULL);
-			if (err)
-				return err;
-
-			mmc_set_bus_width(mmc, 4);
 		}
 
 		if (mmc->card_caps & MMC_MODE_HS) {
