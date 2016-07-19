@@ -26,6 +26,7 @@ static int cur_dev_num = -1;
 static int mmc_set_timing(struct mmc *mmc, uint timing);
 static int mmc_set_bus_width(struct mmc *mmc, uint width);
 static int mmc_select_bus_width(struct mmc *mmc);
+static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage);
 
 __weak int board_mmc_getwp(struct mmc *mmc)
 {
@@ -1211,6 +1212,12 @@ static int mmc_set_bus_width(struct mmc *mmc, uint width)
 	return mmc_set_ios(mmc);
 }
 
+static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage)
+{
+	mmc->signal_voltage = signal_voltage;
+	return mmc_set_ios(mmc);
+}
+
 static int mmc_select_hs_ddr(struct mmc *mmc)
 {
 	u32 ext_csd_bits;
@@ -1816,6 +1823,14 @@ int mmc_start_init(struct mmc *mmc)
 		return err;
 
 	mmc->ddr_mode = 0;
+
+	/* First try to set 3.3V. If it fails set to 1.8V */
+	err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_330);
+	if (err != 0)
+		err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_180);
+	if (err != 0)
+		printf("failed to set signal voltage\n");
+
 	mmc_set_bus_width(mmc, 1);
 	mmc_set_clock(mmc, 1);
 	mmc_set_timing(mmc, MMC_TIMING_LEGACY);
