@@ -174,7 +174,7 @@ static void omap4_vmmc_pbias_config(struct mmc *mmc)
 #endif
 
 #if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
-static void omap5_pbias_config(struct mmc *mmc)
+static void omap5_pbias_config(struct mmc *mmc, uint voltage)
 {
 	u32 value = 0;
 
@@ -185,7 +185,7 @@ static void omap5_pbias_config(struct mmc *mmc)
 	value &= ~SDCARD_BIAS_PWRDNZ;
 	writel(value, (*ctrl)->control_pbias);
 
-	palmas_mmc1_poweron_ldo();
+	palmas_mmc1_poweron_ldo(voltage);
 
 	value = readl((*ctrl)->control_pbias);
 	value |= SDCARD_BIAS_PWRDNZ;
@@ -243,7 +243,7 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 #endif
 #if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
 	if (mmc->block_dev.devnum == 0)
-		omap5_pbias_config(mmc);
+		omap5_pbias_config(mmc, LDO_VOLT_3V0);
 #endif
 
 	return 0;
