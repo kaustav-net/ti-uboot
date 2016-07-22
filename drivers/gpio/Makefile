@@ -52,3 +52,4 @@ obj-$(CONFIG_PIC32_GPIO)	+= pic32_gpio.o
 obj-$(CONFIG_MVEBU_GPIO)	+= mvebu_gpio.o
 obj-$(CONFIG_MSM_GPIO)		+= msm_gpio.o
 obj-$(CONFIG_PM8916_GPIO)	+= pm8916_gpio.o
+obj-$(CONFIG_PCF8575_GPIO)	+= pcf8575_gpio.o
