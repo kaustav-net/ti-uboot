@@ -324,4 +324,9 @@
 #define CONFIG_EEPROM_CHIP_ADDRESS 0x50
 #define CONFIG_EEPROM_BUS_ADDRESS 0
 
+/* PCF Support */
+#if defined(CONFIG_DM_GPIO) && defined(CONFIG_DM_I2C)
+#define CONFIG_PCF8575_GPIO
+#endif
+
 #endif /* __CONFIG_DRA7XX_EVM_H */
