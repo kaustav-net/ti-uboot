@@ -324,8 +324,4 @@
 #define CONFIG_EEPROM_CHIP_ADDRESS 0x50
 #define CONFIG_EEPROM_BUS_ADDRESS 0
 
-/* pcf support */
-#define CONFIG_PCF8575
-#define CONFIG_SYS_I2C_PCF8575_CHIP { {0x21, 0xeaf7} }
-
 #endif /* __CONFIG_DRA7XX_EVM_H */
