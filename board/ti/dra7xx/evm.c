@@ -28,7 +28,6 @@
 #include <dwc3-omap-uboot.h>
 #include <ti-usb-phy-uboot.h>
 #include <miiphy.h>
-#include <pcf8575.h>
 
 #include "mux_data.h"
 #include "../common/board_detect.h"
@@ -52,10 +51,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define GPIO_DDR_VTT_EN 203
 
 #define SYSINFO_BOARD_NAME_MAX_LEN	37
-
-/* pcf chip address enet_mux_s0 */
-#define PCF_ENET_MUX_ADDR	0x21
-#define PCF_SEL_ENET_MUX_S0	4
 
 const struct omap_sysinfo sysinfo = {
 	"Board: UNKNOWN(DRA7 EVM) REV UNKNOWN\n"
@@ -431,12 +426,6 @@ int board_late_init(void)
 
 	omap_die_id_serial();
 #endif
-
-	if (is_dra72x() && !board_is_dra72x_revc_or_later()) {
-		pcf8575_output(PCF_ENET_MUX_ADDR, PCF_SEL_ENET_MUX_S0,
-			       PCF8575_OUT_LOW);
-	}
-
 	return 0;
 }
 
@@ -790,10 +779,8 @@ int board_eth_init(bd_t *bis)
 	ctrl_val |= 0x22;
 	writel(ctrl_val, (*ctrl)->control_core_control_io1);
 
-	if (*omap_si_rev == DRA722_ES1_0) {
-		cpsw_data.active_slave = 0;
-		cpsw_data.slave_data[0].phy_addr = 3;
-	}
+	if (*omap_si_rev == DRA722_ES1_0)
+		cpsw_data.active_slave = 1;
 
 	if (board_is_dra72x_revc_or_later()) {
 		cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RGMII_ID;
