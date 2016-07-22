@@ -830,12 +830,14 @@ cmd_pad_cat = $(cmd_objcopy) && $(append) || rm -f $@
 cfg: u-boot.cfg
 
 all:		$(ALL-y)
+ifneq ($(CONFIG_OMAP),y)
 ifeq ($(CONFIG_DM_I2C_COMPAT)$(CONFIG_SANDBOX),y)
 	@echo "===================== WARNING ======================"
 	@echo "This board uses CONFIG_DM_I2C_COMPAT. Please remove"
 	@echo "(possibly in a subsequent patch in your series)"
 	@echo "before sending patches to the mailing list."
 	@echo "===================================================="
+endif
 endif
 	@# Check that this build does not use CONFIG options that we do not
 	@# know about unless they are in Kconfig. All the existing CONFIG
