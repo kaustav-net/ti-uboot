@@ -809,12 +809,14 @@ ifneq ($(CONFIG_SYS_GENERIC_BOARD),y)
 	@echo "See doc/README.generic-board for further information"
 	@echo "===================================================="
 endif
+ifneq ($(CONFIG_OMAP),y)
 ifeq ($(CONFIG_DM_I2C_COMPAT),y)
 	@echo "===================== WARNING ======================"
 	@echo "This board uses CONFIG_DM_I2C_COMPAT. Please remove"
 	@echo "(possibly in a subsequent patch in your series)"
 	@echo "before sending patches to the mailing list."
 	@echo "===================================================="
+endif
 endif
 
 PHONY += dtbs
