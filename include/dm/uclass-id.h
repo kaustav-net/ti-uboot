@@ -64,6 +64,7 @@ enum uclass_id {
 	UCLASS_REGULATOR,	/* Regulator device */
 	UCLASS_RESET,		/* Reset device */
 	UCLASS_REMOTEPROC,	/* Remote Processor device */
+	UCLASS_RIO,		/* RapidIO */
 	UCLASS_RTC,		/* Real time clock device */
 	UCLASS_SERIAL,		/* Serial UART */
 	UCLASS_SPI,		/* SPI bus */

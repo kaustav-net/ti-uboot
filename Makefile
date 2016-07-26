@@ -659,6 +659,7 @@ libs-y += drivers/usb/musb-new/
 libs-y += drivers/usb/phy/
 libs-y += drivers/usb/ulpi/
 libs-y += drivers/usb/common/
+libs-y += drivers/rapidio/
 libs-y += cmd/
 libs-y += common/
 libs-$(CONFIG_API) += api/
