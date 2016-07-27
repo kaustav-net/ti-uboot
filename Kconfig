@@ -313,6 +313,14 @@ config FIT_IMAGE_POST_PROCESS
 	  injected into the FIT creation (i.e. the blobs would have been pre-
 	  processed before being added to the FIT image).
 
+config SPL_PANIC_ON_NON_FIT_IMAGE
+	bool "Disable SPL loading of non-FIT images"
+	help
+	  SPL will panic() if the image loaded is not a FIT image. This is
+	  useful for devices that only support authentication/encryption
+	  through SPL FIT loading paths and do not want SPL falling back
+	  to legacy image loading when a non-FIT image is present.
+
 config SYS_CLK_FREQ
 	depends on ARC || ARCH_SUNXI
 	int "CPU clock frequency"

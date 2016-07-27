@@ -80,6 +80,9 @@ void spl_set_header_raw_uboot(void)
 
 void spl_parse_image_header(const struct image_header *header)
 {
+#ifdef CONFIG_SPL_PANIC_ON_NON_FIT_IMAGE
+	panic("** non-FIT images are not supported");
+#else
 	u32 header_size = sizeof(struct image_header);
 
 	if (image_get_magic(header) == IH_MAGIC) {
@@ -123,6 +126,7 @@ void spl_parse_image_header(const struct image_header *header)
 		spl_set_header_raw_uboot();
 #endif
 	}
+#endif
 }
 
 __weak void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
