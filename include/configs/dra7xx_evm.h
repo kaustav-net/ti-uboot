@@ -104,8 +104,7 @@
 
 #define DFU_ALT_INFO_QSPI \
 	"dfu_alt_info_qspi=" \
-	"MLO raw 0x0 0x020000;" \
-	"MLO.backup1 raw 0x020000 0x020000;" \
+	"MLO raw 0x0 0x040000;" \
 	"u-boot.img raw 0x040000 0x0100000;" \
 	"u-boot-spl-os raw 0x140000 0x080000;" \
 	"u-boot-env raw 0x1C0000 0x010000;" \
@@ -164,8 +163,7 @@
 
 /*
  * Default to using SPI for environment, etc.
- * 0x000000 - 0x020000 : QSPI.SPL (128KiB)
- * 0x020000 - 0x020000 : QSPI.SPL.backup1 (128KiB)
+ * 0x000000 - 0x040000 : QSPI.SPL (256KiB)
  * 0x040000 - 0x140000 : QSPI.u-boot (1MiB)
  * 0x140000 - 0x1C0000 : QSPI.u-boot-spl-os (512KiB)
  * 0x1C0000 - 0x1D0000 : QSPI.u-boot-env (64KiB)
