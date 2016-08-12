@@ -1759,7 +1759,9 @@ static int omap_hsmmc_ofdata_to_platdata(struct udevice *dev)
 		priv->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
 	priv->iov = fdtdec_get_int(fdt, node, "iov", 1800000);
 
+#ifdef OMAP_HSMMC_USE_GPIO
 	priv->cd_inverted = fdtdec_get_bool(fdt, node, "cd-inverted");
+#endif
 
 	return 0;
 }
