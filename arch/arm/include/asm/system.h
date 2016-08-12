@@ -225,6 +225,10 @@ void smc_call(struct pt_regs *args);
  */
 void save_boot_params_ret(void);
 
+#ifdef CONFIG_ARMV7_LPAE
+void switch_to_hypervisor_ret(void);
+#endif
+
 #define isb() __asm__ __volatile__ ("" : : : "memory")
 
 #define nop() __asm__ __volatile__("mov\tr0,r0\t@ nop\n\t");
