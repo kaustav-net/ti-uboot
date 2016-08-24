@@ -600,6 +600,13 @@ int board_late_init(void)
 	board_set_ethaddr();
 #endif
 
+	/*
+	 * Default FIT boot on HS devices. Non FIT images are not allowed
+	 * on HS devices.
+	 */
+	if (get_device_type() == HS_DEVICE)
+		setenv("boot_fit", "1");
+
 	return 0;
 }
 
