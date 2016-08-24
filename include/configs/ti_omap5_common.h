@@ -67,6 +67,7 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
+	DEFAULT_FIT_TI_ARGS \
 	"console=" CONSOLEDEV ",115200n8\0" \
 	"fdtfile=undefined\0" \
 	"bootpart=0:2\0" \
@@ -117,6 +118,9 @@
 		"setenv dofastboot 0; saveenv;" \
 		"echo Booting into fastboot ...; fastboot 0;" \
 	"fi;" \
+	"if test ${boot_fit} -eq 1; then "	\
+		"run update_to_fit;"	\
+	"fi;"	\
 	"run findfdt; " \
 	"run envboot; " \
 	"run mmcboot;" \
