@@ -77,20 +77,6 @@
 	"partitions=" PARTS_DEFAULT "\0" \
 	"optargs=\0" \
 	"dofastboot=0\0" \
-	"loadbootscript=fatload mmc ${mmcdev} ${loadaddr} boot.scr\0" \
-	"bootscript=echo Running bootscript from mmc${mmcdev} ...; " \
-		"source ${loadaddr}\0" \
-	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
-	"mmcboot=mmc dev ${mmcdev}; " \
-		"if mmc rescan; then " \
-			"echo SD/MMC found on device ${mmcdev};" \
-			"if run loadimage; then " \
-				"run loadfdt; " \
-				"echo Booting from mmc${mmcdev} ...; " \
-				"run args_mmc; " \
-				"bootz ${loadaddr} - ${fdtaddr}; " \
-			"fi;" \
-		"fi;\0" \
 	"findfdt="\
 		"if test $board_name = omap5_uevm; then " \
 			"setenv fdtfile omap5-uevm.dtb; fi; " \
@@ -122,7 +108,6 @@
 			"setenv fdtfile am571x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
-	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
 	DFUARGS \
 	NETARGS \
 
