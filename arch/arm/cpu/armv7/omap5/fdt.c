@@ -194,49 +194,28 @@ const char *dra7_opp_gpu_clk_names[OPP_GPU_CLK_NUM] = {
 };
 
 /* DSPEVE voltage domain */
-#if defined(CONFIG_DRA7_DSPEVE_OPP_HIGH) /* OPP_HIGH */
-u32 dra7_opp_dsp_clk_rates[OPP_DSP_CLK_NUM] = {
-	750000000, 750000000, 500000000,
+u32 dra7_opp_dsp_clk_rates[NUM_OPPS][OPP_DSP_CLK_NUM] = {
+	{}, /*OPP_LOW */
+	{600000000, 600000000, 400000000}, /* OPP_NOM */
+	{700000000, 700000000, 466666667}, /* OPP_OD */
+	{750000000, 750000000, 500000000}, /* OPP_HIGH */
 };
-#elif defined(CONFIG_DRA7_DSPEVE_OPP_OD) /* OPP_OD */
-u32 dra7_opp_dsp_clk_rates[OPP_DSP_CLK_NUM] = {
-	700000000, 700000000, 466666667,
-};
-#else /* OPP_NOM */
-u32 dra7_opp_dsp_clk_rates[OPP_DSP_CLK_NUM] = {
-	600000000, 600000000, 400000000,
-};
-#endif
 
 /* IVA voltage domain */
-#if defined(CONFIG_DRA7_IVA_OPP_HIGH) /* OPP_HIGH */
-u32 dra7_opp_iva_clk_rates[OPP_IVA_CLK_NUM] = {
-	1064000000, 532000000,
+u32 dra7_opp_iva_clk_rates[NUM_OPPS][OPP_IVA_CLK_NUM] = {
+	{}, /* OPP_LOW */
+	{1165000000, 388333334}, /* OPP_NOM */
+	{860000000, 430000000}, /* OPP_OD */
+	{1064000000, 532000000}, /* OPP_HIGH */
 };
-#elif defined(CONFIG_DRA7_IVA_OPP_OD) /* OPP_OD */
-u32 dra7_opp_iva_clk_rates[OPP_IVA_CLK_NUM] = {
-	860000000, 430000000,
-};
-#else /* OPP_NOM */
-u32 dra7_opp_iva_clk_rates[OPP_IVA_CLK_NUM] = {
-	1165000000, 388333334,
-};
-#endif
 
 /* GPU voltage domain */
-#if defined(CONFIG_DRA7_GPU_OPP_HIGH) /* OPP_HIGH */
-u32 dra7_opp_gpu_clk_rates[OPP_GPU_CLK_NUM] = {
-	1064000000, 532000000,
+u32 dra7_opp_gpu_clk_rates[NUM_OPPS][OPP_GPU_CLK_NUM] = {
+	{}, /* OPP_LOW */
+	{1277000000, 425666667}, /* OPP_NOM */
+	{1000000000, 500000000}, /* OPP_OD */
+	{1064000000, 532000000}, /* OPP_HIGH */
 };
-#elif defined(CONFIG_DRA7_GPU_OPP_OD) /* OPP_OD */
-u32 dra7_opp_gpu_clk_rates[OPP_GPU_CLK_NUM] = {
-	1000000000, 500000000,
-};
-#else /* OPP_NOM */
-u32 dra7_opp_gpu_clk_rates[OPP_GPU_CLK_NUM] = {
-	1277000000, 425666667,
-};
-#endif
 
 static int ft_fixup_clocks(void *fdt, const char **names, u32 *rates, int num)
 {
@@ -296,7 +275,7 @@ static void ft_opp_clock_fixups(void *fdt, bd_t *bd)
 
 	/* fixup DSP clocks */
 	clk_names = dra7_opp_dsp_clk_names;
-	clk_rates = dra7_opp_dsp_clk_rates;
+	clk_rates = dra7_opp_dsp_clk_rates[get_voltrail_opp(VOLT_EVE)];
 	ret = ft_fixup_clocks(fdt, clk_names, clk_rates, OPP_DSP_CLK_NUM);
 	if (ret) {
 		printf("ft_fixup_clocks failed for DSP voltage domain: %s\n",
@@ -306,7 +285,7 @@ static void ft_opp_clock_fixups(void *fdt, bd_t *bd)
 
 	/* fixup IVA clocks */
 	clk_names = dra7_opp_iva_clk_names;
-	clk_rates = dra7_opp_iva_clk_rates;
+	clk_rates = dra7_opp_iva_clk_rates[get_voltrail_opp(VOLT_IVA)];
 	ret = ft_fixup_clocks(fdt, clk_names, clk_rates, OPP_IVA_CLK_NUM);
 	if (ret) {
 		printf("ft_fixup_clocks failed for IVA voltage domain: %s\n",
@@ -316,7 +295,7 @@ static void ft_opp_clock_fixups(void *fdt, bd_t *bd)
 
 	/* fixup GPU clocks */
 	clk_names = dra7_opp_gpu_clk_names;
-	clk_rates = dra7_opp_gpu_clk_rates;
+	clk_rates = dra7_opp_gpu_clk_rates[get_voltrail_opp(VOLT_GPU)];
 	ret = ft_fixup_clocks(fdt, clk_names, clk_rates, OPP_GPU_CLK_NUM);
 	if (ret) {
 		printf("ft_fixup_clocks failed for GPU voltage domain: %s\n",

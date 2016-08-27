@@ -287,56 +287,53 @@
 #define STD_FUSE_OPP_VMIN_MPU_HIGH	(DRA752_EFUSE_BASE + 0x1B28)
 
 /* Common voltage and Efuse register macros */
-/* CORE voltage domain */
-#define VDD_CORE_DRA7			VDD_CORE_DRA7_NOM
-#define STD_FUSE_OPP_VMIN_CORE		STD_FUSE_OPP_VMIN_CORE_NOM
-
-/* MPU voltage domain */
+/* DRA74x/DRA75x/DRA72x */
 #define VDD_MPU_DRA7			VDD_MPU_DRA7_NOM
-#if defined(CONFIG_DRA7_MPU_OPP_HIGH) /* OPP_HIGH */
-#define STD_FUSE_OPP_VMIN_MPU		STD_FUSE_OPP_VMIN_MPU_HIGH
-#elif defined(CONFIG_DRA7_MPU_OPP_OD) /* OPP_OD */
-#define STD_FUSE_OPP_VMIN_MPU		STD_FUSE_OPP_VMIN_MPU_OD
-#else /* OPP_NOM - default */
-#define STD_FUSE_OPP_VMIN_MPU		STD_FUSE_OPP_VMIN_MPU_NOM
-#endif
-
-/* DSPEVE voltage domain */
-#if defined(CONFIG_DRA7_DSPEVE_OPP_HIGH) /* OPP_HIGH */
+#define VDD_CORE_DRA7			VDD_CORE_DRA7_NOM
 #define VDD_EVE_DRA7			VDD_EVE_DRA7_HIGH
-#define STD_FUSE_OPP_VMIN_DSPEVE	STD_FUSE_OPP_VMIN_DSPEVE_HIGH
-#elif defined(CONFIG_DRA7_DSPEVE_OPP_OD) /* OPP_OD */
-#define VDD_EVE_DRA7			VDD_EVE_DRA7_OD
-#define STD_FUSE_OPP_VMIN_DSPEVE	STD_FUSE_OPP_VMIN_DSPEVE_OD
-#else /* OPP_NOM - default */
-#define VDD_EVE_DRA7			VDD_EVE_DRA7_NOM
-#define STD_FUSE_OPP_VMIN_DSPEVE	STD_FUSE_OPP_VMIN_DSPEVE_NOM
-#endif
-
-/* IVA voltage domain */
-#if defined(CONFIG_DRA7_IVA_OPP_HIGH) /* OPP_HIGH */
-#define VDD_IVA_DRA7			VDD_IVA_DRA7_HIGH
-#define STD_FUSE_OPP_VMIN_IVA		STD_FUSE_OPP_VMIN_IVA_HIGH
-#elif defined(CONFIG_DRA7_IVA_OPP_OD) /* OPP_OD */
-#define VDD_IVA_DRA7			VDD_IVA_DRA7_OD
-#define STD_FUSE_OPP_VMIN_IVA		STD_FUSE_OPP_VMIN_IVA_OD
-#else /* OPP_NOM - default */
-#define VDD_IVA_DRA7			VDD_IVA_DRA7_NOM
-#define STD_FUSE_OPP_VMIN_IVA		STD_FUSE_OPP_VMIN_IVA_NOM
-#endif
-
-/* GPU voltage domain */
-#if defined(CONFIG_DRA7_GPU_OPP_HIGH) /* OPP_HIGH */
 #define VDD_GPU_DRA7			VDD_GPU_DRA7_HIGH
+#define VDD_IVA_DRA7			VDD_IVA_DRA7_HIGH
+
+#define STD_FUSE_OPP_VMIN_MPU		STD_FUSE_OPP_VMIN_MPU_NOM
+#define STD_FUSE_OPP_VMIN_CORE		STD_FUSE_OPP_VMIN_CORE_NOM
+#define STD_FUSE_OPP_VMIN_DSPEVE	STD_FUSE_OPP_VMIN_DSPEVE_HIGH
 #define STD_FUSE_OPP_VMIN_GPU		STD_FUSE_OPP_VMIN_GPU_HIGH
-#elif defined(CONFIG_DRA7_GPU_OPP_OD) /* OPP_OD */
-#define VDD_GPU_DRA7			VDD_GPU_DRA7_OD
-#define STD_FUSE_OPP_VMIN_GPU		STD_FUSE_OPP_VMIN_GPU_OD
-#else /* OPP_NOM - default */
-#define VDD_GPU_DRA7			VDD_GPU_DRA7_NOM
-#define STD_FUSE_OPP_VMIN_GPU		STD_FUSE_OPP_VMIN_GPU_NOM
+#define STD_FUSE_OPP_VMIN_IVA		STD_FUSE_OPP_VMIN_IVA_HIGH
+
+/* Common OPP selection for DRA7xx devices */
+#define DRA7_CORE_OPP	OPP_NOM
+
+#if defined(CONFIG_DRA7_MPU_OPP_HIGH)
+#define DRA7_MPU_OPP	OPP_HIGH
+#elif defined(CONFIG_DRA7_MPU_OPP_OD)
+#define DRA7_MPU_OPP	OPP_OD
+#else /* OPP_NOM default */
+#define DRA7_MPU_OPP	OPP_NOM
 #endif
 
+#if defined(CONFIG_DRA7_DSPEVE_OPP_HIGH)
+#define DRA7_DSPEVE_OPP	OPP_HIGH
+#elif defined(CONFIG_DRA7_DSPEVE_OPP_OD)
+#define DRA7_DSPEVE_OPP	OPP_OD
+#else /* OPP_NOM default */
+#define DRA7_DSPEVE_OPP	OPP_NOM
+#endif
+
+#if defined(CONFIG_DRA7_IVA_OPP_HIGH)
+#define DRA7_IVA_OPP	OPP_HIGH
+#elif defined(CONFIG_DRA7_IVA_OPP_OD)
+#define DRA7_IVA_OPP	OPP_OD
+#else /* OPP_NOM default */
+#define DRA7_IVA_OPP	OPP_NOM
+#endif
+
+#if defined(CONFIG_DRA7_GPU_OPP_HIGH)
+#define DRA7_GPU_OPP	OPP_HIGH
+#elif defined(CONFIG_DRA7_GPU_OPP_OD)
+#define DRA7_GPU_OPP	OPP_OD
+#else /* OPP_NOM default */
+#define DRA7_GPU_OPP	OPP_NOM
+#endif
 
 /* Standard offset is 0.5v expressed in uv */
 #define PALMAS_SMPS_BASE_VOLT_UV 500000
