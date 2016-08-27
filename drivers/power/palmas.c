@@ -23,6 +23,24 @@ void palmas_init_settings(void)
 #endif
 }
 
+#if defined(CONFIG_DRA7XX) || defined(CONFIG_AM57XX)
+int lp873x_mmc1_poweron_ldo(uint voltage)
+{
+	if (palmas_i2c_write_u8(LP873X_LDO1_ADDR, LP873X_LDO1_VOLTAGE,
+				voltage)) {
+		printf("lp873x: could not set LDO1 voltage.\n");
+		return 1;
+	}
+	/* TURN ON LDO1 */
+	if (palmas_i2c_write_u8(LP873X_LDO1_ADDR, LDO1_CTRL, 0x3)) {
+		printf("lp873x: could not turn on LDO1.\n");
+		return 1;
+	}
+	return 0;
+
+}
+#endif
+
 int palmas_mmc1_poweron_ldo(uint voltage)
 {
 	u8 val = 0;
