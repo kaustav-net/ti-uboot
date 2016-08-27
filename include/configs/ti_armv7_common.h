@@ -289,6 +289,10 @@
 #endif
 #endif /* !CONFIG_NOR_BOOT */
 
+/* Display CPU and Board info */
+#define CONFIG_DISPLAY_CPUINFO
+#define CONFIG_DISPLAY_BOARDINFO
+
 /* Generic Environment Variables */
 
 #ifdef CONFIG_CMD_NET

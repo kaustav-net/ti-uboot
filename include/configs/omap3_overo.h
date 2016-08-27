@@ -18,10 +18,6 @@
 
 #define CONFIG_BCH
 
-/* Display CPU and Board information */
-#define CONFIG_DISPLAY_CPUINFO
-#define CONFIG_DISPLAY_BOARDINFO
-
 /* call misc_init_r */
 #define CONFIG_MISC_INIT_R
 

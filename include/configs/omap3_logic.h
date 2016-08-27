@@ -36,10 +36,6 @@
 #define CONFIG_SPL_TEXT_BASE   0x40200000
 #define CONFIG_SPL_MAX_SIZE    (SRAM_SCRATCH_SPACE_ADDR - CONFIG_SPL_TEXT_BASE)
 
-/* Display CPU and Board information */
-
-#define CONFIG_DISPLAY_CPUINFO
-#define CONFIG_DISPLAY_BOARDINFO
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_MISC_INIT_R		/* misc_init_r dumps the die id */
 #define CONFIG_CMDLINE_TAG		/* enable passing of ATAGs */
