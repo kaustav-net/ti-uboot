@@ -472,29 +472,124 @@ int ethss_stop(void)
 	return 0;
 }
 
-struct ks2_serdes ks2_serdes_sgmii_156p25mhz = {
-	.clk = SERDES_CLOCK_156P25M,
-	.rate = SERDES_RATE_5G,
-	.rate_mode = SERDES_QUARTER_RATE,
-	.intf = SERDES_PHY_SGMII,
-	.loopback = 0,
+struct kserdes_dev ks2_serdes_dev = {
+	.sc = {
+		.phy_type = KSERDES_PHY_SGMII,
+		.lanes = CONFIG_KSNET_SERDES_LANES_PER_SGMII,
+		.regs = (void __iomem *)CONFIG_KSNET_SERDES_SGMII_BASE,
+		.link_rate = KSERDES_LINK_RATE_1P25G,
+		.lane[0] = {
+			.enable = true,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[1] = {
+			.enable = true,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[2] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[3] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+	},
 };
+
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2L)
+struct kserdes_dev ks2_serdes_dev2 = {
+	.sc = {
+		.phy_type = KSERDES_PHY_SGMII,
+		.lanes = CONFIG_KSNET_SERDES_LANES_PER_SGMII,
+		.regs = (void __iomem *)CONFIG_KSNET_SERDES_SGMII2_BASE,
+		.link_rate = KSERDES_LINK_RATE_1P25G,
+		.lane[0] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[1] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[2] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[3] = {
+			.enable = false,
+			.ctrl_rate = KSERDES_QUARTER_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+	},
+};
+#endif
 
 #ifndef CONFIG_SOC_K2G
 static void keystone2_net_serdes_setup(void)
 {
-	ks2_serdes_init(CONFIG_KSNET_SERDES_SGMII_BASE,
-			&ks2_serdes_sgmii_156p25mhz,
-			CONFIG_KSNET_SERDES_LANES_PER_SGMII);
+	if (!ks2_serdes_dev.dev) {
+		kserdes_provider_init(&ks2_serdes_dev);
+		/* wait till setup */
+		udelay(2500);
+		ks2_serdes_dev.dev = (struct device *)&ks2_serdes_dev;
+	}
 
 #if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2L)
-	ks2_serdes_init(CONFIG_KSNET_SERDES_SGMII2_BASE,
-			&ks2_serdes_sgmii_156p25mhz,
-			CONFIG_KSNET_SERDES_LANES_PER_SGMII);
+	if (!ks2_serdes_dev2.dev) {
+		kserdes_provider_init(&ks2_serdes_dev2);
+		/* wait till setup */
+		udelay(2500);
+		ks2_serdes_dev2.dev = (struct device *)&ks2_serdes_dev2;
+	}
+#endif
+}
+
+/* slave_port is 1 based
+ * lane is 0 based
+ */
+static void keystone2_net_serdes_enable_rx(u32 slave_port)
+{
+	struct kserdes_dev *sd = &ks2_serdes_dev;
+	u32 lane = slave_port - 1;
+	int ret;
+
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2L)
+	if (slave_port > CONFIG_KSNET_SERDES_LANES_PER_SGMII) {
+		lane = slave_port - CONFIG_KSNET_SERDES_LANES_PER_SGMII - 1;
+		sd = &ks2_serdes_dev2;
+	}
 #endif
 
-	/* wait till setup */
-	udelay(5000);
+	if (!sd->sc.lane[lane].enable)
+		return;
+
+	ret = kserdes_phy_enable_rx(sd, lane);
+	if (ret && (sd->sc.phy_type == KSERDES_PHY_XGE))
+		kserdes_phy_reset(sd, lane);
 }
 #endif
 
@@ -719,6 +814,7 @@ int keystone2_emac_initialize(struct eth_priv_t *eth_priv)
 
 #ifndef CONFIG_SOC_K2G
 	keystone2_net_serdes_setup();
+	keystone2_net_serdes_enable_rx(eth_priv->slave_port)
 #endif
 
 	/* Create phy device and bind it with driver */
@@ -948,6 +1044,7 @@ static int ks2_eth_probe(struct udevice *dev)
 
 #ifndef CONFIG_SOC_K2G
 	keystone2_net_serdes_setup();
+	keystone2_net_serdes_enable_rx(priv->slave_port);
 #endif
 
 	priv->netcp_pktdma = &netcp_pktdma;
