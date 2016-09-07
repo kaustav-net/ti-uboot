@@ -615,7 +615,7 @@ void am57x_idk_lcd_detect(void)
 	if (r) {
 		/* AM572x IDK has no explicit settings for optional LCD kit */
 		if (board_is_am571x_idk()) {
-			printf("%s: Touch screen detect failed: %d!",
+			printf("%s: Touch screen detect failed: %d\n",
 			       __func__, r);
 		}
 		goto out;
