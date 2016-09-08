@@ -25,6 +25,7 @@
 #include <asm/io.h>
 #include <asm/emif.h>
 #include <asm/gpio.h>
+#include <asm/omap_sec_common.h>
 #include <i2c.h>
 #include <miiphy.h>
 #include <cpsw.h>
@@ -1014,5 +1015,12 @@ enable_failed:
 	printf("Could not enable node %s: %s\n",
 	       path, fdt_strerror(ret));
 	return ret;
+}
+#endif
+
+#ifdef CONFIG_TI_SECURE_DEVICE
+void board_fit_image_post_process(void **p_image, size_t *p_size)
+{
+	secure_boot_verify_image(p_image, p_size);
 }
 #endif
