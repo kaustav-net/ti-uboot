@@ -40,8 +40,8 @@ static int do_mon_install(cmd_tbl_t *cmdtp, int flag, int argc,
 	       size);
 
 	rcode = mon_install(load_addr, dpsc_base, freq);
-	printf("## installed monitor, freq [%d], status %d\n",
-	       freq, rcode);
+	printf("## installed monitor @ 0x%x, freq [%d], status %d\n",
+	       load_addr, freq, rcode);
 
 	return 0;
 }
