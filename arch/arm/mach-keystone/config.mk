@@ -5,8 +5,14 @@
 # SPDX-License-Identifier:     GPL-2.0+
 #
 
+include  $(srctree)/$(CPUDIR)/omap-common/config_secure.mk
+
 ifndef CONFIG_SPL_BUILD
+ifeq ($(CONFIG_TI_SECURE_DEVICE),y)
+ALL-y += u-boot_HS_MLO
+else
 ALL-y += MLO
+endif
 endif
 
 MKIMAGEFLAGS_u-boot-spl.gph = -A $(ARCH) -T gpimage -C none \
