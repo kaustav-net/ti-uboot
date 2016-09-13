@@ -24,13 +24,11 @@
 #define AUX_CORE_BOOT_0		0x48281800
 #define AUX_CORE_BOOT_1		0x48281804
 
-#ifdef CONFIG_DRA7XX
 /* DRA7xx ROM code function "startup_BootSlave". This function is where CPU1
  * waits on WFE, polling on AUX_CORE_BOOT_x registers.
- * This address is same for J6 and J6 Eco.
+ * This address is same for J6, J6 Eco, and AM57xx.
  */
 #define ROM_FXN_STARTUP_BOOTSLAVE     0x00038a64
-#endif
 
 /* Assembly core where CPU1 is woken up into
  * No need to save-restore registers, does not use stack.
