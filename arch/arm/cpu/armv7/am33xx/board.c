@@ -405,7 +405,7 @@ void s_init(void)
 #endif
 	watchdog_disable();
 	set_uart_mux_conf();
-	setup_clocks_for_console();
+	setup_early_clocks();
 	uart_soft_reset();
 #if defined(CONFIG_SPL_AM33XX_ENABLE_RTC32K_OSC)
 	/* Enable RTC32K clock */
