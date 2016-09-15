@@ -11,6 +11,16 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+#ifdef CONFIG_TI_SECURE_DEVICE
+#define board_is_bone() 0
+#define board_is_bone_lt() 0
+#define board_is_bbg1() 0
+#define board_is_evm_sk() 0
+#define board_is_idk() 0
+#define board_is_gp_evm() 1
+#define board_is_evm_15_or_later() 1
+#define board_is_icev2() 0
+#else
 static inline int board_is_bone(void)
 {
 	return board_ti_is("A335BONE");
@@ -51,6 +61,7 @@ static inline int board_is_icev2(void)
 {
 	return board_ti_is("A335_ICE") && !strncmp("2", board_ti_get_rev(), 1);
 }
+#endif /* CONFIG_TI_SECURE_DEVICE */
 
 /*
  * We have three pin mux functions that must exist.  We must be able to enable
