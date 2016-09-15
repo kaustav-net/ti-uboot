@@ -345,4 +345,5 @@
 #define CONFIG_PCF8575_GPIO
 #endif
 
+#define CONFIG_DRA7XX_DWC1
 #endif /* __CONFIG_DRA7XX_EVM_H */

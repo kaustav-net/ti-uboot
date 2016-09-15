@@ -182,4 +182,6 @@
 #define CONFIG_SF_DEFAULT_MODE                 SPI_MODE_0
 #define CONFIG_QSPI_QUAD_SUPPORT
 
+#define CONFIG_DRA7XX_DWC2
+
 #endif /* __CONFIG_AM57XX_EVM_H */
