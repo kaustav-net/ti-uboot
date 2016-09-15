@@ -23,7 +23,7 @@ void palmas_init_settings(void)
 #endif
 }
 
-#if defined(CONFIG_DRA7XX) || defined(CONFIG_AM57XX)
+#if defined(CONFIG_DRA7XX)
 int lp873x_mmc1_poweron_ldo(uint voltage)
 {
 	if (palmas_i2c_write_u8(LP873X_LDO1_ADDR, LP873X_LDO1_VOLTAGE,
@@ -45,7 +45,7 @@ int palmas_mmc1_poweron_ldo(uint voltage)
 {
 	u8 val = 0;
 
-#if defined(CONFIG_DRA7XX) || defined(CONFIG_AM57XX)
+#if defined(CONFIG_DRA7XX)
 	/*
 	 * Currently valid for the dra7xx_evm board:
 	 * Set TPS659038 LDO1 to 3.0 V
