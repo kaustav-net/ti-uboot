@@ -322,6 +322,13 @@ config SPL_PANIC_ON_NON_FIT_IMAGE
 	  through SPL FIT loading paths and do not want SPL falling back
 	  to legacy image loading when a non-FIT image is present.
 
+menu "SPL Media Loading Support"
+	depends on SPL
+
+source "common/spl/Kconfig"
+
+endmenu
+
 config SPL_DFU_SUPPORT
 	bool "Enable SPL with DFU to load binaries to memory device"
 	depends on USB

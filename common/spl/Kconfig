@@ -1,0 +1,54 @@
+config SPL_YMODEM_SUPPORT
+	depends on SPL
+	bool "SPL Support for loading next stage from UART"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  over a UART line using the x/y/z/modem protocol.
+
+config SPL_MMC_SUPPORT
+	bool "SPL Support for loading next stage from SD/MMC/eMMC"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from an SD/MMC/eMMC device.
+
+config SPL_SPI_SUPPORT
+	bool "SPL Support for loading next stage from SPI flash"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from SPI flash.
+
+config SPL_USB_SUPPORT
+	bool "SPL Support for loading next stage from USB"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from a USB device.
+
+config SPL_SATA_SUPPORT
+	bool "SPL Support for loading next stage from SATA"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from a SATA device.
+
+config SPL_NOR_SUPPORT
+	bool "SPL Support for loading next stage from NOR flash"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from NOR flash.
+
+config SPL_NAND_SUPPORT
+	bool "SPL Support for loading next stage from NAND flash"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from NAND flash.
+
+config SPL_ONENAND_SUPPORT
+	bool "SPL Support for loading next stage from ONENAND"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from ONENAND.
+
+config SPL_NET_SUPPORT
+	bool "SPL Support for loading next stage from NET"
+	help
+	  This option enables SPL to load the next stage bootloader
+	  from NET.
