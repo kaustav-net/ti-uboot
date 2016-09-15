@@ -189,7 +189,6 @@
 /* SPL */
 #ifndef CONFIG_NOR_BOOT
 #define CONFIG_SPL_POWER_SUPPORT
-#define CONFIG_SPL_YMODEM_SUPPORT
 
 /* Bootcount using the RTC block */
 #define CONFIG_BOOTCOUNT_LIMIT
@@ -309,7 +308,6 @@
 
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_USBETH_SUPPORT)
 /* Remove other SPL modes. */
-#undef CONFIG_SPL_YMODEM_SUPPORT
 #undef CONFIG_SPL_NAND_SUPPORT
 #undef CONFIG_SPL_MMC_SUPPORT
 #define CONFIG_ENV_IS_NOWHERE
