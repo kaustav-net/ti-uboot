@@ -1044,7 +1044,6 @@ static int ks2_eth_probe(struct udevice *dev)
 
 #ifndef CONFIG_SOC_K2G
 	keystone2_net_serdes_setup();
-	keystone2_net_serdes_enable_rx(priv->slave_port);
 #endif
 
 	priv->netcp_pktdma = &netcp_pktdma;
@@ -1055,6 +1054,9 @@ static int ks2_eth_probe(struct udevice *dev)
 		phy_config(priv->phydev);
 	}
 
+#ifndef CONFIG_SOC_K2G
+	keystone2_net_serdes_enable_rx(priv->slave_port);
+#endif
 	return 0;
 }
 
