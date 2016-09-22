@@ -154,25 +154,23 @@ int secure_emif_firewall_lock(void)
 	return result;
 }
 
-#if	((CONFIG_TI_SECURE_EMIF_TOTAL_REGION_SIZE != 0) && \
-	(CONFIG_TI_SECURE_EMIF_PROTECTED_REGION_SIZE != 0))
-
 static struct ppa_tee_load_info tee_info __aligned(ARCH_DMA_MINALIGN);
 
-static int do_teeload(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int secure_tee_install(u32 addr)
 {
 	struct tee_header *hdr;
 	void *loadptr;
-	u32 addr;
 	u32 tee_file_size;
 	u32 sec_mem_start = get_sec_mem_start();
 	const u32 size = CONFIG_TI_SECURE_EMIF_PROTECTED_REGION_SIZE;
 	u32 *smc_cpu1_params;
 
-	if ((argc < 2) || (argc > 3))
-		return CMD_RET_USAGE;
+	/* If there is no protected region, there is no place to put the TEE */
+	if (size == 0) {
+		printf("Error loading TEE, no protected memory region available\n");
+		return -ENOBUFS;
+	}
 
-	addr = simple_strtoul(argv[1], NULL, 16);
 	hdr = (struct tee_header *)map_sysmem(addr, sizeof(struct tee_header));
 	/* 280 bytes = size of signature */
 	tee_file_size = hdr->init_size + hdr->paged_size +
@@ -240,11 +238,3 @@ static int do_teeload(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	return 0;
 }
-
-U_BOOT_CMD(
-	teeload,	2,	1,	do_teeload,
-	"Load and start a TEE in secure world",
-	"teeload <address where signed tee binary is loaded>"
-);
-
-#endif
