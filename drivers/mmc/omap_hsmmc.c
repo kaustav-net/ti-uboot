@@ -802,7 +802,7 @@ static int omap_hsmmc_adma_desc(struct mmc *mmc, char *buf, u16 len, bool end)
 static int omap_hsmmc_prepare_adma_table(struct mmc *mmc, struct mmc_data *data)
 {
 	uint total_len = data->blocksize * data->blocks;
-	uint desc_count = (total_len / ADMA_MAX_LEN) + 1;
+	uint desc_count = DIV_ROUND_UP(total_len, ADMA_MAX_LEN);
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
 	int i = desc_count;
 	char *buf;
