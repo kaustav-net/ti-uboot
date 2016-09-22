@@ -1028,4 +1028,9 @@ void board_fit_image_post_process(void **p_image, size_t *p_size)
 {
 	secure_boot_verify_image(p_image, p_size);
 }
+
+void board_tee_image_process(void *tee_image, size_t tee_size)
+{
+	secure_tee_install((u32)tee_image);
+}
 #endif
