@@ -159,6 +159,7 @@ static const table_entry_t uimage_type[] = {
 	{	IH_TYPE_RKSD,       "rksd",       "Rockchip SD Boot Image" },
 	{	IH_TYPE_RKSPI,      "rkspi",      "Rockchip SPI Boot Image" },
 	{	IH_TYPE_ZYNQIMAGE,  "zynqimage",  "Xilinx Zynq Boot Image" },
+	{	IH_TYPE_TEE,        "tee",        "TEE OS Image",},
 	{	-1,		    "",		  "",			},
 };
 
@@ -1229,6 +1230,8 @@ int boot_get_loadable(int argc, char * const argv[], bootm_headers_t *images,
 	int fit_img_result;
 	char *uname;
 
+	uint8_t img_type;
+
 	/* Check to see if the images struct has a FIT configuration */
 	if (!genimg_has_config(images)) {
 		debug("## FIT configuration was not specified\n");
@@ -1269,6 +1272,21 @@ int boot_get_loadable(int argc, char * const argv[], bootm_headers_t *images,
 				/* Something went wrong! */
 				return fit_img_result;
 			}
+
+			fit_img_result = fit_image_get_node(buf, uname);
+			if (fit_img_result < 0) {
+				/* Something went wrong! */
+				return fit_img_result;
+			}
+			fit_img_result = fit_image_get_type(buf, fit_img_result, &img_type);
+			if (fit_img_result < 0) {
+				/* Something went wrong! */
+				return fit_img_result;
+			}
+#if defined(CONFIG_FIT_IMAGE_TEE_PROCESS)
+			if (img_type == IH_TYPE_TEE)
+				board_tee_image_process(img_data, img_len);
+#endif
 		}
 		break;
 	default:

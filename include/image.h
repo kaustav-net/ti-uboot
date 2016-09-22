@@ -246,8 +246,9 @@ struct lmb;
 #define IH_TYPE_RKSD		24	/* Rockchip SD card		*/
 #define IH_TYPE_RKSPI		25	/* Rockchip SPI image		*/
 #define IH_TYPE_ZYNQIMAGE	26	/* Xilinx Zynq Boot Image */
+#define IH_TYPE_TEE		27	/* Trusted Execution Environment OS Image */
 
-#define IH_TYPE_COUNT		27	/* Number of image types */
+#define IH_TYPE_COUNT		28	/* Number of image types */
 
 /*
  * Compression Types
@@ -1184,5 +1185,19 @@ int board_fit_config_name_match(const char *name);
  */
 void board_fit_image_post_process(void **p_image, size_t *p_size);
 #endif /* CONFIG_SPL_FIT_IMAGE_POST_PROCESS */
+
+#ifdef CONFIG_FIT_IMAGE_TEE_PROCESS
+/**
+ * board_fit_tee_process() - Do any needed processing on a loaded TEE image
+ *
+ * This is used to verify, decrypt, and/or install a TEE in a platform or
+ * board specific way.
+ *
+ * @tee_image: pointer to the image
+ * @tee_size: the image size
+ * @return no return value (failure should be handled internally)
+ */
+void board_tee_image_process(void *tee_image, size_t tee_size);
+#endif /* CONFIG_FIT_IMAGE_TEE_PROCESS */
 
 #endif	/* __IMAGE_H__ */

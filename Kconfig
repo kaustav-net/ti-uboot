@@ -314,6 +314,16 @@ config FIT_IMAGE_POST_PROCESS
 	  injected into the FIT creation (i.e. the blobs would have been pre-
 	  processed before being added to the FIT image).
 
+config FIT_IMAGE_TEE_PROCESS
+	bool "Enable processing of TEE images during FIT loading by U-Boot"
+	depends on FIT && TI_SECURE_DEVICE
+	help
+	  Allows platforms to perform processing, such as authentication and
+	  installation, on TEE images extracted from FIT images in a platform
+	  or board specific way. In order to use this feature a platform or
+	  board-specific implementation of board_tee_image_process() must be
+	  provided.
+
 config SPL_PANIC_ON_NON_FIT_IMAGE
 	bool "Disable SPL loading of non-FIT images"
 	help
