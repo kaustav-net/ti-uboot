@@ -1285,7 +1285,7 @@ int boot_get_loadable(int argc, char * const argv[], bootm_headers_t *images,
 			}
 #if defined(CONFIG_FIT_IMAGE_TEE_PROCESS)
 			if (img_type == IH_TYPE_TEE)
-				board_tee_image_process(img_data, img_len);
+				board_tee_image_process((void *)img_data, img_len);
 #endif
 		}
 		break;
