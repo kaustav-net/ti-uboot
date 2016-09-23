@@ -207,7 +207,7 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 		&prcm_base->iclken1_core);
 #endif
 
-#if defined(CONFIG_OMAP54XX) && defined(CONFIG_OMAP44XX)
+#if defined(CONFIG_OMAP54XX) || defined(CONFIG_OMAP44XX)
 	/* PBIAS config needed for MMC1 only */
 	if (mmc->block_dev.devnum == 0)
 		vmmc_pbias_config(LDO_VOLT_3V0);

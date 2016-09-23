@@ -23,7 +23,7 @@ void palmas_init_settings(void)
 #endif
 }
 
-#if defined(CONFIG_DRA7XX)
+#if defined(CONFIG_OMAP54XX)
 int lp873x_mmc1_poweron_ldo(uint voltage)
 {
 	if (palmas_i2c_write_u8(LP873X_LDO1_ADDR, LP873X_LDO1_VOLTAGE,
