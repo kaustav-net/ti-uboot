@@ -63,6 +63,7 @@ struct common_args {
 #endif
 	uint8_t aes_key[AES_KEY_LENGTH];
 	int aes_flag; /* Is AES encryption used? */
+	char *lockname;
 };
 extern struct common_args common_args;
 
