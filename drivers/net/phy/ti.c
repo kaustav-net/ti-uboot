@@ -177,9 +177,9 @@ static int dp83867_of_init(struct phy_device *phydev)
 	int node = dev->of_offset;
 	const void *fdt = gd->fdt_blob;
 
-	if (fdtdec_get_bool(fdt, node, "ti,max-output-imepdance"))
+	if (fdtdec_get_bool(fdt, node, "ti,max-output-impedance"))
 		dp83867->io_impedance = DP83867_IO_MUX_CFG_IO_IMPEDANCE_MAX;
-	else if (fdtdec_get_bool(fdt, node, "ti,min-output-imepdance"))
+	else if (fdtdec_get_bool(fdt, node, "ti,min-output-impedance"))
 		dp83867->io_impedance = DP83867_IO_MUX_CFG_IO_IMPEDANCE_MIN;
 	else
 		dp83867->io_impedance = -EINVAL;
