@@ -1431,7 +1431,7 @@ static int kserdes_wait_link_up(struct kserdes_config *sc,
 				u32 *lanes_up_mask)
 {
 	u32 current_state[KSERDES_MAX_LANES];
-	unsigned long timeout = 2000;
+	unsigned long timeout = 50;
 	unsigned long time_check = 0;
 	int i, link_up, ret = 0;
 
@@ -2191,7 +2191,7 @@ static int kserdes_enable_lane_rx(struct kserdes_config *sc, u32 lane,
 	if (!sc->rx_force_enable) {
 		ret = _kserdes_wait_lane_sd(sc->regs, lane);
 		if (ret) {
-			dev_err(sc->dev,
+			dev_dbg(sc->dev,
 				"%p %u init_lane_rx wait sd valid FAILED %d\n",
 				sc->regs, lane, ret);
 			return ret;
