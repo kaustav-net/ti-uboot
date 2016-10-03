@@ -624,8 +624,7 @@ int32_t cpmac_drv_send(u32 *buffer, int num_bytes, int slave_port_num)
 	if (num_bytes < EMAC_MIN_ETHERNET_PKT_SIZE)
 		num_bytes = EMAC_MIN_ETHERNET_PKT_SIZE;
 
-	return ksnav_send(&netcp_pktdma, buffer,
-			  num_bytes, (slave_port_num) << 16);
+	return ksnav_send(&netcp_pktdma, buffer, num_bytes, slave_port_num);
 }
 
 /* Eth device open */

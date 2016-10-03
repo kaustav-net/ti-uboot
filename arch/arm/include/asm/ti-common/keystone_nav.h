@@ -152,6 +152,11 @@ struct rx_flow_regs {
 	u32	thresh[3];
 };
 
+enum dest_port_info {
+	PKT_INFO,
+	TAG_INFO
+};
+
 struct pktdma_cfg {
 	struct global_ctl_regs	*global;
 	struct tx_chan_regs	*tx_ch;
@@ -167,6 +172,7 @@ struct pktdma_cfg {
 	u32			tx_snd_q;
 
 	u32			rx_flow; /* flow that is used for RX */
+	enum dest_port_info	dest_port_info; /* flag where is dest port */
 };
 
 extern struct pktdma_cfg netcp_pktdma;
@@ -184,7 +190,8 @@ struct rx_buff_desc {
 
 int ksnav_close(struct pktdma_cfg *pktdma);
 int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers);
-int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2);
+int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt,
+	       int num_bytes, u32 dest_port);
 void *ksnav_recv(struct pktdma_cfg *pktdma, u32 **pkt, int *num_bytes);
 void ksnav_release_rxhd(struct pktdma_cfg *pktdma, void *hd);
 

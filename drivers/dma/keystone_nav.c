@@ -278,7 +278,8 @@ int ksnav_close(struct pktdma_cfg *pktdma)
 	return QM_OK;
 }
 
-int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2)
+int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt,
+	       int num_bytes, u32 dest_port)
 {
 	struct qm_host_desc *hd;
 
@@ -286,9 +287,14 @@ int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2)
 	if (hd == NULL)
 		return QM_ERR;
 
-	hd->desc_info	= num_bytes;
-	hd->swinfo[2]	= swinfo2;
-	hd->packet_info = qm_cfg->qpool_num;
+	dest_port &= 0xf;
+	hd->desc_info = num_bytes;
+	if (pktdma->dest_port_info == PKT_INFO) {
+		hd->packet_info = qm_cfg->qpool_num | (dest_port << 16);
+	} else {
+		hd->packet_info = qm_cfg->qpool_num;
+		hd->tag_info = dest_port;
+	}
 
 	qm_buff_push(hd, pktdma->tx_snd_q, pkt, num_bytes);
 

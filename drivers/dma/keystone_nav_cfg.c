@@ -23,5 +23,6 @@ struct pktdma_cfg netcp_pktdma = {
 	.rx_free_q	= CONFIG_KSNAV_NETCP_PDMA_RX_FREE_QUEUE,
 	.rx_rcv_q	= CONFIG_KSNAV_NETCP_PDMA_RX_RCV_QUEUE,
 	.tx_snd_q	= CONFIG_KSNAV_NETCP_PDMA_TX_SND_QUEUE,
+	.dest_port_info	= CONFIG_KSNAV_NETCP_PDMA_DEST_PORT_INFO,
 };
 #endif
