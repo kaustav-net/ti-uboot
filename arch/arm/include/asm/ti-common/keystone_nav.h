@@ -97,7 +97,9 @@ struct qm_host_desc {
 #define HDESC_NUM        256
 
 int	qm_init(void);
+int	qm2_init(void);
 void	qm_close(void);
+void	qm2_close(void);
 void	qm_push(struct qm_host_desc *hd, u32 qnum);
 struct qm_host_desc *qm_pop(u32 qnum);
 
