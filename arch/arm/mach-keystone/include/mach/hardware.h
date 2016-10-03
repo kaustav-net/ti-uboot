@@ -133,6 +133,20 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_NETCP_PDMA_RX_RCV_QUEUE	4002
 #endif
 
+/* 10gbe NETCP pktdma */
+#if defined(CONFIG_SOC_K2HK) || defined(CONFIG_SOC_K2E)
+#define KS2_NETCPX_PDMA_CTRL_BASE	0x02fa1000
+#define KS2_NETCPX_PDMA_TX_BASE		0x02fa1400
+#define KS2_NETCPX_PDMA_TX_CH_NUM	8
+#define KS2_NETCPX_PDMA_RX_BASE		0x02fa1800
+#define KS2_NETCPX_PDMA_RX_CH_NUM	16
+#define KS2_NETCPX_PDMA_SCHED_BASE	0x02fa1c00
+#define KS2_NETCPX_PDMA_RX_FLOW_BASE	0x02fa2000
+#define KS2_NETCPX_PDMA_RX_FLOW_NUM	16
+#define KS2_NETCPX_PDMA_DEST_PORT_INFO	TAG_INFO
+
+#endif
+
 /* Chip Interrupt Controller */
 #define KS2_CIC2_BASE			0x02608000
 

@@ -26,3 +26,21 @@ struct pktdma_cfg netcp_pktdma = {
 	.dest_port_info	= CONFIG_KSNAV_NETCP_PDMA_DEST_PORT_INFO,
 };
 #endif
+
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2HK)
+/* 10gbe NETCP Pktdma */
+struct pktdma_cfg netcpx_pktdma = {
+	.global		= (void *)CONFIG_KSNAV_NETCPX_PDMA_CTRL_BASE,
+	.tx_ch		= (void *)CONFIG_KSNAV_NETCPX_PDMA_TX_BASE,
+	.tx_ch_num	= CONFIG_KSNAV_NETCPX_PDMA_TX_CH_NUM,
+	.rx_ch		= (void *)CONFIG_KSNAV_NETCPX_PDMA_RX_BASE,
+	.rx_ch_num	= CONFIG_KSNAV_NETCPX_PDMA_RX_CH_NUM,
+	.tx_sched	= (u32 *)CONFIG_KSNAV_NETCPX_PDMA_SCHED_BASE,
+	.rx_flows	= (void *)CONFIG_KSNAV_NETCPX_PDMA_RX_FLOW_BASE,
+	.rx_flow_num	= CONFIG_KSNAV_NETCPX_PDMA_RX_FLOW_NUM,
+	.rx_free_q	= CONFIG_KSNAV_NETCPX_PDMA_RX_FREE_QUEUE,
+	.rx_rcv_q	= CONFIG_KSNAV_NETCPX_PDMA_RX_RCV_QUEUE,
+	.tx_snd_q	= CONFIG_KSNAV_NETCPX_PDMA_TX_SND_QUEUE,
+	.dest_port_info	= CONFIG_KSNAV_NETCPX_PDMA_DEST_PORT_INFO,
+};
+#endif

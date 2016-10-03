@@ -185,6 +185,7 @@ struct pktdma_cfg {
 };
 
 extern struct pktdma_cfg netcp_pktdma;
+extern struct pktdma_cfg netcpx_pktdma;
 
 /*
  * packet dma user allocates memory for rx buffers
