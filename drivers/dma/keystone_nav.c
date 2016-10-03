@@ -24,6 +24,9 @@ struct qm_config qm_memmap = {
 	.pdsp_cmd	= CONFIG_KSNAV_QM_PDSP1_CMD_BASE,
 	.pdsp_ctl	= CONFIG_KSNAV_QM_PDSP1_CTRL_BASE,
 	.pdsp_iram	= CONFIG_KSNAV_QM_PDSP1_IRAM_BASE,
+	.i_lram_size	= CONFIG_KSNAV_QM_LINK_RAM_SIZE,
+	.start_queue	= CONFIG_KSNAV_QM_START_QUEUE,
+	.num_queues	= CONFIG_KSNAV_QM_QUEUES_PER_QMGR,
 	.qpool_num	= CONFIG_KSNAV_QM_QPOOL_NUM,
 };
 
@@ -47,64 +50,117 @@ inline int num_of_desc_to_reg(int num_descr)
 	return 15;
 }
 
+static inline u32 qnum_to_logical_qmgr(u32 qnum)
+{
+	return qnum / CONFIG_KSNAV_QM_QS_PER_LOGICAL_QM;
+}
+
+static inline bool qmgr_manage_qnum(struct qm_config *qm, u32 qnum)
+{
+	u32 startq, endq;
+
+	startq = qm->start_queue;
+	endq = qm->start_queue + qm->num_queues - 1;
+
+	return (startq <= qnum) && (qnum <= endq);
+}
+
+static inline struct qm_config *qnum_to_qmgr(u32 qnum)
+{
+	if (qm_cfg && qmgr_manage_qnum(qm_cfg, qnum))
+		return qm_cfg;
+
+	return NULL;
+}
+
 int _qm_init(struct qm_config *cfg)
 {
 	u32 j;
+	struct qm_host_desc *desc;
 
-	qm_cfg = cfg;
+	cfg->mngr_cfg->link_ram_base0	= cfg->i_lram;
+	cfg->mngr_cfg->link_ram_size0	= cfg->i_lram_size;
+	cfg->mngr_cfg->link_ram_base1	= 0;
+	cfg->mngr_cfg->link_ram_size1	= 0;
+	cfg->mngr_cfg->link_ram_base2	= 0;
 
-	qm_cfg->mngr_cfg->link_ram_base0	= qm_cfg->i_lram;
-	qm_cfg->mngr_cfg->link_ram_size0	= HDESC_NUM * 8 - 1;
-	qm_cfg->mngr_cfg->link_ram_base1	= 0;
-	qm_cfg->mngr_cfg->link_ram_size1	= 0;
-	qm_cfg->mngr_cfg->link_ram_base2	= 0;
-
-	qm_cfg->desc_mem[0].base_addr = (u32)desc_pool;
-	qm_cfg->desc_mem[0].start_idx = 0;
-	qm_cfg->desc_mem[0].desc_reg_size =
+	cfg->desc_mem[0].base_addr = cfg->desc_pool_base;
+	cfg->desc_mem[0].start_idx = 0;
+	cfg->desc_mem[0].desc_reg_size =
 		(((sizeof(struct qm_host_desc) >> 4) - 1) << 16) |
 		num_of_desc_to_reg(HDESC_NUM);
 
-	memset(desc_pool, 0, sizeof(desc_pool));
-	for (j = 0; j < HDESC_NUM; j++)
-		qm_push(&desc_pool[j], qm_cfg->qpool_num);
+	memset((void *)cfg->desc_pool_base, 0, cfg->desc_pool_size);
+
+	desc = (struct qm_host_desc *)cfg->desc_pool_base;
+	for (j = 0; j < cfg->num_desc; j++)
+		qm_push(&desc[j], cfg->qpool_num);
 
 	return QM_OK;
 }
 
 int qm_init(void)
 {
-	return _qm_init(&qm_memmap);
+	int ret;
+
+	if (qm_cfg)
+		return QM_OK;
+
+	qm_memmap.desc_pool_base = (u32)desc_pool;
+	qm_memmap.desc_pool_size = sizeof(desc_pool);
+	qm_memmap.num_desc = HDESC_NUM;
+
+	qm_cfg = &qm_memmap;
+
+	ret = _qm_init(qm_cfg);
+	if (ret != QM_OK)
+		qm_cfg = NULL;
+
+	return ret;
+}
+
+static void _qm_close(struct qm_config *qm)
+{
+	u32	j;
+
+	queue_close(qm->qpool_num);
+
+	qm->mngr_cfg->link_ram_base0	= 0;
+	qm->mngr_cfg->link_ram_size0	= 0;
+	qm->mngr_cfg->link_ram_base1	= 0;
+	qm->mngr_cfg->link_ram_size1	= 0;
+	qm->mngr_cfg->link_ram_base2	= 0;
+
+	for (j = 0; j < qm->region_num; j++) {
+		qm->desc_mem[j].base_addr = 0;
+		qm->desc_mem[j].start_idx = 0;
+		qm->desc_mem[j].desc_reg_size = 0;
+	}
 }
 
 void qm_close(void)
 {
-	u32	j;
+	if (!qm_cfg)
+		return;
 
-	queue_close(qm_cfg->qpool_num);
-
-	qm_cfg->mngr_cfg->link_ram_base0	= 0;
-	qm_cfg->mngr_cfg->link_ram_size0	= 0;
-	qm_cfg->mngr_cfg->link_ram_base1	= 0;
-	qm_cfg->mngr_cfg->link_ram_size1	= 0;
-	qm_cfg->mngr_cfg->link_ram_base2	= 0;
-
-	for (j = 0; j < qm_cfg->region_num; j++) {
-		qm_cfg->desc_mem[j].base_addr = 0;
-		qm_cfg->desc_mem[j].start_idx = 0;
-		qm_cfg->desc_mem[j].desc_reg_size = 0;
-	}
-
+	_qm_close(qm_cfg);
 	qm_cfg = NULL;
 }
 
 void qm_push(struct qm_host_desc *hd, u32 qnum)
 {
 	u32 regd;
+	struct qm_config *qm;
+
+	qm = qnum_to_qmgr(qnum);
+	if (!qm)
+		return;
+
+	qnum -= qm->start_queue;
 
 	cpu_to_bus((u32 *)hd, sizeof(struct qm_host_desc)/4);
 	regd = (u32)hd | ((sizeof(struct qm_host_desc) >> 4) - 1);
-	writel(regd, &qm_cfg->queue[qnum].ptr_size_thresh);
+	writel(regd, &qm->queue[qnum].ptr_size_thresh);
 }
 
 void qm_buff_push(struct qm_host_desc *hd, u32 qnum,
@@ -120,8 +176,15 @@ void qm_buff_push(struct qm_host_desc *hd, u32 qnum,
 struct qm_host_desc *qm_pop(u32 qnum)
 {
 	u32 uhd;
+	struct qm_config *qm;
 
-	uhd = readl(&qm_cfg->queue[qnum].ptr_size_thresh) & ~0xf;
+	qm = qnum_to_qmgr(qnum);
+	if (!qm)
+		return NULL;
+
+	qnum -= qm->start_queue;
+
+	uhd = readl(&qm->queue[qnum].ptr_size_thresh) & ~0xf;
 	if (uhd)
 		cpu_to_bus((u32 *)uhd, sizeof(struct qm_host_desc)/4);
 
@@ -203,21 +266,26 @@ static int ksnav_tx_disable(struct pktdma_cfg *pktdma)
 
 int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers)
 {
-	u32 j, v;
+	u32 j, v, qm, qm_offset, num_lqms = 4;
 	struct qm_host_desc *hd;
 	u8 *rx_ptr;
 
 	if (pktdma == NULL || rx_buffers == NULL ||
-	    rx_buffers->buff_ptr == NULL || qm_cfg == NULL)
+	    rx_buffers->buff_ptr == NULL)
 		return QM_ERR;
 
 	pktdma->rx_flow = rx_buffers->rx_flow;
+
+	if (qm_cfg)
+		pktdma->qpool_num = qm_cfg->qpool_num;
+	else
+		return QM_ERR;
 
 	/* init rx queue */
 	rx_ptr = rx_buffers->buff_ptr;
 
 	for (j = 0; j < rx_buffers->num_buffs; j++) {
-		hd = qm_pop(qm_cfg->qpool_num);
+		hd = qm_pop(pktdma->qpool_num);
 		if (hd == NULL)
 			return QM_ERR;
 
@@ -230,12 +298,14 @@ int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers)
 	ksnav_rx_disable(pktdma);
 
 	/* configure rx channels */
-	v = CPDMA_REG_VAL_MAKE_RX_FLOW_A(1, 1, 0, 0, 0, 0, 0, pktdma->rx_rcv_q);
+	qm = qnum_to_logical_qmgr(pktdma->rx_rcv_q);
+	v = CPDMA_REG_VAL_MAKE_RX_FLOW_A(1, 1, 0, 0, 0, 0,
+					 qm, pktdma->rx_rcv_q);
 	writel(v, &pktdma->rx_flows[pktdma->rx_flow].control);
 	writel(0, &pktdma->rx_flows[pktdma->rx_flow].tags);
 	writel(0, &pktdma->rx_flows[pktdma->rx_flow].tag_sel);
 
-	v = CPDMA_REG_VAL_MAKE_RX_FLOW_D(0, pktdma->rx_free_q, 0,
+	v = CPDMA_REG_VAL_MAKE_RX_FLOW_D(qm, pktdma->rx_free_q, qm,
 					 pktdma->rx_free_q);
 
 	writel(v, &pktdma->rx_flows[pktdma->rx_flow].fdq_sel[0]);
@@ -252,7 +322,14 @@ int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers)
 	writel(0, &pktdma->global->emulation_control);
 
 	/* Set QM base address, only for K2x devices */
-	writel(CONFIG_KSNAV_QM_BASE_ADDRESS, &pktdma->global->qm_base_addr[0]);
+	qm_offset = CONFIG_KSNAV_QM_QS_PER_LOGICAL_QM *
+				sizeof(struct qm_reg_queue);
+	if (cpu_is_k2e())
+		num_lqms = 2;
+	for (j = 0; j < 4; j++)
+		writel(CONFIG_KSNAV_QM_BASE_ADDRESS +
+		       (j % num_lqms) * qm_offset,
+		       &pktdma->global->qm_base_addr[j]);
 
 	/* Enable all channels. The current state isn't important */
 	for (j = 0; j < pktdma->tx_ch_num; j++)  {
@@ -283,16 +360,19 @@ int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt,
 {
 	struct qm_host_desc *hd;
 
-	hd = qm_pop(qm_cfg->qpool_num);
-	if (hd == NULL)
+	hd = qm_pop(pktdma->qpool_num);
+	if (!hd) {
+		printf("_netcp_send: no desc qpool_num %u\n",
+		       pktdma->qpool_num);
 		return QM_ERR;
+	}
 
 	dest_port &= 0xf;
 	hd->desc_info = num_bytes;
 	if (pktdma->dest_port_info == PKT_INFO) {
-		hd->packet_info = qm_cfg->qpool_num | (dest_port << 16);
+		hd->packet_info = pktdma->qpool_num | (dest_port << 16);
 	} else {
-		hd->packet_info = qm_cfg->qpool_num;
+		hd->packet_info = pktdma->qpool_num;
 		hd->tag_info = dest_port;
 	}
 

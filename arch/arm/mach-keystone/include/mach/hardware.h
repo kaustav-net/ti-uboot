@@ -281,8 +281,11 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_QM_MANAGER_Q_PROXY_BASE	0x04040200
 #define KS2_QM_QUEUE_STATUS_BASE	0x04100000
 #define KS2_QM_LINK_RAM_BASE		0x04020000
+#define KS2_QM_LINK_RAM_SIZE		0x7ff
 #define KS2_QM_REGION_NUM		8
 #define KS2_QM_QPOOL_NUM		112
+#define KS2_QM_QUEUES_PER_QMGR		128
+#define KS2_QM_QS_PER_LOGICAL_QM	128
 #else
 #define KS2_QM_BASE_ADDRESS		0x23a80000
 #define KS2_QM_CONF_BASE		0x02a02000
@@ -296,8 +299,11 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_QM_MANAGER_Q_PROXY_BASE	0x02ac0000
 #define KS2_QM_QUEUE_STATUS_BASE	0x02a40000
 #define KS2_QM_LINK_RAM_BASE		0x00100000
+#define KS2_QM_LINK_RAM_SIZE		0x7fff
 #define KS2_QM_REGION_NUM		64
 #define KS2_QM_QPOOL_NUM		4000
+#define KS2_QM_QUEUES_PER_QMGR		8192
+#define KS2_QM_QS_PER_LOGICAL_QM	4096
 #endif
 
 /* USB */

@@ -71,7 +71,13 @@ struct qm_config {
 	u32	pdsp_iram;
 	/* QM configuration parameters */
 
-	u32	qpool_num;	/* */
+	u32	i_lram_size;	/* internal linking RAM	size */
+	u32	start_queue;
+	u32	num_queues;
+	u32	qpool_num;
+	u32	desc_pool_base;
+	u32	desc_pool_size;
+	u32	num_desc;
 };
 
 struct qm_host_desc {
@@ -173,6 +179,7 @@ struct pktdma_cfg {
 
 	u32			rx_flow; /* flow that is used for RX */
 	enum dest_port_info	dest_port_info; /* flag where is dest port */
+	u32			qpool_num;
 };
 
 extern struct pktdma_cfg netcp_pktdma;
