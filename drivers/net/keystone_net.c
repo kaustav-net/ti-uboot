@@ -454,6 +454,9 @@ int keystone_sgmii_config(struct phy_device *phy_dev, int port, int interface)
 	if ((status & mask) == mask)
 		return 0;
 
+	if (!(control & SGMII_REG_CONTROL_AUTONEG))
+		return -EFAULT;
+
 	printf("\n%s Waiting for SGMII auto negotiation to complete",
 	       phy_dev->dev->name);
 	while ((status & mask) != mask) {
@@ -1041,8 +1044,12 @@ static int ks2_eth_start(struct udevice *dev)
 #ifdef CONFIG_SOC_K2G
 		keystone_rgmii_config(priv->phydev);
 #else
-		keystone_sgmii_config(priv->phydev, priv->slave_port - 1,
-				      priv->sgmii_link_type);
+		ret = keystone_sgmii_config(priv->phydev, priv->slave_port - 1,
+					    priv->sgmii_link_type);
+		if (ret) {
+			printf("%s sgmii link down\n", dev->name);
+			return ret;
+		}
 #endif
 
 		udelay(10000);
@@ -1115,7 +1122,7 @@ static int ks2_eth_send(struct udevice *dev, void *packet, int length)
 {
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
 
-	if (!priv->is_10gbe) {
+	if (!priv->is_10gbe && priv->phydev) {
 		genphy_update_link(priv->phydev);
 		if (priv->phydev->link == 0)
 			return -1;
@@ -1511,6 +1518,10 @@ static int ks2_eth_parse_slave_interface(int netcp, int slave,
 		pdata->phy_interface = priv->phy_if;
 		priv->sgmii_link_type = SGMII_LINK_MAC_PHY;
 		priv->has_mdio = true;
+	} else if (priv->link_type == LINK_TYPE_SGMII_MAC_TO_MAC_FORCED_MODE) {
+		priv->phy_if = PHY_INTERFACE_MODE_SGMII;
+		pdata->phy_interface = priv->phy_if;
+		priv->sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED;
 	} else if (priv->link_type == LINK_TYPE_RGMII_LINK_MAC_PHY) {
 		priv->phy_if = PHY_INTERFACE_MODE_RGMII;
 		pdata->phy_interface = priv->phy_if;
