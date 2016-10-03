@@ -145,6 +145,8 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_NETCPX_PDMA_RX_FLOW_NUM	16
 #define KS2_NETCPX_PDMA_DEST_PORT_INFO	TAG_INFO
 
+#define KS2_LANES_PER_XGMII_SERDES	2
+#define KS2_XGMII_SERDES_BASE		0x0231e000
 #endif
 
 /* Chip Interrupt Controller */

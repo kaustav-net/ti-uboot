@@ -97,9 +97,16 @@ enum link_type {
 
 #endif
 
+#define XMAC_XMACSW_PORT_BASE_OFS	0x1060
+#define CPXMACSL_REG_SA_LO		0x10
+#define CPXMACSL_REG_SA_HI		0x14
 
+#define DEVICE_XMACSW_BASE(base, x)	((base) + XMAC_XMACSW_PORT_BASE_OFS +  \
+					 (x) * 0x30)
 struct ks2_eth_priv {
 	struct udevice			*dev;
+	struct kserdes_dev		*serdes_dev;
+	struct kserdes_dev		*serdes_dev2;
 	struct phy_device		*phydev;
 	struct mii_dev			*mdio_bus;
 	int				phy_addr;
@@ -113,8 +120,124 @@ struct ks2_eth_priv {
 	enum link_type			link_type;
 	bool				emac_open;
 	bool				has_mdio;
+	bool				is_10gbe;
 };
 #endif
+
+int xmac_sl_reset(u32 port)
+{
+	u32 i, v;
+
+	if (port >= DEVICE_N_XMACSL_PORTS)
+		return GMACSL_RET_INVALID_PORT;
+
+	/* Set the soft reset bit */
+	writel(CPGMAC_REG_RESET_VAL_RESET,
+	       DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_RESET);
+
+	/* Wait for the bit to clear */
+	for (i = 0; i < DEVICE_EMACSL_RESET_POLL_COUNT; i++) {
+		v = readl(DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_RESET);
+		if ((v & CPGMAC_REG_RESET_VAL_RESET_MASK) !=
+		    CPGMAC_REG_RESET_VAL_RESET)
+			return GMACSL_RET_OK;
+	}
+
+	/* Timeout on the reset */
+	return GMACSL_RET_WARN_RESET_INCOMPLETE;
+}
+
+static int xmac_sl_config(u_int16_t port, struct mac_sl_cfg *cfg)
+{
+	u32 v, i;
+	int ret = GMACSL_RET_OK;
+
+	if (port >= DEVICE_N_XMACSL_PORTS)
+		return GMACSL_RET_INVALID_PORT;
+
+	if (cfg->max_rx_len > CPGMAC_REG_MAXLEN_LEN) {
+		cfg->max_rx_len = CPGMAC_REG_MAXLEN_LEN;
+		ret = GMACSL_RET_WARN_MAXLEN_TOO_BIG;
+	}
+
+	/* Must wait if the device is undergoing reset */
+	for (i = 0; i < DEVICE_EMACSL_RESET_POLL_COUNT; i++) {
+		v = readl(DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_RESET);
+		if ((v & CPGMAC_REG_RESET_VAL_RESET_MASK) !=
+		    CPGMAC_REG_RESET_VAL_RESET)
+			break;
+	}
+
+	if (i == DEVICE_EMACSL_RESET_POLL_COUNT)
+		return GMACSL_RET_CONFIG_FAIL_RESET_ACTIVE;
+
+	writel(cfg->max_rx_len, DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_MAXLEN);
+	writel(cfg->ctl, DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_CTL);
+
+	/* Map RX packet flow priority to 0 */
+	writel(0, DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_RX_PRI_MAP);
+
+	return ret;
+}
+
+static int xgess_config(u32 ctl, u32 max_pkt_size)
+{
+	u32 i;
+
+	writel(XGESS_REG_VAL_XGMII_MODE, KS2_XGESS_BASE + XGESS_REG_CTL);
+
+	/* Max length register */
+	writel(max_pkt_size, DEVICE_CPSWX_BASE + CPSWX_REG_MAXLEN);
+
+	/* Control register */
+	writel(ctl, DEVICE_CPSWX_BASE + CPSWX_REG_CTL);
+
+	/* All statistics enabled by default */
+	writel(CPSWX_REG_VAL_STAT_ENABLE_ALL,
+	       DEVICE_CPSWX_BASE + CPSWX_REG_STAT_PORT_EN);
+
+	/* Reset and enable the ALE */
+	writel(CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE |
+	       CPSW_REG_VAL_ALE_CTL_BYPASS,
+	       DEVICE_CPSWX_BASE + CPSWX_REG_ALE_CONTROL);
+
+	/* All ports put into forward mode */
+	for (i = 0; i < DEVICE_CPSWX_NUM_PORTS; i++)
+		writel(CPSW_REG_VAL_PORTCTL_FORWARD_MODE,
+		       DEVICE_CPSWX_BASE + CPSWX_REG_ALE_PORTCTL(i));
+
+	return 0;
+}
+
+static int xgess_start(void)
+{
+	int i;
+	struct mac_sl_cfg cfg;
+
+	cfg.max_rx_len	= MAX_SIZE_STREAM_BUFFER;
+
+	cfg.ctl		= (XMACSL_XGMII_ENABLE	|
+			   XMACSL_XGIG_MODE	|
+			   XMACSL_RX_ENABLE_CSF	|
+			   GMACSL_RX_ENABLE_EXT_CTL);
+
+	for (i = 0; i < DEVICE_N_XMACSL_PORTS; i++) {
+		xmac_sl_reset(i);
+		xmac_sl_config(i, &cfg);
+	}
+
+	return 0;
+}
+
+int xgess_stop(void)
+{
+	int i;
+
+	for (i = 0; i < DEVICE_N_XMACSL_PORTS; i++)
+		xmac_sl_reset(i);
+
+	return 0;
+}
 
 /* MDIO */
 
@@ -472,6 +595,7 @@ int ethss_stop(void)
 	return 0;
 }
 
+#ifndef CONFIG_SOC_K2G
 struct kserdes_dev ks2_serdes_dev = {
 	.sc = {
 		.phy_type = KSERDES_PHY_SGMII,
@@ -548,6 +672,38 @@ struct kserdes_dev ks2_serdes_dev2 = {
 };
 #endif
 
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2HK)
+struct kserdes_dev ks2_xserdes_dev = {
+	.sc = {
+		.phy_type = KSERDES_PHY_XGE,
+		.lanes = CONFIG_KSNET_SERDES_LANES_PER_XGMII,
+		.regs = (void __iomem *)CONFIG_KSNET_SERDES_XGMII_BASE,
+		.peripheral_regmap = (void __iomem *)CONFIG_KSNET_NETCPX_BASE,
+		.pcsr_regmap = (void __iomem *)
+				(CONFIG_KSNET_NETCPX_BASE + XGE_PCSR_OFFSET),
+		.link_rate = KSERDES_LINK_RATE_10P3125G,
+		.lane[0] = {
+			.enable = true,
+			.ctrl_rate = KSERDES_FULL_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+		.lane[1] = {
+			.enable = true,
+			.ctrl_rate = KSERDES_FULL_RATE,
+			.tx_coeff = {2, 0, 0, 12, 4},
+			.rx_start = {7, 5},
+			.rx_force = {1, 1},
+		},
+	},
+};
+#endif
+
+#endif
+
+#ifndef CONFIG_DM_ETH
+
 #ifndef CONFIG_SOC_K2G
 static void keystone2_net_serdes_setup(void)
 {
@@ -592,8 +748,6 @@ static void keystone2_net_serdes_enable_rx(u32 slave_port)
 		kserdes_phy_reset(sd, lane);
 }
 #endif
-
-#ifndef CONFIG_DM_ETH
 
 int keystone2_eth_read_mac_addr(struct eth_device *dev)
 {
@@ -833,27 +987,92 @@ int keystone2_emac_initialize(struct eth_priv_t *eth_priv)
 
 #else
 
+#ifndef CONFIG_SOC_K2G
+static void keystone2_net_serdes_setup(struct kserdes_dev *sd)
+{
+	if (sd->dev)
+		return;
+
+	kserdes_provider_init(sd);
+	/* wait till setup */
+	udelay(2500);
+	sd->dev = (struct device *)sd;
+}
+
+/* slave_port is 1 based
+ * lane is 0 based
+ */
+static void keystone2_net_serdes_enable_rx(struct kserdes_dev *sd, u32 lane)
+{
+	if (!sd)
+		return;
+
+	if (!sd->sc.lane[lane].enable)
+		return;
+
+	kserdes_phy_enable_rx(sd, lane);
+}
+#endif
+
+static int ks2_xeth_check_link_state(struct udevice *dev)
+{
+	struct ks2_eth_priv *priv = dev_get_priv(dev);
+	struct eth_pdata *pdata = dev_get_platdata(dev);
+	int sw_link_state;
+	int p = priv->slave_port - 1;
+	u32 sts;
+
+	sts = readl(pdata->iobase + XGE_PCSR_PORT_RX_STATUS(p));
+	sw_link_state = (sts & XGE_PCSR_BLOCK_LOCK_MASK) >>
+			 XGE_PCSR_BLOCK_LOCK_SHIFT;
+	if (sw_link_state)
+		return 0;
+
+	/* Attempt to reset serdes */
+	return kserdes_phy_reset(priv->serdes_dev, p);
+}
+
 static int ks2_eth_start(struct udevice *dev)
 {
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
+	int ret;
 
+	if (!priv->is_10gbe) {
 #ifdef CONFIG_SOC_K2G
-	keystone_rgmii_config(priv->phydev);
+		keystone_rgmii_config(priv->phydev);
 #else
-	keystone_sgmii_config(priv->phydev, priv->slave_port - 1,
-			      priv->sgmii_link_type);
+		keystone_sgmii_config(priv->phydev, priv->slave_port - 1,
+				      priv->sgmii_link_type);
 #endif
 
-	udelay(10000);
+		udelay(10000);
 
-	/* On chip switch configuration */
-	ethss_config(target_get_switch_ctl(), SWITCH_MAX_PKT_SIZE);
-
-	qm_init();
+		/* On chip switch configuration */
+		ethss_config(target_get_switch_ctl(), SWITCH_MAX_PKT_SIZE);
+		qm_init();
+	} else {
+		xgess_config(target_get_switch_ctl(), SWITCH_MAX_PKT_SIZE);
+		if (cpu_is_k2hk())
+			qm2_init();
+		else
+			qm_init();
+	}
 
 	if (ksnav_init(priv->netcp_pktdma, &priv->net_rx_buffs)) {
 		error("ksnav_init failed\n");
 		goto err_knav_init;
+	}
+
+	if (priv->is_10gbe) {
+		ret = ks2_xeth_check_link_state(dev);
+		if (ret) {
+			printf("%s serdes lane NOT up\n", dev->name);
+			return ret;
+		}
+
+		xgess_start();
+		priv->emac_open = true;
+		return 0;
 	}
 
 	/*
@@ -884,7 +1103,10 @@ static int ks2_eth_start(struct udevice *dev)
 err_phy_start:
 	ksnav_close(priv->netcp_pktdma);
 err_knav_init:
-	qm_close();
+	if (!priv->is_10gbe || cpu_is_k2e())
+		qm_close();
+	else
+		qm2_close();
 
 	return -EFAULT;
 }
@@ -893,9 +1115,11 @@ static int ks2_eth_send(struct udevice *dev, void *packet, int length)
 {
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
 
-	genphy_update_link(priv->phydev);
-	if (priv->phydev->link == 0)
-		return -1;
+	if (!priv->is_10gbe) {
+		genphy_update_link(priv->phydev);
+		if (priv->phydev->link == 0)
+			return -1;
+	}
 
 	if (length < EMAC_MIN_ETHERNET_PKT_SIZE)
 		length = EMAC_MIN_ETHERNET_PKT_SIZE;
@@ -935,11 +1159,23 @@ static void ks2_eth_stop(struct udevice *dev)
 
 	if (!priv->emac_open)
 		return;
-	ethss_stop();
+
+	if (!priv->is_10gbe)
+		ethss_stop();
+	else
+		xgess_stop();
 
 	ksnav_close(priv->netcp_pktdma);
-	qm_close();
-	phy_shutdown(priv->phydev);
+
+	if (!priv->is_10gbe) {
+		qm_close();
+		phy_shutdown(priv->phydev);
+	} else if (cpu_is_k2e()) {
+		qm_close();
+	} else {
+		qm2_close();
+	}
+
 	priv->emac_open = false;
 }
 
@@ -949,6 +1185,9 @@ int ks2_eth_read_rom_hwaddr(struct udevice *dev)
 	struct eth_pdata *pdata = dev_get_platdata(dev);
 	u32 maca = 0;
 	u32 macb = 0;
+
+	if (priv->is_10gbe)
+		return 0;
 
 	/* Read the e-fuse mac address */
 	if (priv->slave_port == 1) {
@@ -970,25 +1209,37 @@ int ks2_eth_write_hwaddr(struct udevice *dev)
 {
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
 	struct eth_pdata *pdata = dev_get_platdata(dev);
+	u32 sa_lo, sa_hi, sl_port_base;
 
-	writel(mac_hi(pdata->enetaddr),
-	       DEVICE_EMACSW_BASE(pdata->iobase, priv->slave_port - 1) +
-				  CPGMACSL_REG_SA_HI);
-	writel(mac_lo(pdata->enetaddr),
-	       DEVICE_EMACSW_BASE(pdata->iobase, priv->slave_port - 1) +
-				  CPGMACSL_REG_SA_LO);
+	if (priv->is_10gbe) {
+		sl_port_base = DEVICE_XMACSW_BASE(pdata->iobase,
+						  priv->slave_port - 1);
+		sa_lo = sl_port_base + CPXMACSL_REG_SA_LO;
+		sa_hi = sl_port_base + CPXMACSL_REG_SA_HI;
+	} else {
+		sl_port_base = DEVICE_EMACSW_BASE(pdata->iobase,
+						  priv->slave_port - 1);
+		sa_lo = sl_port_base + CPGMACSL_REG_SA_LO;
+		sa_hi = sl_port_base + CPGMACSL_REG_SA_HI;
+	}
 
+	writel(mac_hi(pdata->enetaddr), sa_hi);
+	writel(mac_lo(pdata->enetaddr), sa_lo);
 	return 0;
 }
 
-static int ks2_eth_probe(struct udevice *dev)
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2HK)
+static inline int ks2_xeth_clocks_enable(void)
 {
-	struct ks2_eth_priv *priv = dev_get_priv(dev);
-	struct mii_dev *mdio_bus;
-	int ret;
+	if (psc_enable_module(KS2_LPSC_XGE))
+		return -EACCES;
 
-	priv->dev = dev;
+	return 0;
+}
+#endif
 
+static int ks2_eth_clocks_enable(void)
+{
 	/* These clock enables has to be moved to common location */
 	if (cpu_is_k2g())
 		writel(KS2_ETHERNET_RGMII, KS2_ETHERNET_CFG);
@@ -1006,10 +1257,14 @@ static int ks2_eth_probe(struct udevice *dev)
 	if (cpu_is_k2e() || cpu_is_k2l())
 		pll_pa_clk_sel();
 
+	return 0;
+}
 
-	priv->net_rx_buffs.buff_ptr = rx_buffs;
-	priv->net_rx_buffs.num_buffs = RX_BUFF_NUMS;
-	priv->net_rx_buffs.buff_len = RX_BUFF_LEN;
+static int ks2_eth_mdio_setup(struct udevice *dev)
+{
+	struct ks2_eth_priv *priv = dev_get_priv(dev);
+	struct mii_dev *mdio_bus;
+	int ret;
 
 	if (priv->slave_port == 1) {
 		/*
@@ -1041,11 +1296,53 @@ static int ks2_eth_probe(struct udevice *dev)
 		priv->mdio_bus = parent_priv->mdio_bus;
 	}
 
-#ifndef CONFIG_SOC_K2G
-	keystone2_net_serdes_setup();
-#endif
+	return 0;
+}
 
-	priv->netcp_pktdma = &netcp_pktdma;
+static int ks2_eth_probe(struct udevice *dev)
+{
+	struct ks2_eth_priv *priv = dev_get_priv(dev);
+	int ret = -EINVAL;
+
+	priv->dev = dev;
+
+	if (!priv->is_10gbe) {
+#ifndef CONFIG_SOC_K2G
+		priv->serdes_dev = &ks2_serdes_dev;
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2L)
+		priv->serdes_dev2 = &ks2_serdes_dev2;
+#endif
+#endif
+		priv->netcp_pktdma = &netcp_pktdma;
+		ret = ks2_eth_clocks_enable();
+	} else {
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2HK)
+		priv->serdes_dev = &ks2_xserdes_dev;
+		priv->netcp_pktdma = &netcpx_pktdma;
+		ret = ks2_xeth_clocks_enable();
+#endif
+	}
+
+	if (ret)
+		return ret;
+
+	priv->net_rx_buffs.buff_ptr = rx_buffs;
+	priv->net_rx_buffs.num_buffs = RX_BUFF_NUMS;
+	priv->net_rx_buffs.buff_len = RX_BUFF_LEN;
+
+	if (!priv->is_10gbe) {
+		ret = ks2_eth_mdio_setup(dev);
+		if (ret)
+			return ret;
+	}
+
+#ifndef CONFIG_SOC_K2G
+	if (priv->serdes_dev)
+		keystone2_net_serdes_setup(priv->serdes_dev);
+
+	if (priv->serdes_dev2)
+		keystone2_net_serdes_setup(priv->serdes_dev2);
+#endif
 
 	if (priv->has_mdio) {
 		priv->phydev = phy_connect(priv->mdio_bus, priv->phy_addr,
@@ -1054,8 +1351,28 @@ static int ks2_eth_probe(struct udevice *dev)
 	}
 
 #ifndef CONFIG_SOC_K2G
-	keystone2_net_serdes_enable_rx(priv->slave_port);
+	if (priv->serdes_dev2) {
+		u32 lane = priv->slave_port - 1;
+
+		if (priv->slave_port > priv->serdes_dev2->sc.lanes) {
+			lane -= priv->serdes_dev2->sc.lanes;
+			keystone2_net_serdes_enable_rx(priv->serdes_dev2, lane);
+		} else if (priv->serdes_dev) {
+			keystone2_net_serdes_enable_rx(priv->serdes_dev, lane);
+		} else {
+			return -ENODEV;
+		}
+	} else {
+		u32 lane = priv->slave_port - 1;
+
+		if (!priv->serdes_dev ||
+		    (priv->slave_port > priv->serdes_dev->sc.lanes))
+			return -ENODEV;
+
+		keystone2_net_serdes_enable_rx(priv->serdes_dev, lane);
+	}
 #endif
+
 	return 0;
 }
 
@@ -1082,13 +1399,14 @@ static const struct eth_ops ks2_eth_ops = {
 
 static int ks2_eth_bind_slaves(struct udevice *dev, int gbe, int *gbe_0)
 {
+	struct ks2_eth_priv *priv = dev_get_priv(dev);
 	const void *fdt = gd->fdt_blob;
 	struct udevice *sl_dev;
 	int interfaces;
 	int sec_slave;
 	int slave;
 	int ret;
-	char *slave_name;
+	char *slave_name, *intf_name, *sl_drv_name;
 
 	interfaces = fdt_subnode_offset(fdt, gbe, "interfaces");
 	fdt_for_each_subnode(fdt, slave, interfaces) {
@@ -1104,8 +1422,15 @@ static int ks2_eth_bind_slaves(struct udevice *dev, int gbe, int *gbe_0)
 		} else {
 			/* Slave devices to be registered */
 			slave_name = malloc(20);
-			snprintf(slave_name, 20, "netcp@slave-%d", slave_no);
-			ret = device_bind_driver_to_node(dev, "eth_ks2_sl",
+			if (!priv->is_10gbe) {
+				intf_name = "netcp@slave-%d";
+				sl_drv_name = "eth_ks2_sl";
+			} else {
+				intf_name = "netcpx@slave-%d";
+				sl_drv_name = "xeth_ks2_sl";
+			}
+			snprintf(slave_name, 20, intf_name, slave_no);
+			ret = device_bind_driver_to_node(dev, sl_drv_name,
 							 slave_name, slave,
 							 &sl_dev);
 			if (ret) {
@@ -1114,6 +1439,9 @@ static int ks2_eth_bind_slaves(struct udevice *dev, int gbe, int *gbe_0)
 			}
 		}
 	}
+
+	if (priv->is_10gbe)
+		return 0;
 
 	sec_slave = fdt_subnode_offset(fdt, gbe, "secondary-slave-ports");
 	fdt_for_each_subnode(fdt, slave, sec_slave) {
@@ -1187,6 +1515,10 @@ static int ks2_eth_parse_slave_interface(int netcp, int slave,
 		priv->phy_if = PHY_INTERFACE_MODE_RGMII;
 		pdata->phy_interface = priv->phy_if;
 		priv->has_mdio = true;
+	} else if (priv->link_type == LINK_TYPE_10G_MAC_TO_MAC_FORCED_MODE) {
+		priv->phy_if = PHY_INTERFACE_MODE_XGMII,
+		pdata->phy_interface = priv->phy_if;
+		priv->has_mdio = false;
 	}
 
 	return 0;
@@ -1197,6 +1529,7 @@ static int ks2_sl_eth_ofdata_to_platdata(struct udevice *dev)
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
 	struct eth_pdata *pdata = dev_get_platdata(dev);
 	const void *fdt = gd->fdt_blob;
+	const char *compat = NULL;
 	int slave = dev->of_offset;
 	int interfaces;
 	int gbe;
@@ -1207,6 +1540,10 @@ static int ks2_sl_eth_ofdata_to_platdata(struct udevice *dev)
 	gbe = fdt_parent_offset(fdt, interfaces);
 	netcp_devices = fdt_parent_offset(fdt, gbe);
 	netcp = fdt_parent_offset(fdt, netcp_devices);
+
+	compat = fdt_getprop(fdt, netcp, "compatible", NULL);
+	if (compat && !strcmp(compat, "ti,netcpx-1.0"))
+		priv->is_10gbe = true;
 
 	ks2_eth_parse_slave_interface(netcp, slave, priv, pdata);
 
@@ -1220,9 +1557,14 @@ static int ks2_eth_ofdata_to_platdata(struct udevice *dev)
 	struct ks2_eth_priv *priv = dev_get_priv(dev);
 	struct eth_pdata *pdata = dev_get_platdata(dev);
 	const void *fdt = gd->fdt_blob;
+	const char *compat = NULL;
 	int gbe_0 = -ENODEV;
 	int netcp_devices;
 	int gbe;
+
+	compat = fdt_getprop(fdt, dev->of_offset, "compatible", NULL);
+	if (compat && !strcmp(compat, "ti,netcpx-1.0"))
+		priv->is_10gbe = true;
 
 	netcp_devices = fdt_subnode_offset(fdt, dev->of_offset,
 					   "netcp-devices");
@@ -1239,6 +1581,7 @@ static int ks2_eth_ofdata_to_platdata(struct udevice *dev)
 
 static const struct udevice_id ks2_eth_ids[] = {
 	{ .compatible = "ti,netcp-1.0" },
+	{ .compatible = "ti,netcpx-1.0" },
 	{ }
 };
 
@@ -1266,4 +1609,31 @@ U_BOOT_DRIVER(eth_ks2) = {
 	.platdata_auto_alloc_size = sizeof(struct eth_pdata),
 	.flags = DM_FLAG_ALLOC_PRIV_DMA,
 };
+
+#if defined(CONFIG_SOC_K2E) || defined(CONFIG_SOC_K2HK)
+U_BOOT_DRIVER(xeth_ks2_slave) = {
+	.name	= "xeth_ks2_sl",
+	.id	= UCLASS_ETH,
+	.ofdata_to_platdata = ks2_sl_eth_ofdata_to_platdata,
+	.probe	= ks2_eth_probe,
+	.remove	= ks2_eth_remove,
+	.ops	= &ks2_eth_ops,
+	.priv_auto_alloc_size = sizeof(struct ks2_eth_priv),
+	.platdata_auto_alloc_size = sizeof(struct eth_pdata),
+	.flags = DM_FLAG_ALLOC_PRIV_DMA,
+};
+
+U_BOOT_DRIVER(xeth_ks2) = {
+	.name	= "xeth_ks2",
+	.id	= UCLASS_ETH,
+	.of_match = ks2_eth_ids,
+	.ofdata_to_platdata = ks2_eth_ofdata_to_platdata,
+	.probe	= ks2_eth_probe,
+	.remove	= ks2_eth_remove,
+	.ops	= &ks2_eth_ops,
+	.priv_auto_alloc_size = sizeof(struct ks2_eth_priv),
+	.platdata_auto_alloc_size = sizeof(struct eth_pdata),
+	.flags = DM_FLAG_ALLOC_PRIV_DMA,
+};
+#endif
 #endif
