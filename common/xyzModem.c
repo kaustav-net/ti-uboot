@@ -73,9 +73,9 @@ CYGACC_COMM_IF_GETC_TIMEOUT (char chan, char *c)
 {
 #define DELAY 20
   unsigned long counter = 0;
-  while (!tstc () && (counter < xyzModem_CHAR_TIMEOUT / DELAY))
+  while (!tstc () && (counter < xyzModem_CHAR_TIMEOUT * 1000 / DELAY))
     {
-      mdelay (DELAY);
+      udelay (DELAY);
       counter++;
     }
   if (tstc ())
