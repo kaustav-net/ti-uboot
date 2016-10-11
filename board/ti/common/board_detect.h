@@ -141,7 +141,7 @@ bool board_ti_rev_is(char *rev_tag, int cmp_len);
 /**
  * board_ti_get_rev() - Get board revision for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board revision otherwise
  */
 char *board_ti_get_rev(void);
@@ -149,7 +149,7 @@ char *board_ti_get_rev(void);
 /**
  * board_ti_get_config() - Get board config for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board config otherwise
  */
 char *board_ti_get_config(void);
@@ -157,7 +157,7 @@ char *board_ti_get_config(void);
 /**
  * board_ti_get_name() - Get board name for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board name otherwise
  */
 char *board_ti_get_name(void);

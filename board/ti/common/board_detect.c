@@ -257,9 +257,7 @@ char * __maybe_unused board_ti_get_rev(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
-	if (ep->header == TI_DEAD_EEPROM_MAGIC)
-		return NULL;
-
+	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
 	return ep->version;
 }
 
@@ -267,9 +265,7 @@ char * __maybe_unused board_ti_get_config(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
-	if (ep->header == TI_DEAD_EEPROM_MAGIC)
-		return NULL;
-
+	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
 	return ep->config;
 }
 
@@ -277,9 +273,7 @@ char * __maybe_unused board_ti_get_name(void)
 {
 	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
 
-	if (ep->header == TI_DEAD_EEPROM_MAGIC)
-		return NULL;
-
+	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
 	return ep->name;
 }
 
