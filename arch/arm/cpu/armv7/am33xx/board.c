@@ -335,18 +335,6 @@ static void watchdog_disable(void)
 		;
 }
 
-#ifdef CONFIG_SPL_BUILD
-void board_init_f(ulong dummy)
-{
-	board_early_init_f();
-	sdram_init();
-	/* dram_init must store complete ramsize in gd->ram_size */
-	gd->ram_size = get_ram_size(
-			(void *)CONFIG_SYS_SDRAM_BASE,
-			CONFIG_MAX_RAM_BANK_SIZE);
-}
-#endif
-
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_RTC_ONLY_SUPPORT)
 /*
  * Check if we are executing rtc-only mode, and resume from it if needed
@@ -409,6 +397,10 @@ void s_init(void)
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_RTC_ONLY_SUPPORT)
 	rtc_only();
 #endif
+}
+
+void early_system_init(void)
+{
 	/*
 	 * The ROM will only have set up sufficient pinmux to allow for the
 	 * first 4KiB NOR to be read, we must finish doing what we know of
@@ -429,4 +421,26 @@ void s_init(void)
 	rtc32k_enable();
 #endif
 }
+
+#ifdef CONFIG_SPL_BUILD
+void board_init_f(ulong dummy)
+{
+	early_system_init();
+	board_early_init_f();
+	sdram_init();
+	/* dram_init must store complete ramsize in gd->ram_size */
+	gd->ram_size = get_ram_size(
+			(void *)CONFIG_SYS_SDRAM_BASE,
+			CONFIG_MAX_RAM_BANK_SIZE);
+}
 #endif
+
+#endif
+
+int arch_cpu_init_dm(void)
+{
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+	early_system_init();
+#endif
+	return 0;
+}
