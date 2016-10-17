@@ -365,7 +365,6 @@
 		lp8733_regulators: regulators {
 			lp8733_buck0_reg: buck0 {
 				/* FB_B0 -> LP8733-BUCK1 - VPO_S1_AVS - VDD_CORE_AVS (core, mpu, gpu) */
-				compatible = "ti,lp873x-buck0";
 				regulator-name = "lp8733-buck0";
 				regulator-min-microvolt = <850000>;
 				regulator-max-microvolt = <1250000>;
@@ -376,7 +375,6 @@
 
 			lp8733_buck1_reg: buck1 {
 				/* FB_B1 -> LP8733-BUCK2 - VPO_S2_AVS - VDD_DSP_AVS (DSP/eve/iva) */
-				compatible = "ti,lp873x-buck1";
 				regulator-name = "lp8733-buck1";
 				regulator-min-microvolt = <850000>;
 				regulator-max-microvolt = <1250000>;
@@ -387,7 +385,6 @@
 
 			lp8733_ldo0_reg: ldo0 {
 				/* LDO0 -> LP8733-LDO1 - VPO_L1_3V3 - VDDSHV8 (optional) */
-				compatible = "ti,lp873x-ldo0";
 				regulator-name = "lp8733-ldo0";
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
@@ -396,7 +393,6 @@
 
 			lp8733_ldo1_reg: ldo1 {
 				/* LDO1 -> LP8733-LDO2 - VPO_L2_3V3 - VDDA_USB3V3 */
-				compatible = "ti,lp873x-ldo1";
 				regulator-name = "lp8733-ldo1";
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
@@ -414,7 +410,6 @@
 		lp8732_regulators: regulators {
 			lp8732_buck0_reg: buck0 {
 				/* FB_B0 -> LP8732-BUCK1 - VPO_S3_1V8 - VDDS_1V8 */
-				compatible = "ti,lp873x-buck0";
 				regulator-name = "lp8732-buck0";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
@@ -425,7 +420,6 @@
 
 			LP8732_buck1_reg: buck1 {
 				/* FB_B1 -> LP8732-BUCK2 - VPO_S4_DDR - VDD_DDR_1V35 */
-				compatible = "ti,lp873x-buck1";
 				regulator-name = "lp8732-buck1";
 				regulator-min-microvolt = <1350000>;
 				regulator-max-microvolt = <1350000>;
@@ -436,7 +430,6 @@
 
 			lp8732_ldo0_reg: ldo0 {
 				/* LDO0 -> LP8732-LDO1 - VPO_L3_1V8 - VDA_1V8_PLL */
-				compatible = "ti,lp873x-ldo0";
 				regulator-name = "lp8732-ldo0";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
@@ -447,7 +440,6 @@
 
 			lp8732_ldo1_reg: ldo1 {
 				/* LDO1 -> LP8732-LDO2 - VPO_L4_1V8 - VDA_1V8_PHY */
-				compatible = "ti,lp873x-ldo1";
 				regulator-name = "lp8732-ldo1";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
