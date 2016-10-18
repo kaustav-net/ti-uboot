@@ -23,6 +23,15 @@ static inline int board_is_k2g_gp(void)
 #endif
 }
 
+static inline int board_is_k2g_ice(void)
+{
+#if !defined(CONFIG_K2G_GP_EVM) && defined(CONFIG_SOC_K2G)
+	return true;
+#else
+	return false;
+#endif
+}
+
 int get_num_eth_ports(void);
 void spl_init_keystone_plls(void);
 
