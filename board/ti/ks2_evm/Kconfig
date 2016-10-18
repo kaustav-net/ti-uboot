@@ -48,4 +48,8 @@ config SYS_VENDOR
 config SYS_CONFIG_NAME
 	default "k2g_evm"
 
+config K2G_GP_EVM
+	bool "Current board is TI K2G GP EVM"
+	default n
+
 endif
