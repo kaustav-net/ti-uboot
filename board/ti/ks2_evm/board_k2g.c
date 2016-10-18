@@ -156,6 +156,19 @@ int board_early_init_f(void)
 }
 #endif
 
+#ifdef CONFIG_BOARD_LATE_INIT
+int board_late_init(void)
+{
+#ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
+	if (board_is_k2g_gp())
+		setenv("board_name", "66AK2GGP\0");
+	else if (board_is_k2g_ice())
+		setenv("board_name", "66AK2GIC\0");
+#endif
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_SPL_BUILD
 void spl_init_keystone_plls(void)
 {
