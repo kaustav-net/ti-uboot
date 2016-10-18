@@ -10,3 +10,8 @@ F:	include/configs/k2l_evm.h
 F:	configs/k2l_evm_defconfig
 F:	include/configs/k2g_evm.h
 F:	configs/k2g_evm_defconfig
+
+K2G_ICE BOARD
+M:	Franklin S Cooper Jr. <fcooper@ti.com>
+S:	Maintained
+F:	configs/k2g_ice_defconfig
