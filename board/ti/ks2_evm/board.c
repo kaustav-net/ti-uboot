@@ -60,10 +60,13 @@ int dram_init(void)
 	aemif_init(ARRAY_SIZE(aemif_configs), aemif_configs);
 #endif
 
-	if (ddr3_size)
-		ddr3_init_ecc(KS2_DDR3A_EMIF_CTRL_BASE, ddr3_size);
-	else
-		ddr3_init_ecc(KS2_DDR3A_EMIF_CTRL_BASE, gd->ram_size >> 30);
+	if (!board_is_k2g_ice()) {
+		if (ddr3_size)
+			ddr3_init_ecc(KS2_DDR3A_EMIF_CTRL_BASE, ddr3_size);
+		else
+			ddr3_init_ecc(KS2_DDR3A_EMIF_CTRL_BASE,
+				      gd->ram_size >> 30);
+	}
 
 	return 0;
 }
@@ -73,11 +76,13 @@ int board_init(void)
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
 #if defined(CONFIG_TI_GPMC)
-	ti_gpmc_init(&gpmc_config);
+	if (!board_is_k2g_ice())
+		ti_gpmc_init(&gpmc_config);
 #endif
 
 #if defined(CONFIG_TI_AEMIF)
-	aemif_init(ARRAY_SIZE(aemif_configs), aemif_configs);
+	if (!board_is_k2g_ice())
+		aemif_init(ARRAY_SIZE(aemif_configs), aemif_configs);
 #endif
 	return 0;
 }
