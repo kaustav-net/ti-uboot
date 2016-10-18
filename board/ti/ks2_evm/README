@@ -57,7 +57,8 @@ As U-Boot is migrating to Kconfig there is also board defconfig files
 configs/k2e_evm_defconfig
 configs/k2hk_evm_defconfig
 configs/k2l_evm_defconfig
-configs/k2g_evm_defconfig
+configs/k2g_evm_defconfig (Only for the General Purpose EVM)
+configs/k2g_ice_defconfig (Only for the Industrial Communication Engine EVM)
 
 Supported boot modes:
  - SPI NOR boot
@@ -74,6 +75,7 @@ Supported image formats:
 Build instructions:
 ===================
 Examples for k2hk, for k2e, k2l and k2g just replace k2hk prefix accordingly.
+For K2G ICE evm users, you also need to replace "evm" with "ice".
 Don't forget to add ARCH=arm and CROSS_COMPILE.
 
 To build u-boot.bin, u-boot-spi.gph, MLO:
