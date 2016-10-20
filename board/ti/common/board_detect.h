@@ -210,4 +210,16 @@ void set_board_info_env(char *name);
  */
 int ti_i2c_eeprom_am_set(const char *name, const char *rev);
 
+/**
+ * board_ti_set_ethaddr- Sets the ethaddr environment from EEPROM
+ * @index: The first eth<index>addr environment variable to set
+ *
+ * EEPROM should be already read before calling this function.
+ * The EEPROM contains 2 MAC addresses which define the MAC address
+ * range (i.e. first and last MAC address).
+ * This function sets the ethaddr environment variable for all
+ * the available MAC addresses starting from eth<index>addr.
+ */
+void __maybe_unused board_ti_set_ethaddr(int index);
+
 #endif	/* __BOARD_DETECT_H */
