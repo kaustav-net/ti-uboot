@@ -12,6 +12,7 @@
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/mmc_host_def.h>
 #include "mux-k2g.h"
+#include "../common/board_detect.h"
 
 #define SYS_CLK		24000000
 
@@ -159,12 +160,24 @@ int board_early_init_f(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
+	__maybe_unused int rc;
+
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 	if (board_is_k2g_gp())
 		setenv("board_name", "66AK2GGP\0");
 	else if (board_is_k2g_ice())
 		setenv("board_name", "66AK2GIC\0");
 #endif
+
+#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_TI_I2C_BOARD_DETECT)
+	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
+			CONFIG_EEPROM_CHIP_ADDRESS);
+	if (rc)
+		printf("ti_i2c_eeprom_init failed %d\n", rc);
+
+	board_ti_set_ethaddr(1);
+#endif
+
 	return 0;
 }
 #endif

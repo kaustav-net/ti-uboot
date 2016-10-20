@@ -61,6 +61,10 @@
 /* SPL SPI Loader Configuration */
 #define CONFIG_SPL_TEXT_BASE		0x0c080000
 
+/* Board Detection EEPROM */
+#define CONFIG_EEPROM_BUS_ADDRESS	0
+#define CONFIG_EEPROM_CHIP_ADDRESS	0x50
+
 /* Network */
 #define CONFIG_KSNET_NETCP_V1_5
 #define CONFIG_KSNET_CPSW_NUM_PORTS	2
