@@ -15,7 +15,7 @@ config TARGET_K2L_EVM
 
 config TARGET_K2G_EVM
 	bool "TI Keystone 2 Galileo EVM"
-
+	select TI_I2C_BOARD_DETECT
 endchoice
 
 config SYS_SOC

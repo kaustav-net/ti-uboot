@@ -52,4 +52,6 @@ config K2G_GP_EVM
 	bool "Current board is TI K2G GP EVM"
 	default n
 
+source "board/ti/common/Kconfig"
+
 endif
