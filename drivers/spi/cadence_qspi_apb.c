@@ -749,10 +749,15 @@ int cadence_qspi_apb_indirect_write_execute(struct cadence_spi_platdata *plat,
 	while (remaining > 0) {
 		write_bytes = remaining > page_size ? page_size : remaining;
 		/* Handle non-4-byte aligned access to avoid data abort. */
-		if (((uintptr_t)txbuf % 4) || (write_bytes % 4))
+		if ((uintptr_t)txbuf % 4) {
 			writesb(plat->ahbbase, txbuf, write_bytes);
-		else
+		} else {
 			writesl(plat->ahbbase, txbuf, write_bytes >> 2);
+			if (write_bytes % 4)
+				writesb(plat->ahbbase,
+					txbuf + rounddown(write_bytes, 4),
+					write_bytes % 4);
+		}
 
 		ret = wait_for_bit("QSPI", plat->regbase + CQSPI_REG_SDRAMLEVEL,
 				   CQSPI_REG_SDRAMLEVEL_WR_MASK <<
