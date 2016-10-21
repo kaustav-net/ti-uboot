@@ -327,6 +327,15 @@ struct pin_cfg k2g_ice_evm_pin_cfg[] = {
 	/* UART 0 */
 	{ 115, MODE(0) | PIN_PTD },	/* UART0_RXD.UART0_RXD */
 	{ 116, MODE(0) | PIN_PTD },	/* UART0_TXD.UART0_TXD */
+
+	/* QSPI */
+	{ 129,	MODE(0) | PIN_PDIS },	/* QSPI_CLK.QSPI_CLK */
+	{ 130,	MODE(0) | PIN_PDIS},	/* QSPI_RCLK.QSPI_RCLK */
+	{ 131,	MODE(0) | PIN_PDIS},	/* QSPI_D0.QSPI_D0 */
+	{ 132,	MODE(0) | PIN_PDIS},	/* QSPI_D1.QSPI_D1 */
+	{ 133,	MODE(0) | PIN_PDIS},	/* QSPI_D2.QSPI_D2 */
+	{ 134,	MODE(0) | PIN_PDIS},	/* QSPI_D3.QSPI_D3 */
+	{ 135,	MODE(0) | PIN_PDIS},	/* QSPI_CSN0.QSPI_CSN0 */
 	{ MAX_PIN_N, }
 };
 
