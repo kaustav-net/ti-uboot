@@ -320,6 +320,23 @@ struct pin_cfg k2g_ice_evm_pin_cfg[] = {
 	{ 70, MODE(0) | PIN_PTU },	/* MMC1_SDWP.MMC1_SDWP */
 	{ 71, MODE(0) | PIN_PTD },	/* MMC1_POW.MMC1_POW   */
 
+	/* RGMII */
+	{ 85, MODE(1) },		/* MII_TXCLK.RGMII_TXC  */
+	{ 72, MODE(1) },		/* MII_RXCLK.RGMII_RXC  */
+	{ 77, MODE(1) | PIN_PDIS},	/* MII_RXD3.RGMII_RXD3  */
+	{ 78, MODE(1) | PIN_PDIS},	/* MII_RXD2.RGMII_RXD2  */
+	{ 79, MODE(1) | PIN_PDIS},	/* MII_RXD1.RGMII_RXD1  */
+	{ 80, MODE(1) | PIN_PDIS},	/* MII_RXD0.RGMII_RXD0  */
+	{ 81, MODE(1) | PIN_PDIS},	/* MII_RXDV.RGMII_RXCTL */
+	{ 91, MODE(1) },		/* MII_TXD3.RGMII_TXD3  */
+	{ 92, MODE(1) },		/* MII_TXD2.RGMII_TXD2  */
+	{ 93, MODE(1) },		/* MII_TXD1.RGMII_TXD1  */
+	{ 94, MODE(1) },		/* MII_TXD0.RGMII_TXD0  */
+	{ 95, MODE(1) },		/* MII_TXEN.RGMII_TXCTL */
+	{ 98, MODE(0) },		/* MDIO_DATA.MDIO_DATA  */
+	{ 99, MODE(0) },		/* MDIO_CLK.MDIO_CLK    */
+	{ 10, MODE(3) },		/* GPMC_AD10.GPIO0_10   */
+
 	/* I2C 0 */
 	{ 223, MODE(0) | PIN_PDIS },	/* I2C0_SCL.I2C0_SCL */
 	{ 224, MODE(0) | PIN_PDIS },	/* I2C0_SDA.I2C0_SDA */
