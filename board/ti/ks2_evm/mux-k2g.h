@@ -353,6 +353,10 @@ struct pin_cfg k2g_ice_evm_pin_cfg[] = {
 	{ 133,	MODE(0) | PIN_PDIS},	/* QSPI_D2.QSPI_D2 */
 	{ 134,	MODE(0) | PIN_PDIS},	/* QSPI_D3.QSPI_D3 */
 	{ 135,	MODE(0) | PIN_PDIS},	/* QSPI_CSN0.QSPI_CSN0 */
+
+	/* ICSS1 Padconf Workaround */
+	{ 202, MODE(1) | PIN_PDIS },    /* PR1_PRU1_GPO1.PR1_PRU1_GPI1 (PR1_MII1_RXD1) */
+
 	{ MAX_PIN_N, }
 };
 
