@@ -139,3 +139,11 @@ config DM_REGULATOR_LP873X
 	This enables implementation of driver-model regulator uclass
 	features for REGULATOR LP873X and the family of LP873X PMICs.
 	The driver implements get/set api for: value and enable.
+
+config DM_REGULATOR_PBIAS
+	bool "Enable driver for PBIAS regulator"
+        depends on MISC
+	---help---
+	This enables implementation of driver-model regulator uclass
+	features for REGULATOR PBIAS.
+	The driver implements regulator API for set voltage and enable.
