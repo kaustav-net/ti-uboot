@@ -93,6 +93,7 @@ struct omap_hsmmc_data {
 	char *version;
 	struct udevice *vmmc_supply;
 	struct udevice *vmmc_aux_supply;
+	struct udevice *pbias_supply;
 	ushort last_cmd;
 	uint signal_voltage;
 #ifdef CONFIG_IODELAY_RECALIBRATION
@@ -437,15 +438,27 @@ static int omap_hsmmc_set_io_regulator(struct mmc *mmc, int uV)
 	if (!priv->vmmc_aux_supply)
 		return 0;
 
+	ret = regulator_set_enable(priv->pbias_supply, false);
+	if (ret && ret != -ENOSYS)
+		return ret;
+
 	ret = regulator_set_enable(priv->vmmc_aux_supply, false);
 	if (ret && ret != -ENOSYS)
 		return ret;
 
 	ret = regulator_set_value(priv->vmmc_aux_supply, uV);
-	if (ret)
+	if (ret && ret != -ENOSYS)
+		return ret;
+
+	ret = regulator_set_value(priv->pbias_supply, uV);
+	if (ret && ret != -ENOSYS)
 		return ret;
 
 	ret = regulator_set_enable(priv->vmmc_aux_supply, true);
+	if (ret && ret != -ENOSYS)
+		return ret;
+
+	ret = regulator_set_enable(priv->pbias_supply, true);
 	if (ret && ret != -ENOSYS)
 		return ret;
 
@@ -456,6 +469,9 @@ static int omap_hsmmc_set_io_regulator(struct mmc *mmc, int uV)
 static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
 {
 	u32 val;
+#ifdef CONFIG_DM_REGULATOR
+	int ret;
+#endif
 	struct hsmmc *mmc_base;
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
 
@@ -497,6 +513,16 @@ static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
 #else
 		vmmc_pbias_config(LDO_VOLT_1V8);
 #endif
+#endif
+#ifdef CONFIG_DM_REGULATOR
+	} else if (mmc->signal_voltage == 0) {
+		ret = regulator_set_enable(priv->pbias_supply, false);
+		if (ret && ret != -ENOSYS)
+			return ret;
+
+		ret = regulator_set_enable(priv->vmmc_aux_supply, false);
+		if (ret && ret != -ENOSYS)
+			return ret;
 #endif
 	} else {
 		return -EOPNOTSUPP;
@@ -1799,11 +1825,13 @@ static int omap_hsmmc_probe(struct udevice *dev)
 		return -1;
 
 	omap_hsmmc_platform_fixup(mmc);
+	priv->signal_voltage = -EINVAL;
 
 #ifdef CONFIG_DM_REGULATOR
 	device_get_supply_regulator(dev, "vmmc-supply", &priv->vmmc_supply);
 	device_get_supply_regulator(dev, "vmmc_aux-supply",
 				    &priv->vmmc_aux_supply);
+	device_get_supply_regulator(dev, "pbias-supply", &priv->pbias_supply);
 #endif
 #ifdef OMAP_HSMMC_USE_GPIO
 	gpio_request_by_name(dev, "cd-gpios", 0, &priv->cd_gpio, GPIOD_IS_IN);
