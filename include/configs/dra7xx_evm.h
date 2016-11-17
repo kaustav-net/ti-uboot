@@ -195,8 +195,6 @@
 /* In SPL, use the environment and discard MMC support for space. */
 #ifdef CONFIG_SPL_BUILD
 #undef CONFIG_SPL_MMC_SUPPORT
-#undef CONFIG_SPL_MAX_SIZE
-#define CONFIG_SPL_MAX_SIZE             (256 << 10) /* 256 KiB */
 #endif
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_ENV_IS_IN_SPI_FLASH
