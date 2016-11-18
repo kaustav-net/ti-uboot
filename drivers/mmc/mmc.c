@@ -2056,7 +2056,6 @@ static void mmc_power_up(struct mmc *mmc)
 
 static void mmc_power_off(struct mmc *mmc)
 {
-	mmc_set_signal_voltage(mmc, 0);
 	mmc_set_vdd(mmc, false);
 }
 
