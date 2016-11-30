@@ -165,11 +165,6 @@
 #endif
 
 /* DRA7xx/AM57xx have 512K of SRAM, OMAP5 only 128K */
-#if defined(CONFIG_DRA7XX)
-#define CONFIG_SPL_BOOT_END		0x4037E000
-#else
-#define CONFIG_SPL_BOOT_END		0x4031E000
-#endif
 #define CONFIG_SPL_DISPLAY_PRINT
 #define CONFIG_SPL_LDSCRIPT "$(CPUDIR)/omap-common/u-boot-spl.lds"
 #define CONFIG_SYS_SPL_ARGS_ADDR	(CONFIG_SYS_SDRAM_BASE + \
