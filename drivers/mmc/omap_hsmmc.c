@@ -633,7 +633,7 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 		goto tuning_error;
 	}
 
-	phase_delay = max_window + 4 * (max_len >> 1);
+	phase_delay = max_window + 4 * ((3 * max_len) >> 2);
 	omap_hsmmc_set_dll(mmc, phase_delay);
 
 	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
