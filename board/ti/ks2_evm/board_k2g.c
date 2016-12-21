@@ -152,6 +152,21 @@ int board_early_init_f(void)
 
 		if (psc_enable_module(KS2_LPSC_GPMC))
 			printf("%s can't enable gpmc\n", __func__);
+	} else if (board_is_k2g_ice()) {
+		/* GBE Phy workaround. For Phy to latch the input
+		 * configuration, a GPIO reset is asserted at the
+		 * Phy reset pin to latch configuration correctly after SoC
+		 * reset. GPIO0 Pin 10 (Ball AA20) is used for this on ICE
+		 * board. Just do a low to high transition.
+		 */
+		clrbits_le32(K2G_GPIO0_BANK0_BASE + K2G_GPIO_DIR_OFFSET,
+			     BIT(10));
+		setbits_le32(K2G_GPIO0_BANK0_BASE + K2G_GPIO_CLRDATA_OFFSET,
+			     BIT(10));
+		/* Delay just to get a transition to high */
+		udelay(100);
+		setbits_le32(K2G_GPIO0_BANK0_BASE + K2G_GPIO_SETDATA_OFFSET,
+			     BIT(10));
 	}
 	return 0;
 }
