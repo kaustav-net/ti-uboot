@@ -79,8 +79,8 @@
 
 &mdio {
 	status = "okay";
-	ethphy0: ethernet-phy@1 {
-		reg = <1>;
+	ethphy0: ethernet-phy@0 {
+		reg = <0>;
 		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_25_NS>;
 		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_8_B_NIB>;
 		ti,min-output-impedance;
