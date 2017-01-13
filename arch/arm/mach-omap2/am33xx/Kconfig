@@ -230,6 +230,13 @@ config TARGET_CM_T43
 
 endchoice
 
+config SPL_RTC_ONLY_SUPPORT
+	bool
+	depends on SPL
+	prompt "Enable RTC ONLY Support"
+	help
+	  If you want RTC ONLY Support, say Y.
+
 endif
 
 if AM43XX || AM33XX
