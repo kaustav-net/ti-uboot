@@ -2001,7 +2001,6 @@ static int eth_bind(struct usb_gadget *gadget)
 	struct usb_ep		*in_ep, *out_ep, *status_ep = NULL;
 	int			status = -ENOMEM;
 	int			gcnum;
-	u8			tmp[7];
 
 	/* these flags are only ever cleared; compiler take note */
 #ifndef	CONFIG_USB_ETH_CDC
@@ -2206,9 +2205,6 @@ autoconf_fail:
 	 * thing didn't, Sharp never assigned those addresses on Zaurii.
 	 */
 	get_ether_addr(dev_addr, dev->net->enetaddr);
-
-	memset(tmp, 0, sizeof(tmp));
-	memcpy(tmp, dev->net->enetaddr, sizeof(dev->net->enetaddr));
 
 	get_ether_addr(host_addr, dev->host_mac);
 
