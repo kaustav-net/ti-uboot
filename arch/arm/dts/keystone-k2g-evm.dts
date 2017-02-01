@@ -9,7 +9,7 @@
  */
 /dts-v1/;
 
-#include "k2g.dtsi"
+#include "keystone-k2g.dtsi"
 
 / {
 	compatible =  "ti,k2g-evm","ti,keystone";
