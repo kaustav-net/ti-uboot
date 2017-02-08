@@ -50,6 +50,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#define GPIO_ETH_LCD		GPIO_TO_PIN(2, 22)
 /* GPIO 7_11 */
 #define GPIO_DDR_VTT_EN 203
 
@@ -449,6 +450,21 @@ void hw_data_init(void)
 	*ctrl = &dra7xx_ctrl;
 }
 
+bool am571x_idk_needs_lcd(void)
+{
+	bool needs_lcd;
+
+	gpio_request(GPIO_ETH_LCD, "nLCD_Detect");
+	if (gpio_get_value(GPIO_ETH_LCD))
+		needs_lcd = false;
+	else
+		needs_lcd = true;
+
+	gpio_free(GPIO_ETH_LCD);
+
+	return needs_lcd;
+}
+
 int board_init(void)
 {
 	gpmc_init();
@@ -459,6 +475,8 @@ int board_init(void)
 
 int board_late_init(void)
 {
+	char *idk_lcd;
+
 	setup_board_eeprom_env();
 	u8 val;
 
@@ -486,6 +504,17 @@ int board_late_init(void)
 	val = val | TPS65903X_PAD2_POWERHOLD_MASK;
 	palmas_i2c_write_u8(TPS65903X_CHIP_P1, TPS65903X_PRIMARY_SECONDARY_PAD2,
 			    val);
+
+	/* TBD: Add LCD panel detection once information is available */
+	if (am571x_idk_needs_lcd())
+		idk_lcd = "osd101t2045"; /* Default to legacy LCD */
+	else
+		idk_lcd = "no";
+	setenv("idk_lcd", idk_lcd);
+
+#if !defined(CONFIG_SPL_BUILD)
+	board_ti_set_ethaddr(2);
+#endif
 
 	return 0;
 }
@@ -545,6 +574,17 @@ void recalibrate_iodelay(void)
 		} else {
 			pconf = core_padconf_array_delta_x15_sr1_1;
 			pconf_sz = ARRAY_SIZE(core_padconf_array_delta_x15_sr1_1);
+		}
+		do_set_mux32((*ctrl)->control_padconf_core_base, pconf, pconf_sz);
+	}
+
+	if (board_is_am571x_idk()) {
+		if (am571x_idk_needs_lcd()) {
+			pconf = core_padconf_array_vout_am571x_idk;
+			pconf_sz = ARRAY_SIZE(core_padconf_array_vout_am571x_idk);
+		} else {
+			pconf = core_padconf_array_icss1eth_am571x_idk;
+			pconf_sz = ARRAY_SIZE(core_padconf_array_icss1eth_am571x_idk);
 		}
 		do_set_mux32((*ctrl)->control_padconf_core_base, pconf, pconf_sz);
 	}
