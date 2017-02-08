@@ -56,6 +56,7 @@ DECLARE_GLOBAL_DATA_PTR;
 struct omap_hsmmc_data {
 	struct hsmmc *base_addr;
 	struct mmc_config cfg;
+	uint clock;
 #ifdef OMAP_HSMMC_USE_GPIO
 #ifdef CONFIG_DM_MMC
 	struct gpio_desc cd_gpio;	/* Change Detect GPIO */
@@ -74,6 +75,8 @@ struct omap_hsmmc_data {
 static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size);
 static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 			unsigned int siz);
+static void omap_hsmmc_start_clock(struct hsmmc *mmc_base);
+static void omap_hsmmc_stop_clock(struct hsmmc *mmc_base);
 
 #if defined(OMAP_HSMMC_USE_GPIO) && !defined(CONFIG_DM_MMC)
 static int omap_mmc_setup_gpio_in(int gpio, const char *label)
@@ -512,13 +515,57 @@ static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 	return 0;
 }
 
-static void omap_hsmmc_set_ios(struct mmc *mmc)
+static void omap_hsmmc_stop_clock(struct hsmmc *mmc_base)
 {
+	writel(readl(&mmc_base->sysctl) & ~CEN_ENABLE, &mmc_base->sysctl);
+}
+
+static void omap_hsmmc_start_clock(struct hsmmc *mmc_base)
+{
+	writel(readl(&mmc_base->sysctl) | CEN_ENABLE, &mmc_base->sysctl);
+}
+
+static void omap_hsmmc_set_clock(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv_data = mmc->priv;
 	struct hsmmc *mmc_base;
 	unsigned int dsor = 0;
 	ulong start;
 
-	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
+	mmc_base = priv_data->base_addr;
+	omap_hsmmc_stop_clock(mmc_base);
+
+	/* TODO: Is setting DTO required here? */
+	mmc_reg_out(&mmc_base->sysctl, (ICE_MASK | DTO_MASK),
+		    (ICE_STOP | DTO_15THDTO));
+
+	if (mmc->clock != 0) {
+		dsor = DIV_ROUND_UP(MMC_CLOCK_REFERENCE * 1000000, mmc->clock);
+		if (dsor > CLKD_MAX)
+			dsor = CLKD_MAX;
+	}
+
+	mmc_reg_out(&mmc_base->sysctl, ICE_MASK | CLKD_MASK,
+		    (dsor << CLKD_OFFSET) | ICE_OSCILLATE);
+
+	start = get_timer(0);
+	while ((readl(&mmc_base->sysctl) & ICS_MASK) == ICS_NOTREADY) {
+		if (get_timer(0) - start > MAX_RETRY_MS) {
+			printf("%s: timedout waiting for ics!\n", __func__);
+			return;
+		}
+	}
+
+	priv_data->clock = mmc->clock;
+	omap_hsmmc_start_clock(mmc_base);
+}
+
+static void omap_hsmmc_set_ios(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv_data = mmc->priv;
+	struct hsmmc *mmc_base;
+
+	mmc_base = priv_data->base_addr;
 	/* configue bus width */
 	switch (mmc->bus_width) {
 	case 8:
@@ -542,28 +589,8 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 		break;
 	}
 
-	/* configure clock with 96Mhz system clock.
-	 */
-	if (mmc->clock != 0) {
-		dsor = (MMC_CLOCK_REFERENCE * 1000000 / mmc->clock);
-		if ((MMC_CLOCK_REFERENCE * 1000000) / dsor > mmc->clock)
-			dsor++;
-	}
-
-	mmc_reg_out(&mmc_base->sysctl, (ICE_MASK | DTO_MASK | CEN_MASK),
-				(ICE_STOP | DTO_15THDTO));
-
-	mmc_reg_out(&mmc_base->sysctl, ICE_MASK | CLKD_MASK,
-				(dsor << CLKD_OFFSET) | ICE_OSCILLATE);
-
-	start = get_timer(0);
-	while ((readl(&mmc_base->sysctl) & ICS_MASK) == ICS_NOTREADY) {
-		if (get_timer(0) - start > MAX_RETRY_MS) {
-			printf("%s: timedout waiting for ics!\n", __func__);
-			return;
-		}
-	}
-	writel(readl(&mmc_base->sysctl) | CEN_ENABLE, &mmc_base->sysctl);
+	if (priv_data->clock != mmc->clock)
+		omap_hsmmc_set_clock(mmc);
 }
 
 #ifdef OMAP_HSMMC_USE_GPIO
