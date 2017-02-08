@@ -988,32 +988,18 @@ static int omap_hsmmc_ofdata_to_platdata(struct udevice *dev)
 	const void *fdt = gd->fdt_blob;
 	int node = dev->of_offset;
 	struct mmc_config *cfg;
-	int val;
+	int ret;
 
 	priv->base_addr = map_physmem(dev_get_addr(dev), sizeof(struct hsmmc *),
 				      MAP_NOCACHE);
 	cfg = &priv->cfg;
 
-	cfg->host_caps = MMC_MODE_HS_52MHz | MMC_MODE_HS;
-	val = fdtdec_get_int(fdt, node, "bus-width", -1);
-	if (val < 0) {
-		printf("error: bus-width property missing\n");
-		return -ENOENT;
-	}
+	ret = mmc_of_parse(fdt, node, cfg);
+	if (ret < 0)
+		return ret;
 
-	switch (val) {
-	case 0x8:
-		cfg->host_caps |= MMC_MODE_8BIT;
-	case 0x4:
-		cfg->host_caps |= MMC_MODE_4BIT;
-		break;
-	default:
-		printf("error: invalid bus-width property\n");
-		return -ENOENT;
-	}
-
+	cfg->host_caps |= MMC_MODE_HS_52MHz | MMC_MODE_HS;
 	cfg->f_min = 400000;
-	cfg->f_max = fdtdec_get_int(fdt, node, "max-frequency", 52000000);
 	cfg->voltages = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
 	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
 	if (fdtdec_get_bool(fdt, node, "ti,dual-volt"))
