@@ -214,6 +214,7 @@ struct hsmmc {
 
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		int wp_gpio);
+int platform_fixup_disable_uhs_mode(void);
 
 void vmmc_pbias_config(uint voltage);
 #endif /* OMAP_MMC_H_ */
