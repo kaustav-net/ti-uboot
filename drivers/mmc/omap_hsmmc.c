@@ -56,6 +56,7 @@ DECLARE_GLOBAL_DATA_PTR;
 struct omap_hsmmc_data {
 	struct hsmmc *base_addr;
 	struct mmc_config cfg;
+	uint bus_width;
 	uint clock;
 #ifdef OMAP_HSMMC_USE_GPIO
 #ifdef CONFIG_DM_MMC
@@ -560,7 +561,7 @@ static void omap_hsmmc_set_clock(struct mmc *mmc)
 	omap_hsmmc_start_clock(mmc_base);
 }
 
-static void omap_hsmmc_set_ios(struct mmc *mmc)
+static void omap_hsmmc_set_bus_width(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv_data = mmc->priv;
 	struct hsmmc *mmc_base;
@@ -588,6 +589,16 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 			&mmc_base->hctl);
 		break;
 	}
+
+	priv_data->bus_width = mmc->bus_width;
+}
+
+static void omap_hsmmc_set_ios(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv_data = mmc->priv;
+
+	if (priv_data->bus_width != mmc->bus_width)
+		omap_hsmmc_set_bus_width(mmc);
 
 	if (priv_data->clock != mmc->clock)
 		omap_hsmmc_set_clock(mmc);
