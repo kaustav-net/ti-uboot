@@ -313,7 +313,7 @@ static int pxa_mmc_request(struct mmc *mmc, struct mmc_cmd *cmd,
 	return 0;
 }
 
-static void pxa_mmc_set_ios(struct mmc *mmc)
+static int pxa_mmc_set_ios(struct mmc *mmc)
 {
 	struct pxa_mmc_priv *priv = mmc->priv;
 	struct pxa_mmc_regs *regs = priv->regs;
@@ -342,6 +342,8 @@ static void pxa_mmc_set_ios(struct mmc *mmc)
 	}
 
 	writel(pxa_mmc_clock, &regs->clkrt);
+
+	return 0;
 }
 
 static int pxa_mmc_init(struct mmc *mmc)

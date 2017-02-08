@@ -590,6 +590,8 @@ static void uniphier_sd_set_clk_rate(struct uniphier_sd_priv *priv,
 	writel(tmp, priv->regbase + UNIPHIER_SD_CLKCTL);
 
 	udelay(1000);
+
+	return 0;
 }
 
 static int uniphier_sd_set_ios(struct udevice *dev)

@@ -1054,7 +1054,7 @@ static void omap_hsmmc_set_bus_width(struct mmc *mmc)
 	priv_data->bus_width = mmc->bus_width;
 }
 
-static void omap_hsmmc_set_ios(struct mmc *mmc)
+static int omap_hsmmc_set_ios(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv_data = mmc->priv;
 
@@ -1070,6 +1070,8 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 		omap_hsmmc_set_timing(mmc);
 #endif
 #endif
+
+	return 0;
 }
 
 #ifdef OMAP_HSMMC_USE_GPIO
