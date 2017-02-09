@@ -395,3 +395,13 @@ void board_ti_set_ethaddr(int index)
 		}
 	}
 }
+
+bool __maybe_unused board_ti_was_eeprom_read(void)
+{
+	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
+
+	if (ep->header == TI_EEPROM_HEADER_MAGIC)
+		return true;
+	else
+		return false;
+}
