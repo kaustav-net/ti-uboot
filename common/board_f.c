@@ -929,6 +929,9 @@ static init_fnc_t init_sequence_f[] = {
 #if defined(CONFIG_MPC5xxx)
 	prt_mpc5xxx_clks,
 #endif /* CONFIG_MPC5xxx */
+#if defined(CONFIG_DTB_RESELECT)
+	embedded_dtb_select,
+#endif
 #if defined(CONFIG_DISPLAY_BOARDINFO)
 	show_board_info,
 #endif
