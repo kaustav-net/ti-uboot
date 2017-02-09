@@ -18,6 +18,7 @@
 
 #include "compiler.h"
 #include <asm/byteorder.h>
+#include <linux/kconfig.h>
 
 /* Define this to avoid #ifdefs later on */
 struct lmb;
@@ -1272,6 +1273,13 @@ int board_fit_config_name_match(const char *name);
  */
 void board_fit_image_post_process(void **p_image, size_t *p_size);
 #endif /* CONFIG_SPL_FIT_IMAGE_POST_PROCESS */
+
+#if IS_ENABLED(CONFIG_SPL_LOAD_FIT)
+
+ulong fdt_getprop_u32(const void *fdt, int node, const char *prop);
+int fit_select_fdt(const void *fdt, int images, int *fdt_offsetp);
+
+#endif
 
 /**
  * Mapping of image types to function handlers to be invoked on the associated
