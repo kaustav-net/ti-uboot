@@ -1274,7 +1274,7 @@ int board_fit_config_name_match(const char *name);
 void board_fit_image_post_process(void **p_image, size_t *p_size);
 #endif /* CONFIG_SPL_FIT_IMAGE_POST_PROCESS */
 
-#if IS_ENABLED(CONFIG_SPL_LOAD_FIT)
+#if IS_ENABLED(CONFIG_SPL_LOAD_FIT) || IS_ENABLED(CONFIG_FIT_EMBED)
 
 ulong fdt_getprop_u32(const void *fdt, int node, const char *prop);
 int fit_select_fdt(const void *fdt, int images, int *fdt_offsetp);
