@@ -54,7 +54,7 @@ static void gpimage_set_header(void *ptr, struct stat *sbuf, int ifd,
 {
 	struct gp_header *gph = (struct gp_header *)ptr;
 
-	gph_set_header(gph, sbuf->st_size, params->addr, 1);
+	gph_set_header(gph, sbuf->st_size - GPIMAGE_HDR_SIZE, params->addr, 1);
 }
 
 /*
