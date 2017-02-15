@@ -172,7 +172,6 @@
 #endif
 
 #ifdef CONFIG_SPL_BUILD
-#undef CONFIG_DM_MMC
 #undef CONFIG_TIMER
 #endif
 
