@@ -52,6 +52,6 @@
 /* The rest of the configuration is shared */
 #include <configs/socfpga_common.h>
 
-#define CONFIG_SPL_ABORT_ON_RAW_IMAGE
+#undef CONFIG_SPL_RAW_IMAGE_SUPPORT
 
 #endif	/* __CONFIG_TERASIC_DE1_SOC_H__ */
