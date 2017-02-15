@@ -111,7 +111,7 @@ static const struct gpio_bank gpio_bank_am33xx[] = {
 const struct gpio_bank *const omap_gpio_bank = gpio_bank_am33xx;
 #endif
 
-#if defined(CONFIG_OMAP_HSMMC) && !defined(CONFIG_SPL_BUILD)
+#if defined(CONFIG_OMAP_HSMMC)
 int cpu_mmc_init(bd_t *bis)
 {
 	int ret;
