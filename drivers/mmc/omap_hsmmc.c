@@ -1642,13 +1642,18 @@ omap_hsmmc_get_pinctrl_by_mode(struct mmc *mmc, char *mode)
 	pinctrl_state = (struct omap_hsmmc_pinctrl_state *)
 			 malloc(sizeof(*pinctrl_state));
 	if (!pinctrl_state) {
-		printf("failed to allocate memory\n");
+		printf("%s: failed to allocate memory\n",
+		       fdt_get_name(fdt, node, NULL));
 		return 0;
 	}
 
 	index = fdt_find_string(fdt, node, "pinctrl-names", mode);
-	if (index < 0)
+	if (index < 0) {
+		printf("%s: fail to find %s mode %s\n",
+		       fdt_get_name(fdt, node, NULL),
+		       mode, fdt_strerror(index));
 		goto err_pinctrl_state;
+	}
 
 	sprintf(prop_name, "pinctrl-%d", index);
 
