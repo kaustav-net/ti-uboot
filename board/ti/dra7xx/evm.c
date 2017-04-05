@@ -456,27 +456,44 @@ int get_voltrail_opp(int rail_offset)
 {
 	int opp;
 
-	/*
-	 * DRA71x supports only OPP_NOM.
-	 */
-	if (board_is_dra71x_evm())
-		return OPP_NOM;
-
 	switch (rail_offset) {
 	case VOLT_MPU:
 		opp = DRA7_MPU_OPP;
+		/* DRA71x supports only OPP_NOM for MPU */
+		if (board_is_dra71x_evm())
+			opp = OPP_NOM;
 		break;
 	case VOLT_CORE:
 		opp = DRA7_CORE_OPP;
+		/* DRA71x supports only OPP_NOM for CORE */
+		if (board_is_dra71x_evm())
+			opp = OPP_NOM;
 		break;
 	case VOLT_GPU:
 		opp = DRA7_GPU_OPP;
+		/* DRA71x supports only OPP_NOM for GPU */
+		if (board_is_dra71x_evm())
+			opp = OPP_NOM;
 		break;
 	case VOLT_EVE:
 		opp = DRA7_DSPEVE_OPP;
+		/*
+		 * DRA71x does not support OPP_OD for EVE.
+		 * If OPP_OD is selected by menuconfig, fallback
+		 * to OPP_NOM.
+		 */
+		if (board_is_dra71x_evm() && opp == OPP_OD)
+			opp = OPP_NOM;
 		break;
 	case VOLT_IVA:
 		opp = DRA7_IVA_OPP;
+		/*
+		 * DRA71x does not support OPP_OD for IVA.
+		 * If OPP_OD is selected by menuconfig, fallback
+		 * to OPP_NOM.
+		 */
+		if (board_is_dra71x_evm() && opp == OPP_OD)
+			opp = OPP_NOM;
 		break;
 	default:
 		opp = OPP_NOM;
