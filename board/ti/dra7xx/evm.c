@@ -438,14 +438,18 @@ struct vcores_data dra718_volts = {
 	 * and are powered by BUCK1 of LP873X PMIC
 	 */
 	.eve.value[OPP_NOM]	= VDD_EVE_DRA7_NOM,
+	.eve.value[OPP_HIGH]	= VDD_EVE_DRA7_HIGH,
 	.eve.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.efuse.reg[OPP_HIGH] = STD_FUSE_OPP_VMIN_DSPEVE_HIGH,
 	.eve.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.eve.addr	= LP873X_REG_ADDR_BUCK1,
 	.eve.pmic	= &lp8733,
 	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
 
 	.iva.value[OPP_NOM]	= VDD_IVA_DRA7_NOM,
+	.iva.value[OPP_HIGH]	= VDD_IVA_DRA7_HIGH,
 	.iva.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.efuse.reg[OPP_HIGH] = STD_FUSE_OPP_VMIN_IVA_HIGH,
 	.iva.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.iva.addr	= LP873X_REG_ADDR_BUCK1,
 	.iva.pmic	= &lp8733,
