@@ -26,8 +26,10 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int arch_fixup_fdt(void *blob)
 {
+	int ret = 0;
+#if defined(CONFIG_ARMV7_NONSEC) || defined(CONFIG_OF_LIBFDT)
 	bd_t *bd = gd->bd;
-	int bank, ret;
+	int bank;
 	u64 start[CONFIG_NR_DRAM_BANKS];
 	u64 size[CONFIG_NR_DRAM_BANKS];
 
@@ -41,12 +43,15 @@ int arch_fixup_fdt(void *blob)
 #endif
 	}
 
+#ifdef CONFIG_OF_LIBFDT
 	ret = fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
+#endif
 #ifdef CONFIG_ARMV7_NONSEC
 	if (ret)
 		return ret;
 
 	ret = psci_update_dt(blob);
+#endif
 #endif
 	return ret;
 }
