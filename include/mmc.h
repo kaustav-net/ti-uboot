@@ -450,6 +450,7 @@ struct mmc {
 	struct blk_desc block_dev;
 	char op_cond_pending;	/* 1 if we are waiting on an op_cond command */
 	char init_in_progress;	/* 1 if we have done mmc_start_init() */
+	uint host_ok_caps;	/* host caps that are not yet proven wrong */
 	char preinit;		/* start init as early as possible */
 	int ddr_mode;
 	unsigned int sd_bus_speed;
