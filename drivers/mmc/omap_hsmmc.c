@@ -59,9 +59,15 @@ DECLARE_GLOBAL_DATA_PTR;
 #define SYSCTL_SRC	(1 << 25)
 #define SYSCTL_SRD	(1 << 26)
 
+struct omap_hsmmc_plat {
+	struct mmc_config cfg;
+};
+
 struct omap_hsmmc_data {
 	struct hsmmc *base_addr;
+#ifndef CONFIG_DM_MMC
 	struct mmc_config cfg;
+#endif
 	uint bus_width;
 	uint clock;
 #ifdef OMAP_HSMMC_USE_GPIO
@@ -148,6 +154,15 @@ static inline struct omap_hsmmc_data *omap_hsmmc_get_data(struct mmc *mmc)
 	return (struct omap_hsmmc_data *)mmc->priv;
 #endif
 }
+static inline struct mmc_config *omap_hsmmc_get_cfg(struct mmc *mmc)
+{
+#ifdef CONFIG_DM_MMC
+	struct omap_hsmmc_plat *plat = dev_get_platdata(mmc->dev);
+	return &plat->cfg;
+#else
+	return &((struct omap_hsmmc_data *)mmc->priv)->cfg;
+#endif
+}
 
 #if defined(OMAP_HSMMC_USE_GPIO) && !defined(CONFIG_DM_MMC)
 static int omap_mmc_setup_gpio_in(int gpio, const char *label)
@@ -173,6 +188,7 @@ static int omap_mmc_setup_gpio_in(int gpio, const char *label)
 static unsigned char mmc_board_init(struct mmc *mmc)
 {
 #if defined(CONFIG_OMAP34XX)
+	struct mmc_config *cfg = omap_hsmmc_get_cfg(mmc);
 	t2_t *t2_base = (t2_t *)T2_BASE;
 	struct prcm *prcm_base = (struct prcm *)PRCM_BASE;
 	u32 pbias_lite;
@@ -196,7 +212,7 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 		&t2_base->devconf1);
 
 	/* Change from default of 52MHz to 26MHz if necessary */
-	if (!(mmc->cfg->host_caps & MMC_MODE_HS_52MHz))
+	if (!(cfg->host_caps & MMC_MODE_HS_52MHz))
 		writel(readl(&t2_base->ctl_prog_io1) & ~CTLPROGIO1SPEEDCTRL,
 			&t2_base->ctl_prog_io1);
 
@@ -1778,7 +1794,8 @@ err_pinctrl_state:
 static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv = omap_hsmmc_get_data(mmc);
-	struct mmc_config *cfg = &priv->cfg;
+	struct mmc_config *cfg = omap_hsmmc_get_cfg(mmc);
+
 	struct omap_hsmmc_pinctrl_state *default_pinctrl;
 
 	if (!(priv->controller_flags & OMAP_HSMMC_REQUIRE_IODELAY))
@@ -1808,15 +1825,15 @@ static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
 static int omap_hsmmc_ofdata_to_platdata(struct udevice *dev)
 {
 	struct omap_hsmmc_data *priv = dev_get_priv(dev);
+	struct omap_hsmmc_plat *plat = dev_get_platdata(dev);
+	struct mmc_config *cfg = &plat->cfg;
 	const void *fdt = gd->fdt_blob;
 	int node = dev->of_offset;
-	struct mmc_config *cfg;
 	int ret;
 
 	priv->base_addr = map_physmem(dev_get_addr(dev), sizeof(struct hsmmc *),
 				      MAP_NOCACHE);
 	priv->node = node;
-	cfg = &priv->cfg;
 
 	ret = mmc_of_parse(fdt, node, cfg);
 	if (ret < 0)
@@ -1846,7 +1863,7 @@ __weak int platform_fixup_disable_uhs_mode(void)
 static int omap_hsmmc_platform_fixup(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv = omap_hsmmc_get_data(mmc);
-	struct mmc_config *cfg = &priv->cfg;
+	struct mmc_config *cfg = omap_hsmmc_get_cfg(mmc);
 
 	priv->version = NULL;
 
@@ -1861,16 +1878,16 @@ static int omap_hsmmc_platform_fixup(struct mmc *mmc)
 
 static int omap_hsmmc_probe(struct udevice *dev)
 {
+	struct omap_hsmmc_plat *plat = dev_get_platdata(dev);
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
 	struct omap_hsmmc_data *priv = dev_get_priv(dev);
-	struct mmc_config *cfg;
+	struct mmc_config *cfg = &plat->cfg;
 	struct mmc *mmc;
 #ifdef CONFIG_IODELAY_RECALIBRATION
 	int ret;
 	struct omap_mmc_of_data *data;
 #endif
 
-	cfg = &priv->cfg;
 	cfg->name = "OMAP SD/MMC";
 	cfg->ops = &omap_hsmmc_ops;
 
@@ -1931,5 +1948,6 @@ U_BOOT_DRIVER(omap_hsmmc) = {
 	.ofdata_to_platdata = omap_hsmmc_ofdata_to_platdata,
 	.probe	= omap_hsmmc_probe,
 	.priv_auto_alloc_size = sizeof(struct omap_hsmmc_data),
+	.platdata_auto_alloc_size = sizeof(struct omap_hsmmc_plat),
 };
 #endif
