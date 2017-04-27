@@ -35,6 +35,7 @@ obj-$(CONFIG_USE_ARCH_MEMCPY) += memcpy.o
 else
 obj-$(CONFIG_SPL_FRAMEWORK) += spl.o
 obj-$(CONFIG_SPL_FRAMEWORK) += zimage.o
+obj-$(CONFIG_OF_LIBFDT) += bootm-fdt.o
 endif
 obj-$(CONFIG_SEMIHOSTING) += semihosting.o
 
