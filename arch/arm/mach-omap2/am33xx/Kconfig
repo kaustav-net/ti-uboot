@@ -10,6 +10,8 @@ config TARGET_AM335X_EVM
 	select DM_SERIAL
 	select DM_GPIO
 	select TI_I2C_BOARD_DETECT
+	select SPL_SYS_MALLOC_SIMPLE if SPL
+	select SPL_SEPARATE_BSS if SPL
 	help
 	  This option specifies support for the AM335x
 	  GP and HS EVM development platforms. The AM335x
