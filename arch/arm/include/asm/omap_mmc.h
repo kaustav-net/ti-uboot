@@ -26,7 +26,7 @@
 #define OMAP_MMC_H_
 
 struct hsmmc {
-#ifdef CONFIG_DM_MMC
+#ifndef CONFIG_OMAP34XX
 	unsigned int hl_rev;
 	unsigned int hl_hwinfo;
 	unsigned int hl_sysconfig;
