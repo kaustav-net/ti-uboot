@@ -1510,6 +1510,27 @@ omap_hsmmc_get_iodelay_cfg_entry(const fdt32_t *pinctrl, int count)
 	return iodelay;
 }
 
+static int omap_hsmmc_get_pinctrl_entry_size(uint32_t phandle)
+{
+	const void *fdt = gd->fdt_blob;
+	int offset;
+
+	offset = fdt_node_offset_by_phandle(fdt, phandle);
+	if (offset < 0) {
+		printf("failed to get pinctrl node offset %s.\n",
+		       fdt_strerror(offset));
+		return -EINVAL;
+	}
+
+	offset = fdt_parent_offset(fdt, offset);
+	if (offset < 0) {
+		printf("failed to get pinctrl parent node offset %s.\n",
+		       fdt_strerror(offset));
+		return -EINVAL;
+	}
+	return fdt_pinctrl_cells(fdt, offset);
+}
+
 static const fdt32_t *omap_hsmmc_get_pinctrl_entry(uint32_t phandle, int *len)
 {
 	const void *fdt = gd->fdt_blob;
@@ -1578,7 +1599,7 @@ static struct pad_conf_entry *
 omap_hsmmc_get_pad_conf(struct mmc *mmc, char *prop_name, int *npads)
 {
 	int len;
-	int count;
+	int count, size;
 	struct pad_conf_entry *padconf;
 	uint32_t phandle;
 	const fdt32_t *pinctrl;
@@ -1591,7 +1612,11 @@ omap_hsmmc_get_pad_conf(struct mmc *mmc, char *prop_name, int *npads)
 	if (!pinctrl)
 		return ERR_PTR(-EINVAL);
 
-	count = len / sizeof(*pinctrl);
+	size = omap_hsmmc_get_pinctrl_entry_size(phandle);
+	if (size <= 0)
+		return ERR_PTR(size);
+
+	count = (len / sizeof(*pinctrl)) / size;
 	padconf = omap_hsmmc_get_pad_conf_entry(pinctrl, count);
 	if (!padconf)
 		return ERR_PTR(-EINVAL);
@@ -1605,7 +1630,7 @@ static struct iodelay_cfg_entry *
 omap_hsmmc_get_iodelay(struct mmc *mmc, char *prop_name, int *niodelay)
 {
 	int len;
-	int count;
+	int count, size;
 	struct iodelay_cfg_entry *iodelay;
 	uint32_t phandle;
 	const fdt32_t *pinctrl;
@@ -1619,7 +1644,11 @@ omap_hsmmc_get_iodelay(struct mmc *mmc, char *prop_name, int *niodelay)
 	if (!pinctrl)
 		return ERR_PTR(-EINVAL);
 
-	count = len / sizeof(*pinctrl);
+	size = omap_hsmmc_get_pinctrl_entry_size(phandle);
+	if (size <= 0)
+		return ERR_PTR(size);
+
+	count = (len / sizeof(*pinctrl)) / size;
 	iodelay = omap_hsmmc_get_iodelay_cfg_entry(pinctrl, count);
 	if (!iodelay)
 		return ERR_PTR(-EINVAL);
