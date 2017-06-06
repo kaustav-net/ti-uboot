@@ -53,3 +53,24 @@ int fdt_size_cells(const void *fdt, int nodeoffset)
 
 	return val;
 }
+
+int fdt_pinctrl_cells(const void *fdt, int nodeoffset)
+{
+	const fdt32_t *sc;
+	int val;
+	int len;
+
+	sc = fdt_getprop(fdt, nodeoffset, "#pinctrl-cells", &len);
+	if (!sc)
+		return DEF_PINCTRL_LEN;
+
+	if (len != sizeof(*sc))
+		return -FDT_ERR_BADNCELLS;
+
+	val = fdt32_to_cpu(*sc);
+	if ((val < 0) || (val > FDT_MAX_NCELLS))
+		return -FDT_ERR_BADNCELLS;
+
+	/* pinctrl-cells doesn't count the index. So, increment by one */
+	return val + 1;
+}

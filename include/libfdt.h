@@ -990,6 +990,27 @@ int fdt_address_cells(const void *fdt, int nodeoffset);
  */
 int fdt_size_cells(const void *fdt, int nodeoffset);
 
+#define DEF_PINCTRL_LEN (2) /* index + value */
+
+/**
+ * fdt_pinctrl_cells - retrieve pinctrl entry size using the nodeoffset
+ * @fdt: pointer to the device tree blob
+ * @nodeoffset: offset of the node to find the pinctrl-cells value for
+ *
+ * When the node has a valid #pinctrl-cells property, returns its value.
+ *
+ * returns:
+ *	0 <= n < FDT_MAX_NCELLS, on success
+ *       DEF_PINCTRL_LEN, if the node has no #pinctrl-cells property
+ *      -FDT_ERR_BADNCELLS, if the node has a badly formatted or invalid
+ *		#pinctrl-cells property
+ *	-FDT_ERR_BADMAGIC,
+ *	-FDT_ERR_BADVERSION,
+ *	-FDT_ERR_BADSTATE,
+ *	-FDT_ERR_BADSTRUCTURE,
+ *	-FDT_ERR_TRUNCATED, standard meanings
+ */
+int fdt_pinctrl_cells(const void *fdt, int nodeoffset);
 
 /**********************************************************************/
 /* Write-in-place functions                                           */
