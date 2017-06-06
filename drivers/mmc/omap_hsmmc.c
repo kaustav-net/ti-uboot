@@ -1478,9 +1478,9 @@ omap_hsmmc_get_pad_conf_entry(const fdt32_t *pinctrl, int count)
 	}
 
 	while (index < count) {
-		padconf[index].offset = fdt32_to_cpu(pinctrl[index]);
-		padconf[index].val = fdt32_to_cpu(pinctrl[index + 1]);
-		index += 2;
+		padconf[index].offset = fdt32_to_cpu(*pinctrl++);
+		padconf[index].val = fdt32_to_cpu(*pinctrl++);
+		index++;
 	}
 
 	return padconf;
@@ -1499,12 +1499,11 @@ omap_hsmmc_get_iodelay_cfg_entry(const fdt32_t *pinctrl, int count)
 	}
 
 	while (index < count) {
-		iodelay[index].offset = fdt32_to_cpu(pinctrl[index]);
-		iodelay[index].a_delay = fdt32_to_cpu(pinctrl[index + 1])
-						      & 0xFFFF;
-		iodelay[index].g_delay = (fdt32_to_cpu(pinctrl[index + 1])
+		iodelay[index].offset = fdt32_to_cpu(*pinctrl++);
+		iodelay[index].a_delay = fdt32_to_cpu(*pinctrl) & 0xFFFF;
+		iodelay[index].g_delay = (fdt32_to_cpu(*pinctrl++)
 					  & 0xFFFF0000) >> 16;
-		index += 2;
+		index++;
 	}
 
 	return iodelay;
