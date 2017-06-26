@@ -64,6 +64,11 @@ int env_init(void)
 	/* use default */
 	gd->env_addr	= (ulong)&default_environment[0];
 	gd->env_valid	= 1;
+	/*
+	 * intialize the MMC sub-system. This will probe the
+	 * MMC controllers if not already done
+	 */
+	mmc_initialize(NULL);
 
 	return 0;
 }
@@ -81,10 +86,6 @@ static int mmc_set_env_part(struct mmc *mmc)
 	uint part = mmc_get_env_part(mmc);
 	int dev = mmc_get_env_dev();
 	int ret = 0;
-
-#ifdef CONFIG_SPL_BUILD
-	dev = 0;
-#endif
 
 	env_mmc_orig_hwpart = mmc->block_dev.hwpart;
 	ret = mmc_select_hwpart(dev, part);
@@ -116,9 +117,6 @@ static void fini_mmc_for_env(struct mmc *mmc)
 #ifdef CONFIG_SYS_MMC_ENV_PART
 	int dev = mmc_get_env_dev();
 
-#ifdef CONFIG_SPL_BUILD
-	dev = 0;
-#endif
 	mmc_select_hwpart(dev, env_mmc_orig_hwpart);
 #endif
 }
@@ -223,10 +221,6 @@ void env_relocate_spec(void)
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env1, 1);
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env2, 1);
 
-#ifdef CONFIG_SPL_BUILD
-	dev = 0;
-#endif
-
 	mmc = find_mmc_device(dev);
 
 	errmsg = init_mmc_for_env(mmc);
@@ -305,10 +299,6 @@ void env_relocate_spec(void)
 	int ret;
 	int dev = mmc_get_env_dev();
 	const char *errmsg;
-
-#ifdef CONFIG_SPL_BUILD
-	dev = 0;
-#endif
 
 	mmc = find_mmc_device(dev);
 

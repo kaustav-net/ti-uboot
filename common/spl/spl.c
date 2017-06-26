@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include <dm/root.h>
 #include <linux/compiler.h>
+#include <fdt_support.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -53,6 +54,33 @@ __weak int spl_start_uboot(void)
 	return 1;
 }
 #endif
+
+void spl_fixup_fdt(void)
+{
+#if defined(CONFIG_SPL_OF_LIBFDT) && defined(CONFIG_SYS_SPL_ARGS_ADDR)
+	void *fdt_blob = (void *)CONFIG_SYS_SPL_ARGS_ADDR;
+	int err;
+
+	err = fdt_check_header(fdt_blob);
+	if (err < 0) {
+		printf("fdt_root: %s\n", fdt_strerror(err));
+		return;
+	}
+
+	/* fixup the memory dt node */
+	err = fdt_shrink_to_minimum(fdt_blob);
+	if (err == 0) {
+		printf("spl: fdt_shrink_to_minimum err - %d\n", err);
+		return;
+	}
+
+	err = arch_fixup_fdt(fdt_blob);
+	if (err) {
+		printf("spl: arch_fixup_fdt err - %d\n", err);
+		return;
+	}
+#endif
+}
 
 /*
  * Weak default function for board specific cleanup/preparation before
@@ -473,6 +501,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #ifdef CONFIG_SPL_OS_BOOT
 	case IH_OS_LINUX:
 		debug("Jumping to Linux\n");
+		spl_fixup_fdt();
 		spl_board_prepare_for_linux();
 		jump_to_image_linux((void *)CONFIG_SYS_SPL_ARGS_ADDR);
 #endif

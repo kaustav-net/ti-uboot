@@ -12,6 +12,8 @@
 #ifndef __CONFIG_DRA7XX_EVM_H
 #define __CONFIG_DRA7XX_EVM_H
 
+#include <environment/ti/dfu.h>
+
 #define CONFIG_DRA7XX
 #define CONFIG_BOARD_EARLY_INIT_F
 
@@ -27,7 +29,7 @@
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV		1	/* SLOT2: eMMC(1) */
 #define CONFIG_ENV_SIZE			(128 << 10)
-#define CONFIG_ENV_OFFSET		0xE0000
+#define CONFIG_ENV_OFFSET		0x260000
 #define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
 #define CONFIG_SYS_REDUNDAND_ENVIRONMENT
 #endif
@@ -67,50 +69,6 @@
 	"name=ipu2,size=1M,uuid=${uuid_gpt_ipu2};" \
 	"name=userdata,size=-,uuid=${uuid_gpt_userdata}"
 
-#define DFU_ALT_INFO_MMC \
-	"dfu_alt_info_mmc=" \
-	"boot part 0 1;" \
-	"rootfs part 0 2;" \
-	"MLO fat 0 1;" \
-	"MLO.raw raw 0x100 0x100;" \
-	"u-boot.img.raw raw 0x300 0x400;" \
-	"spl-os-args.raw raw 0x80 0x80;" \
-	"spl-os-image.raw raw 0x900 0x2000;" \
-	"spl-os-args fat 0 1;" \
-	"spl-os-image fat 0 1;" \
-	"u-boot.img fat 0 1;" \
-	"uEnv.txt fat 0 1\0"
-
-#define DFU_ALT_INFO_EMMC \
-	"dfu_alt_info_emmc=" \
-	"rawemmc raw 0 3751936;" \
-	"boot part 1 1;" \
-	"rootfs part 1 2;" \
-	"MLO fat 1 1;" \
-	"MLO.raw raw 0x100 0x100;" \
-	"u-boot.img.raw raw 0x300 0x400;" \
-	"spl-os-args.raw raw 0x80 0x80;" \
-	"spl-os-image.raw raw 0x900 0x2000;" \
-	"spl-os-args fat 1 1;" \
-	"spl-os-image fat 1 1;" \
-	"u-boot.img fat 1 1;" \
-	"uEnv.txt fat 1 1\0"
-
-#define DFU_ALT_INFO_RAM \
-	"dfu_alt_info_ram=" \
-	"kernel ram 0x80200000 0x4000000;" \
-	"fdt ram 0x80f80000 0x80000;" \
-	"ramdisk ram 0x81000000 0x4000000\0"
-
-#define DFU_ALT_INFO_QSPI \
-	"dfu_alt_info_qspi=" \
-	"MLO raw 0x0 0x040000;" \
-	"u-boot.img raw 0x040000 0x0100000;" \
-	"u-boot-spl-os raw 0x140000 0x080000;" \
-	"u-boot-env raw 0x1C0000 0x010000;" \
-	"u-boot-env.backup raw 0x1D0000 0x010000;" \
-	"kernel raw 0x1E0000 0x800000\0"
-
 #define DFUARGS \
 	"dfu_bufsiz=0x10000\0" \
 	DFU_ALT_INFO_MMC \
@@ -136,11 +94,6 @@
 #define CONFIG_SPL_HASH_SUPPORT
 
 #ifdef CONFIG_SPL_LOAD_FIT
-#define DFU_ALT_INFO_RAM \
-	"dfu_alt_info_ram=" \
-	"kernel ram 0x80200000 0x4000000;" \
-	"fdt ram 0x80f80000 0x80000;" \
-	"ramdisk ram 0x81000000 0x4000000\0"
 #define DFUARGS \
 	"dfu_bufsiz=0x10000\0" \
 	DFU_ALT_INFO_RAM
