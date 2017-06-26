@@ -488,7 +488,9 @@ static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
 #if CONFIG_IS_ENABLED(DM_REGULATOR) && defined(CONFIG_DM_MMC)
 		return omap_hsmmc_set_io_regulator(mmc, 3000000);
 #else
-		vmmc_pbias_config(LDO_VOLT_3V0);
+		/* PBIAS config needed for MMC1 only */
+		if ((uint32_t) mmc_base == OMAP_HSMMC1_BASE)
+			vmmc_pbias_config(LDO_VOLT_3V0);
 #endif
 #endif
 	} else if (mmc->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
@@ -506,7 +508,9 @@ static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
 #if CONFIG_IS_ENABLED(DM_REGULATOR) && defined(CONFIG_DM_MMC)
 		return omap_hsmmc_set_io_regulator(mmc, 1800000);
 #else
-		vmmc_pbias_config(LDO_VOLT_1V8);
+		/* PBIAS config needed for MMC1 only */
+		if ((uint32_t) mmc_base == OMAP_HSMMC1_BASE)
+			vmmc_pbias_config(LDO_VOLT_1V8);
 #endif
 #endif
 	} else {
