@@ -59,6 +59,10 @@ DECLARE_GLOBAL_DATA_PTR;
 #define SYSCTL_SRC	(1 << 25)
 #define SYSCTL_SRD	(1 << 26)
 
+#ifndef CONFIG_OMAP34XX
+#define SUPPORTS_ADMA
+#endif
+
 #ifdef CONFIG_IODELAY_RECALIBRATION
 struct omap_hsmmc_pinctrl_state {
 	struct pad_conf_entry *padconf;
@@ -83,17 +87,21 @@ struct omap_hsmmc_data {
 	int wp_gpio;
 #endif
 #endif
-#ifdef CONFIG_DM_MMC
-	uint iov;
-	uint timing;
+
+#ifdef SUPPORTS_ADMA
 	u8 controller_flags;
 	struct omap_hsmmc_adma_desc *adma_desc_table;
 	uint desc_slot;
+#endif
+	ushort last_cmd;
+
+#ifdef CONFIG_DM_MMC
+	uint iov;
+	uint timing;
 	int node;
 	char *version;
 	struct udevice *vmmc_supply;
 	struct udevice *vmmc_aux_supply;
-	ushort last_cmd;
 #ifdef CONFIG_IODELAY_RECALIBRATION
 	struct omap_hsmmc_pinctrl_state *default_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *hs_pinctrl_state;
@@ -109,7 +117,7 @@ struct omap_hsmmc_data {
 	uint signal_voltage;
 };
 
-#ifdef CONFIG_DM_MMC
+#ifdef SUPPORTS_ADMA
 struct omap_hsmmc_adma_desc {
 	u8 attr;
 	u8 reserved;
@@ -698,11 +706,9 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 	unsigned int reg_val;
 	unsigned int dsor;
 	ulong start;
-#ifdef CONFIG_DM_MMC
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
-#endif
 
-	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
+	mmc_base = priv->base_addr;
 	mmc_board_init(mmc);
 
 	writel(readl(&mmc_base->sysconfig) | MMC_SOFTRESET,
@@ -724,12 +730,15 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 		}
 	}
 
-#ifdef CONFIG_DM_MMC
-	omap_hsmmc_set_capabilities(mmc);
-	omap_hsmmc_conf_bus_power(mmc, priv->iov);
+#ifdef SUPPORTS_ADMA
 	reg_val = readl(&mmc_base->hl_hwinfo);
 	if (reg_val & MADMA_EN)
 		priv->controller_flags |= OMAP_HSMMC_USE_ADMA;
+#endif
+
+#ifdef CONFIG_DM_MMC
+	omap_hsmmc_set_capabilities(mmc);
+	omap_hsmmc_conf_bus_power(mmc, priv->iov);
 #else
 	writel(DTW_1_BITMODE | SDBP_PWROFF | SDVS_3V0, &mmc_base->hctl);
 	writel(readl(&mmc_base->capa) | VS30_3V0SUP | VS18_1V8SUP,
@@ -814,7 +823,7 @@ static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit)
 	}
 }
 
-#ifdef CONFIG_DM_MMC
+#ifdef SUPPORTS_ADMA
 static int omap_hsmmc_adma_desc(struct mmc *mmc, char *buf, u16 len, bool end)
 {
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
@@ -931,7 +940,7 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 	struct hsmmc *mmc_base;
 	unsigned int flags, mmc_stat;
 	ulong start;
-#ifdef CONFIG_DM_MMC
+#ifdef SUPPORTS_ADMA
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
 	priv->last_cmd = cmd->cmdidx;
 #endif
@@ -1010,7 +1019,7 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 		else
 			flags |= (DP_DATA | DDIR_WRITE);
 
-#ifdef CONFIG_DM_MMC
+#ifdef SUPPORTS_ADMA
 		if ((priv->controller_flags & OMAP_HSMMC_USE_ADMA) &&
 		    cmd->cmdidx != MMC_SEND_TUNING_BLOCK_HS200) {
 			omap_hsmmc_prepare_data(mmc, data);
@@ -1055,7 +1064,7 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 		}
 	}
 
-#ifdef CONFIG_DM_MMC
+#ifdef SUPPORTS_ADMA
 	if ((priv->controller_flags & OMAP_HSMMC_USE_ADMA) && data &&
 	    cmd->cmdidx != MMC_SEND_TUNING_BLOCK_HS200) {
 		if (mmc_stat & IE_ADMAE) {
