@@ -1389,95 +1389,7 @@ static const struct mmc_ops omap_hsmmc_ops = {
 #endif
 };
 
-#ifndef CONFIG_DM_MMC
-int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
-		int wp_gpio)
-{
-	struct mmc *mmc;
-	struct omap_hsmmc_data *priv_data;
-	struct mmc_config *cfg;
-	uint host_caps_val;
-
-	priv_data = malloc(sizeof(*priv_data));
-	if (priv_data == NULL)
-		return -1;
-
-	host_caps_val = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS;
-
-	switch (dev_index) {
-	case 0:
-		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
-		break;
-#ifdef OMAP_HSMMC2_BASE
-	case 1:
-		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC2_BASE;
-#if (defined(CONFIG_OMAP44XX) || defined(CONFIG_OMAP54XX) || \
-	defined(CONFIG_DRA7XX) || \
-	defined(CONFIG_AM43XX) || defined(CONFIG_SOC_KEYSTONE)) && \
-		defined(CONFIG_HSMMC2_8BIT)
-		/* Enable 8-bit interface for eMMC on OMAP4/5 or DRA7XX */
-		host_caps_val |= MMC_MODE_8BIT;
-#endif
-		break;
-#endif
-#ifdef OMAP_HSMMC3_BASE
-	case 2:
-		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC3_BASE;
-#if defined(CONFIG_DRA7XX) && defined(CONFIG_HSMMC3_8BIT)
-		/* Enable 8-bit interface for eMMC on DRA7XX */
-		host_caps_val |= MMC_MODE_8BIT;
-#endif
-		break;
-#endif
-	default:
-		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
-		return 1;
-	}
-#ifdef OMAP_HSMMC_USE_GPIO
-	/* on error gpio values are set to -1, which is what we want */
-	priv_data->cd_gpio = omap_mmc_setup_gpio_in(cd_gpio, "mmc_cd");
-	priv_data->wp_gpio = omap_mmc_setup_gpio_in(wp_gpio, "mmc_wp");
-#endif
-
-	cfg = &priv_data->cfg;
-
-	cfg->name = "OMAP SD/MMC";
-	cfg->ops = &omap_hsmmc_ops;
-
-	cfg->voltages = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
-	cfg->host_caps = host_caps_val & ~host_caps_mask;
-
-	cfg->f_min = 400000;
-
-	if (f_max != 0)
-		cfg->f_max = f_max;
-	else {
-		if (cfg->host_caps & MMC_MODE_HS) {
-			if (cfg->host_caps & MMC_MODE_HS_52MHz)
-				cfg->f_max = 52000000;
-			else
-				cfg->f_max = 26000000;
-		} else
-			cfg->f_max = 20000000;
-	}
-
-	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
-
-#if defined(CONFIG_OMAP34XX)
-	/*
-	 * Silicon revs 2.1 and older do not support multiblock transfers.
-	 */
-	if ((get_cpu_family() == CPU_OMAP34XX) && (get_cpu_rev() <= CPU_3XX_ES21))
-		cfg->b_max = 1;
-#endif
-	mmc = mmc_create(cfg, priv_data);
-	if (mmc == NULL)
-		return -1;
-
-	return 0;
-}
-#else
-#ifdef CONFIG_IODELAY_RECALIBRATION
+#if defined(CONFIG_IODELAY_RECALIBRATION) && defined(CONFIG_DM_MMC)
 static struct pad_conf_entry *
 omap_hsmmc_get_pad_conf_entry(const fdt32_t *pinctrl, int count)
 {
@@ -1772,8 +1684,118 @@ static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
 
 	return 0;
 }
+
+__weak int platform_fixup_disable_uhs_mode(void)
+{
+	return 0;
+}
+
+static int omap_hsmmc_platform_fixup(struct mmc *mmc)
+{
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	struct mmc_config *cfg = &priv->cfg;
+
+	priv->version = NULL;
+
+	if (platform_fixup_disable_uhs_mode()) {
+		priv->version = "rev11";
+		cfg->host_caps &= ~(MMC_MODE_HS200 | MMC_MODE_UHS_SDR104
+				    | MMC_MODE_UHS_SDR50);
+	}
+
+	return 0;
+}
 #endif
 
+#ifndef CONFIG_DM_MMC
+int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
+		int wp_gpio)
+{
+	struct mmc *mmc;
+	struct omap_hsmmc_data *priv_data;
+	struct mmc_config *cfg;
+	uint host_caps_val;
+
+	priv_data = malloc(sizeof(*priv_data));
+	if (priv_data == NULL)
+		return -1;
+
+	host_caps_val = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS;
+
+	switch (dev_index) {
+	case 0:
+		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
+		break;
+#ifdef OMAP_HSMMC2_BASE
+	case 1:
+		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC2_BASE;
+#if (defined(CONFIG_OMAP44XX) || defined(CONFIG_OMAP54XX) || \
+	defined(CONFIG_DRA7XX) || \
+	defined(CONFIG_AM43XX) || defined(CONFIG_SOC_KEYSTONE)) && \
+		defined(CONFIG_HSMMC2_8BIT)
+		/* Enable 8-bit interface for eMMC on OMAP4/5 or DRA7XX */
+		host_caps_val |= MMC_MODE_8BIT;
+#endif
+		break;
+#endif
+#ifdef OMAP_HSMMC3_BASE
+	case 2:
+		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC3_BASE;
+#if defined(CONFIG_DRA7XX) && defined(CONFIG_HSMMC3_8BIT)
+		/* Enable 8-bit interface for eMMC on DRA7XX */
+		host_caps_val |= MMC_MODE_8BIT;
+#endif
+		break;
+#endif
+	default:
+		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
+		return 1;
+	}
+#ifdef OMAP_HSMMC_USE_GPIO
+	/* on error gpio values are set to -1, which is what we want */
+	priv_data->cd_gpio = omap_mmc_setup_gpio_in(cd_gpio, "mmc_cd");
+	priv_data->wp_gpio = omap_mmc_setup_gpio_in(wp_gpio, "mmc_wp");
+#endif
+
+	cfg = &priv_data->cfg;
+
+	cfg->name = "OMAP SD/MMC";
+	cfg->ops = &omap_hsmmc_ops;
+
+	cfg->voltages = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
+	cfg->host_caps = host_caps_val & ~host_caps_mask;
+
+	cfg->f_min = 400000;
+
+	if (f_max != 0) {
+		cfg->f_max = f_max;
+	} else {
+		if (cfg->host_caps & MMC_MODE_HS) {
+			if (cfg->host_caps & MMC_MODE_HS_52MHz)
+				cfg->f_max = 52000000;
+			else
+				cfg->f_max = 26000000;
+		} else {
+			cfg->f_max = 20000000;
+		}
+	}
+
+	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
+
+#if defined(CONFIG_OMAP34XX)
+	/*
+	 * Silicon revs 2.1 and older do not support multiblock transfers.
+	 */
+	if ((get_cpu_family() == CPU_OMAP34XX) && (get_cpu_rev() <= CPU_3XX_ES21))
+		cfg->b_max = 1;
+#endif
+	mmc = mmc_create(cfg, priv_data);
+	if (mmc == NULL)
+		return -1;
+
+	return 0;
+}
+#else
 static int omap_hsmmc_ofdata_to_platdata(struct udevice *dev)
 {
 	struct omap_hsmmc_data *priv = dev_get_priv(dev);
@@ -1802,27 +1824,6 @@ static int omap_hsmmc_ofdata_to_platdata(struct udevice *dev)
 #ifdef OMAP_HSMMC_USE_GPIO
 	priv->cd_inverted = fdtdec_get_bool(fdt, node, "cd-inverted");
 #endif
-
-	return 0;
-}
-
-__weak int platform_fixup_disable_uhs_mode(void)
-{
-	return 0;
-}
-
-static int omap_hsmmc_platform_fixup(struct mmc *mmc)
-{
-	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
-	struct mmc_config *cfg = &priv->cfg;
-
-	priv->version = NULL;
-
-	if (platform_fixup_disable_uhs_mode()) {
-		priv->version = "rev11";
-		cfg->host_caps &= ~(MMC_MODE_HS200 | MMC_MODE_UHS_SDR104
-				    | MMC_MODE_UHS_SDR50);
-	}
 
 	return 0;
 }
