@@ -94,14 +94,15 @@ struct omap_hsmmc_data {
 	uint desc_slot;
 #endif
 	ushort last_cmd;
-
-#ifdef CONFIG_DM_MMC
 	uint iov;
 	uint timing;
-	int node;
 	char *version;
+
+#ifdef CONFIG_DM_MMC
+	int node;
 	struct udevice *vmmc_supply;
 	struct udevice *vmmc_aux_supply;
+#endif
 #ifdef CONFIG_IODELAY_RECALIBRATION
 	struct omap_hsmmc_pinctrl_state *default_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *hs_pinctrl_state;
@@ -112,7 +113,6 @@ struct omap_hsmmc_data {
 	struct omap_hsmmc_pinctrl_state *sdr50_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *sdr25_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *sdr12_pinctrl_state;
-#endif
 #endif
 	uint signal_voltage;
 };
@@ -253,7 +253,6 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 	writel(readl(&mmc_base->con) & ~INIT_INITSTREAM, &mmc_base->con);
 }
 
-#ifdef CONFIG_DM_MMC
 #ifdef CONFIG_IODELAY_RECALIBRATION
 static void omap_hsmmc_set_timing(struct mmc *mmc)
 {
@@ -327,7 +326,6 @@ static void omap_hsmmc_set_timing(struct mmc *mmc)
 	priv->timing = mmc->timing;
 }
 #endif
-#endif
 
 static void omap_hsmmc_conf_bus_power(struct mmc *mmc, uint signal_voltage)
 {
@@ -354,7 +352,6 @@ static void omap_hsmmc_conf_bus_power(struct mmc *mmc, uint signal_voltage)
 	writel(val, &mmc_base->hctl);
 }
 
-#if defined(CONFIG_DM_MMC)
 static int omap_hsmmc_card_busy_low(struct mmc *mmc)
 {
 	u32 val;
@@ -462,7 +459,6 @@ static int omap_hsmmc_set_io_regulator(struct mmc *mmc, int uV)
 	return 0;
 }
 #endif
-#endif
 
 static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
 {
@@ -549,6 +545,7 @@ static void omap_hsmmc_set_capabilities(struct mmc *mmc)
 
 	writel(val, &mmc_base->capa);
 }
+#endif
 
 static void omap_hsmmc_disable_tuning(struct mmc *mmc)
 {
@@ -681,7 +678,6 @@ static int omap_hsmmc_set_vdd(struct mmc *mmc, int enable)
 
 	return 0;
 }
-#endif
 #endif
 
 static void mmc_enable_irq(struct mmc *mmc, struct mmc_cmd *cmd)
@@ -1303,7 +1299,7 @@ static int omap_hsmmc_set_ios(struct mmc *mmc)
 	else
 		omap_hsmmc_start_clock(mmc_base);
 
-#if defined(CONFIG_DM_MMC) && defined(CONFIG_IODELAY_RECALIBRATION)
+#if defined(CONFIG_IODELAY_RECALIBRATION)
 	if (priv_data->timing != mmc->timing)
 		omap_hsmmc_set_timing(mmc);
 #endif
@@ -1380,16 +1376,14 @@ static const struct mmc_ops omap_hsmmc_ops = {
 	.getcd		= omap_hsmmc_getcd,
 	.getwp		= omap_hsmmc_getwp,
 #endif
-#ifdef CONFIG_DM_MMC
 	.execute_tuning = omap_hsmmc_execute_tuning,
 	.card_busy = omap_hsmmc_card_busy,
 #if CONFIG_IS_ENABLED(DM_REGULATOR) && defined(CONFIG_DM_MMC)
 	.set_vdd	= omap_hsmmc_set_vdd,
 #endif
-#endif
 };
 
-#if defined(CONFIG_IODELAY_RECALIBRATION) && defined(CONFIG_DM_MMC)
+#ifdef CONFIG_IODELAY_RECALIBRATION
 static struct pad_conf_entry *
 omap_hsmmc_get_pad_conf_entry(const fdt32_t *pinctrl, int count)
 {
@@ -1684,6 +1678,7 @@ static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
 
 	return 0;
 }
+#endif
 
 __weak int platform_fixup_disable_uhs_mode(void)
 {
@@ -1705,7 +1700,6 @@ static int omap_hsmmc_platform_fixup(struct mmc *mmc)
 
 	return 0;
 }
-#endif
 
 #ifndef CONFIG_DM_MMC
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
@@ -1715,13 +1709,19 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	struct omap_hsmmc_data *priv_data;
 	struct mmc_config *cfg;
 	uint host_caps_val;
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	int ret;
+#endif
 
 	priv_data = malloc(sizeof(*priv_data));
 	if (priv_data == NULL)
 		return -1;
 
 	host_caps_val = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS;
-
+#if defined(CONFIG_OMAP54XX)
+	host_caps_val |= MMC_MODE_DDR_52MHz | MMC_MODE_HS200;
+	priv_data->controller_flags |= OMAP_HSMMC_REQUIRE_IODELAY;
+#endif
 	switch (dev_index) {
 	case 0:
 		priv_data->base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE;
@@ -1765,19 +1765,22 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	cfg->voltages = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
 	cfg->host_caps = host_caps_val & ~host_caps_mask;
 
+
 	cfg->f_min = 400000;
 
 	if (f_max != 0) {
 		cfg->f_max = f_max;
 	} else {
-		if (cfg->host_caps & MMC_MODE_HS) {
-			if (cfg->host_caps & MMC_MODE_HS_52MHz)
-				cfg->f_max = 52000000;
-			else
-				cfg->f_max = 26000000;
-		} else {
+		if (cfg->host_caps & MMC_MODE_HS200)
+			cfg->f_max = 200000000;
+		else if (cfg->host_caps & MMC_MODE_DDR_52MHz)
+			cfg->f_max = 52000000;
+		else if (cfg->host_caps & MMC_MODE_HS_52MHz)
+			cfg->f_max = 52000000;
+		else if (cfg->host_caps & MMC_MODE_HS)
+			cfg->f_max = 26000000;
+		else
 			cfg->f_max = 20000000;
-		}
 	}
 
 	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
@@ -1792,6 +1795,14 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	mmc = mmc_create(cfg, priv_data);
 	if (mmc == NULL)
 		return -1;
+
+	omap_hsmmc_platform_fixup(mmc);
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+	ret = omap_hsmmc_get_pinctrl_state(mmc);
+	if (ret < 0)
+		return ret;
+#endif
 
 	return 0;
 }
