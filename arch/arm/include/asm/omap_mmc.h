@@ -26,7 +26,7 @@
 #define OMAP_MMC_H_
 
 struct hsmmc {
-#ifdef CONFIG_DM_MMC
+#ifndef CONFIG_OMAP34XX
 	unsigned int hl_rev;
 	unsigned int hl_hwinfo;
 	unsigned int hl_sysconfig;
@@ -225,7 +225,8 @@ struct hsmmc {
 
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		int wp_gpio);
-
 int platform_fixup_disable_uhs_mode(void);
+struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
+	(struct hsmmc *base, const char *mode);
 void vmmc_pbias_config(uint voltage);
 #endif /* OMAP_MMC_H_ */
