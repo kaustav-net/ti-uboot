@@ -45,8 +45,8 @@
 	"partitions_android=" \
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=xloader,start=128K,size=256K,uuid=${uuid_gpt_xloader};" \
-	"name=bootloader,size=768K,uuid=${uuid_gpt_bootloader};" \
-	"name=environment,size=128K,uuid=${uuid_gpt_environment};" \
+	"name=bootloader,size=2304K,uuid=${uuid_gpt_bootloader};" \
+	"name=environment,size=256K,uuid=${uuid_gpt_environment};" \
 	"name=misc,size=128K,uuid=${uuid_gpt_misc};" \
 	"name=reserved,size=256K,uuid=${uuid_gpt_reserved};" \
 	"name=efs,size=16M,uuid=${uuid_gpt_efs};" \
