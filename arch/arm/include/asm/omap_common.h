@@ -699,6 +699,7 @@ static inline u8 is_omap54xx(void)
 
 #define DRA7XX		0x07000000
 #define DRA72X		0x07200000
+#define DRA76X		0x07600000
 
 static inline u8 is_dra7xx(void)
 {
@@ -710,6 +711,12 @@ static inline u8 is_dra72x(void)
 {
 	extern u32 *const omap_si_rev;
 	return (*omap_si_rev & 0xFFF00000) == DRA72X;
+}
+
+static inline u8 is_dra76x(void)
+{
+	extern u32 *const omap_si_rev;
+	return (*omap_si_rev & 0xFFF00000) == DRA76X;
 }
 #endif
 
@@ -738,6 +745,7 @@ static inline u8 is_dra72x(void)
 #define OMAP5432_ES2_0  0x54320200
 
 /* DRA7XX */
+#define DRA762_ES1_0	0x07620100
 #define DRA752_ES1_0	0x07520100
 #define DRA752_ES1_1	0x07520110
 #define DRA752_ES2_0	0x07520200
