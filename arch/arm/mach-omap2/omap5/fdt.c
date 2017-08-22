@@ -297,3 +297,96 @@ void ft_cpu_setup(void *fdt, bd_t *bd)
 	ft_hs_fixups(fdt, bd);
 	ft_opp_clock_fixups(fdt, bd);
 }
+
+int ft_dra7x_enable_nand(void *blob, bd_t *bd)
+{
+	const void *model;
+	char *path;
+	int ret, offs;
+
+	path = "/";
+	offs = fdt_path_offset(blob, path);
+	if (offs < 0)
+		goto fdt_error;
+
+	model = fdt_getprop(blob, offs, "model", NULL);
+	if (!model)
+		goto fdt_error;
+
+	/* Remove additional nodes specific to DRA71 LCD DT */
+	if (!strcmp(model, "TI DRA71 EVM-LCD-AUO-Display")) {
+		/* Prevent I2C GPIO expander from causing the
+		 * on board mux to reenable vout3 and disable
+		 * the required NAND pins.
+		 */
+		path = "/ocp/i2c@48070000/gpio@21/p0";
+		offs = fdt_path_offset(blob, path);
+		if (offs < 0)
+			goto fdt_error;
+
+		ret = fdt_delprop(blob, offs, "gpio-hog");
+		if (ret < 0)
+			goto fdt_error;
+
+		ret = fdt_delprop(blob, offs, "gpios");
+		if (ret < 0)
+			goto fdt_error;
+
+		path = "/ocp/i2c@48070000/gpio@21/p7";
+		offs = fdt_path_offset(blob, path);
+		if (offs < 0)
+			goto fdt_error;
+
+		ret = fdt_delprop(blob, offs, "gpio-hog");
+		if (ret < 0)
+			goto fdt_error;
+
+		ret = fdt_delprop(blob, offs, "gpios");
+		if (ret < 0)
+			goto fdt_error;
+
+		/* Disable Touchscreen */
+		path = "/ocp/i2c@48070000/goodix-gt9271@14";
+		offs = fdt_path_offset(blob, path);
+		if (offs < 0)
+			goto fdt_error;
+
+		ret = fdt_setprop_string(blob, offs, "status", "disabled");
+		if (ret < 0)
+			goto fdt_error;
+
+		/* Disable LCD node */
+		path = "/display";
+		offs = fdt_path_offset(blob, path);
+		if (offs < 0)
+			goto fdt_error;
+
+		ret = fdt_setprop_string(blob, offs, "status", "disabled");
+		if (ret < 0)
+			goto fdt_error;
+
+		/* Disable Backlight node */
+		path = "/backlight";
+		offs = fdt_path_offset(blob, path);
+		if (offs < 0)
+			goto fdt_error;
+
+		ret = fdt_setprop_string(blob, offs, "status", "disabled");
+		if (ret < 0)
+			goto fdt_error;
+	}
+
+	path = "/ocp/gpmc";
+	offs = fdt_path_offset(blob, path);
+	if (offs < 0)
+		goto fdt_error;
+
+	ret = fdt_setprop_string(blob, offs, "status", "okay");
+	if (ret < 0)
+		goto fdt_error;
+
+	return 0;
+
+fdt_error:
+	return -1;
+}

@@ -669,6 +669,9 @@ int ft_hs_disable_rng(void *fdt, bd_t *bd);
 int ft_hs_fixup_dram(void *fdt, bd_t *bd);
 int ft_hs_add_tee(void *fdt, bd_t *bd);
 
+/* DRA7x Specific Fixup */
+int ft_dra7x_enable_nand(void *blob, bd_t *bd);
+
 /* ABB */
 #define OMAP_ABB_NOMINAL_OPP		0
 #define OMAP_ABB_FAST_OPP		1
