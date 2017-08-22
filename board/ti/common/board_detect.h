@@ -101,6 +101,18 @@ struct ti_common_eeprom {
 				TI_SRAM_SCRATCH_BOARD_EEPROM_START)
 
 /**
+ * ti_i2c_set_alen - Set chip's i2c address length
+ * @bus_addr - I2C bus number
+ * @dev_addr - I2C eeprom id
+ * @alen     - I2C address length in bytes
+ *
+ * DM_I2C by default sets the address length to be used to 1. This
+ * function allows this address length to be changed to match the
+ * eeprom used for board detection.
+ */
+int ti_i2c_set_alen(int bus_addr, int dev_addr, int alen);
+
+/**
  * ti_i2c_eeprom_am_get() - Consolidated eeprom data collection for AM* TI EVMs
  * @bus_addr:	I2C bus address
  * @dev_addr:	I2C slave address
