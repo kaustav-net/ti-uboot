@@ -95,6 +95,8 @@
 			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
 		"if test $board_name = beagle_x15_revb1; then " \
 			"setenv fdtfile am57xx-beagle-x15-revb1.dtb; fi;" \
+		"if test $board_name = beagle_x15_revc; then " \
+			"setenv fdtfile am57xx-beagle-x15-revc.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am572x-idk.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2045; then " \
