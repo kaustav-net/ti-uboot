@@ -1351,6 +1351,28 @@ static struct iodelay_cfg_entry mmc2_iodelay_hs200_1_8v_dra72_conf[] = {
 	{0x364, 1039 , 0	/* CFG_GPMC_CS1_OEN */},
 };
 
+static struct iodelay_cfg_entry mmc2_iodelay_hs200_1_8v_dra76_conf[] = {
+	{0x190, 384 , 0		/* CFG_GPMC_A19_OEN */},
+	{0x194, 0   , 174	/* CFG_GPMC_A19_OUT */},
+	{0x1A8, 410 , 0		/* CFG_GPMC_A20_OEN */},
+	{0x1AC, 85  , 0		/* CFG_GPMC_A20_OUT */},
+	{0x1B4, 468 , 0		/* CFG_GPMC_A21_OEN */},
+	{0x1B8, 139 , 0		/* CFG_GPMC_A21_OUT */},
+	{0x1C0, 676 , 0		/* CFG_GPMC_A22_OEN */},
+	{0x1C4, 69  , 0		/* CFG_GPMC_A22_OUT */},
+	{0x1D0, 1062, 154	/* CFG_GPMC_A23_OUT */},
+	{0x1D8, 640 , 0		/* CFG_GPMC_A24_OEN */},
+	{0x1DC, 0   , 0		/* CFG_GPMC_A24_OUT */},
+	{0x1E4, 356 , 0		/* CFG_GPMC_A25_OEN */},
+	{0x1E8, 0   , 0		/* CFG_GPMC_A25_OUT */},
+	{0x1F0, 579 , 0		/* CFG_GPMC_A26_OEN */},
+	{0x1F4, 0   , 0		/* CFG_GPMC_A26_OUT */},
+	{0x1FC, 435 , 0		/* CFG_GPMC_A27_OEN */},
+	{0x200, 36  , 0		/* CFG_GPMC_A27_OUT */},
+	{0x364, 759 , 0		/* CFG_GPMC_CS1_OEN */},
+	{0x368, 72  , 0		/* CFG_GPMC_CS1_OUT */},
+};
+
 #define dimof(t) (sizeof(t) / sizeof(t[0]))
 static struct omap_hsmmc_pinctrl_state hsmmc1_default = {
 	.padconf = hsmmc1_default_padconf,
@@ -1407,6 +1429,13 @@ static struct omap_hsmmc_pinctrl_state hsmmc2_hs200_1v8_dra72 = {
 	.npads = dimof(mmc2_pins_ddr_hs200_1_8v),
 	.iodelay = mmc2_iodelay_hs200_1_8v_dra72_conf,
 	.niodelays = dimof(mmc2_iodelay_hs200_1_8v_dra72_conf),
+};
+
+static struct omap_hsmmc_pinctrl_state hsmmc2_hs200_1v8_dra76 = {
+	.padconf = mmc2_pins_ddr_hs200_1_8v,
+	.npads = dimof(mmc2_pins_ddr_hs200_1_8v),
+	.iodelay = mmc2_iodelay_hs200_1_8v_dra76_conf,
+	.niodelays = dimof(mmc2_iodelay_hs200_1_8v_dra76_conf),
 };
 #endif
 

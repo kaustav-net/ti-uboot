@@ -947,6 +947,14 @@ static struct pinctrl_desc pinctrl_descs_hsmmc2_dra72x[] = {
 	{NULL}
 };
 
+static struct pinctrl_desc pinctrl_descs_hsmmc2_dra76x[] = {
+	{"default", &hsmmc2_default_hs},
+	{"hs", &hsmmc2_default_hs},
+	{"ddr_1_8v", &hsmmc2_default_hs},
+	{"hs200_1_8v", &hsmmc2_hs200_1v8_dra76},
+	{NULL}
+};
+
 struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
 				  (struct hsmmc *base, const char *mode)
 {
@@ -962,6 +970,8 @@ struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
 			p = pinctrl_descs_hsmmc2_rev11;
 		else if (is_dra72x())
 			p = pinctrl_descs_hsmmc2_dra72x;
+		else if (is_dra76x())
+			p = pinctrl_descs_hsmmc2_dra76x;
 		else if (is_dra7xx())
 			p = pinctrl_descs_hsmmc2_rev20;
 		break;
