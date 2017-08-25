@@ -293,6 +293,7 @@ void emif_get_reg_dump(u32 emif_nr, const struct emif_regs **regs)
 		break;
 	case DRA722_ES1_0:
 	case DRA722_ES2_0:
+	case DRA722_ES2_1:
 		if (ram_size < CONFIG_MAX_MEM_MAPPED)
 			*regs = &emif_1_regs_ddr3_666_mhz_1cs_dra_es1;
 		else
@@ -357,6 +358,7 @@ void emif_get_dmm_regs(const struct dmm_lisa_map_regs **dmm_lisa_regs)
 		break;
 	case DRA722_ES1_0:
 	case DRA722_ES2_0:
+	case DRA722_ES2_1:
 	default:
 		if (ram_size < CONFIG_MAX_MEM_MAPPED)
 			*dmm_lisa_regs = &lisa_map_2G_x_2;
@@ -752,6 +754,7 @@ void recalibrate_iodelay(void)
 	switch (omap_revision()) {
 	case DRA722_ES1_0:
 	case DRA722_ES2_0:
+	case DRA722_ES2_1:
 		pads = dra72x_core_padconf_array_common;
 		npads = ARRAY_SIZE(dra72x_core_padconf_array_common);
 		if (board_is_dra71x_evm()) {
@@ -881,6 +884,14 @@ static struct pinctrl_desc pinctrl_descs_hsmmc2_dra72x[] = {
 	{NULL}
 };
 
+static struct pinctrl_desc pinctrl_descs_hsmmc2_dra76x[] = {
+	{"default", &hsmmc2_default_hs},
+	{"hs", &hsmmc2_default_hs},
+	{"ddr_1_8v", &hsmmc2_default_hs},
+	{"hs200_1_8v", &hsmmc2_hs200_1v8_dra76},
+	{NULL}
+};
+
 struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
 				  (struct hsmmc *base, const char *mode)
 {
@@ -896,6 +907,8 @@ struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
 			p = pinctrl_descs_hsmmc2_rev11;
 		else if (is_dra72x())
 			p = pinctrl_descs_hsmmc2_dra72x;
+		else if (is_dra76x())
+			p = pinctrl_descs_hsmmc2_dra76x;
 		else if (is_dra7xx())
 			p = pinctrl_descs_hsmmc2_rev20;
 		break;
