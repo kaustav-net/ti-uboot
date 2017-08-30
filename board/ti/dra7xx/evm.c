@@ -801,6 +801,11 @@ void recalibrate_iodelay(void)
 	int npads, niodelays, delta_npads = 0;
 	int ret;
 
+	/* Setup I/O isolation */
+	ret = __recalibrate_iodelay_start();
+	if (ret)
+		goto err;
+
 	switch (omap_revision()) {
 	case DRA722_ES1_0:
 	case DRA722_ES2_0:
@@ -852,6 +857,9 @@ void recalibrate_iodelay(void)
 		npads = ARRAY_SIZE(dra76x_core_padconf_array);
 		iodelay = dra76x_es1_0_iodelay_cfg_array;
 		niodelays = ARRAY_SIZE(dra76x_es1_0_iodelay_cfg_array);
+		/* Set mux for MCAN instead of DCAN1 */
+		clrsetbits_le32((*ctrl)->control_core_control_spare_rw,
+				MCAN_SEL_ALT_MASK, MCAN_SEL);
 		break;
 	default:
 	case DRA752_ES2_0:
@@ -864,10 +872,6 @@ void recalibrate_iodelay(void)
 				      RGMII1_ID_MODE_N_MASK);
 		break;
 	}
-	/* Setup I/O isolation */
-	ret = __recalibrate_iodelay_start();
-	if (ret)
-		goto err;
 
 	/* Do the muxing here */
 	do_set_mux32((*ctrl)->control_padconf_core_base, pads, npads);
