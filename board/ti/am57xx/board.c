@@ -662,6 +662,7 @@ int board_late_init(void)
 #if !defined(CONFIG_SPL_BUILD)
 	board_ti_set_ethaddr(2);
 #endif
+	omap_die_id_serial();
 
 	return 0;
 }
