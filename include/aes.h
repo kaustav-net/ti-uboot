@@ -15,6 +15,9 @@ typedef unsigned int u32;
 #define debug(...) do {} while (0)
 #endif
 
+#error "This implementation of AES has security complications and is not recommended for use." \
+	"Please see CVE-2017-3225 and CVE-2017-3226 for more details."
+
 /*
  * AES encryption library, with small code size, supporting only 128-bit AES
  *
