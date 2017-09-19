@@ -26,6 +26,7 @@
 #include <xyzModem.h>
 #include <stdarg.h>
 #include <crc.h>
+#include <watchdog.h>
 
 /* Assumption - run xyzModem protocol over the console port */
 
@@ -64,6 +65,7 @@ CYGACC_COMM_IF_GETC_TIMEOUT (char chan, char *c)
 {
 
   ulong now = get_timer(0);
+  WATCHDOG_RESET();
   while (!tstc ())
     {
       if (get_timer(now) > xyzModem_CHAR_TIMEOUT)
