@@ -332,6 +332,60 @@ static void dra7_ddr3_leveling(u32 base, const struct emif_regs *regs)
 	update_hwleveling_output(base, regs);
 }
 
+static void dra7_enable_ecc(u32 base, const struct emif_regs *regs)
+{
+	struct emif_reg_struct *emif = (struct emif_reg_struct *)base;
+	u32 rgn, size;
+
+	/* ECC available only on dra76x EMIF1 */
+	if ((base != EMIF1_BASE) || !is_dra76x())
+		return;
+
+	if (regs->emif_ecc_ctrl_reg & EMIF_ECC_CTRL_REG_ECC_EN_MASK) {
+		writel(regs->emif_ecc_address_range_1,
+		       &emif->emif_ecc_address_range_1);
+		writel(regs->emif_ecc_address_range_2,
+		       &emif->emif_ecc_address_range_2);
+		writel(regs->emif_ecc_ctrl_reg, &emif->emif_ecc_ctrl_reg);
+
+		/* Set region1 memory with 0 */
+		rgn = ((regs->emif_ecc_address_range_1 &
+			EMIF_ECC_REG_ECC_START_ADDR_MASK) << 16) +
+		       CONFIG_SYS_SDRAM_BASE;
+		size = (regs->emif_ecc_address_range_1 &
+			EMIF_ECC_REG_ECC_END_ADDR_MASK) + 0x10000;
+
+		/* ToDo: Use EDMA to zero the memory */
+		if (regs->emif_ecc_ctrl_reg &
+		    EMIF_ECC_REG_ECC_ADDR_RGN_1_EN_MASK)
+			memset((void *)rgn, 0, size);
+
+		/* Set region2 memory with 0 */
+		rgn = ((regs->emif_ecc_address_range_2 &
+			EMIF_ECC_REG_ECC_START_ADDR_MASK) << 16) +
+		       CONFIG_SYS_SDRAM_BASE;
+		size = (regs->emif_ecc_address_range_2 &
+			EMIF_ECC_REG_ECC_END_ADDR_MASK) + 0x10000;
+
+		/* ToDo: Use EDMA to zero the memory */
+		if (regs->emif_ecc_ctrl_reg &
+		    EMIF_ECC_REG_ECC_ADDR_RGN_2_EN_MASK)
+			memset((void *)rgn, 0, size);
+
+#ifdef CONFIG_DRA7XX
+		/* Clear the status flags and other history */
+		writel(readl(&emif->emif_1b_ecc_err_cnt),
+		       &emif->emif_1b_ecc_err_cnt);
+		writel(0xffffffff, &emif->emif_1b_ecc_err_dist_1);
+		writel(0x1, &emif->emif_2b_ecc_err_addr_log);
+		writel(EMIF_INT_WR_ECC_ERR_SYS_MASK |
+		       EMIF_INT_TWOBIT_ECC_ERR_SYS_MASK |
+		       EMIF_INT_ONEBIT_ECC_ERR_SYS_MASK,
+		       &emif->emif_irqstatus_sys);
+#endif
+	}
+}
+
 static void dra7_ddr3_init(u32 base, const struct emif_regs *regs)
 {
 	struct emif_reg_struct *emif = (struct emif_reg_struct *)base;
@@ -368,8 +422,29 @@ static void dra7_ddr3_init(u32 base, const struct emif_regs *regs)
 
 	writel(regs->ref_ctrl_final, &emif->emif_sdram_ref_ctrl);
 
-	if (regs->emif_rd_wr_lvl_rmp_ctl & EMIF_REG_RDWRLVL_EN_MASK)
+	if (regs->emif_rd_wr_lvl_rmp_ctl & EMIF_REG_RDWRLVL_EN_MASK) {
+		/*
+		 * Perform Dummy ECC setup just to allow hardware
+		 * leveling of ECC memories
+		 */
+		if (is_dra76x() && (base == EMIF1_BASE) &&
+		    (regs->emif_ecc_ctrl_reg & EMIF_ECC_CTRL_REG_ECC_EN_MASK)) {
+			writel(0, &emif->emif_ecc_address_range_1);
+			writel(0, &emif->emif_ecc_address_range_2);
+			writel(EMIF_ECC_CTRL_REG_ECC_EN_MASK |
+			       EMIF_ECC_CTRL_REG_ECC_ADDR_RGN_PROT_MASK,
+			       &emif->emif_ecc_ctrl_reg);
+		}
+
 		dra7_ddr3_leveling(base, regs);
+
+		/* Disable ECC */
+		if (is_dra76x())
+			writel(0, &emif->emif_ecc_ctrl_reg);
+	}
+
+	/* Enable ECC as necessary */
+	dra7_enable_ecc(base, regs);
 }
 
 static void omap5_ddr3_init(u32 base, const struct emif_regs *regs)
