@@ -17,6 +17,7 @@
 #include <asm/omap_sec_common.h>
 #include <asm/utils.h>
 #include <linux/compiler.h>
+#include <asm/ti-common/ti-edma3.h>
 
 static int emif1_enabled = -1, emif2_enabled = -1;
 
@@ -332,6 +333,19 @@ static void dra7_ddr3_leveling(u32 base, const struct emif_regs *regs)
 	update_hwleveling_output(base, regs);
 }
 
+static void dra7_reset_ddr_data(u32 base, u32 size)
+{
+#if defined(CONFIG_TI_EDMA3) && !defined(CONFIG_DMA)
+	enable_edma3_clocks();
+
+	edma3_fill(EDMA3_BASE, 1, (void *)base, 0, size);
+
+	disable_edma3_clocks();
+#else
+	memset((void *)base, 0, size);
+#endif
+}
+
 static void dra7_enable_ecc(u32 base, const struct emif_regs *regs)
 {
 	struct emif_reg_struct *emif = (struct emif_reg_struct *)base;
@@ -355,10 +369,9 @@ static void dra7_enable_ecc(u32 base, const struct emif_regs *regs)
 		size = (regs->emif_ecc_address_range_1 &
 			EMIF_ECC_REG_ECC_END_ADDR_MASK) + 0x10000;
 
-		/* ToDo: Use EDMA to zero the memory */
 		if (regs->emif_ecc_ctrl_reg &
 		    EMIF_ECC_REG_ECC_ADDR_RGN_1_EN_MASK)
-			memset((void *)rgn, 0, size);
+			dra7_reset_ddr_data(rgn, size);
 
 		/* Set region2 memory with 0 */
 		rgn = ((regs->emif_ecc_address_range_2 &
@@ -367,10 +380,9 @@ static void dra7_enable_ecc(u32 base, const struct emif_regs *regs)
 		size = (regs->emif_ecc_address_range_2 &
 			EMIF_ECC_REG_ECC_END_ADDR_MASK) + 0x10000;
 
-		/* ToDo: Use EDMA to zero the memory */
 		if (regs->emif_ecc_ctrl_reg &
 		    EMIF_ECC_REG_ECC_ADDR_RGN_2_EN_MASK)
-			memset((void *)rgn, 0, size);
+			dra7_reset_ddr_data(rgn, size);
 
 #ifdef CONFIG_DRA7XX
 		/* Clear the status flags and other history */
