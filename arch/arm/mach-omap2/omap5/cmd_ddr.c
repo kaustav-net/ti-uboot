@@ -36,7 +36,7 @@ static int ddr_verify_ecc(u32 addr, u32 ecc_err)
 {
 	struct emif_reg_struct *emif = (struct emif_reg_struct *)EMIF1_BASE;
 	u32 ecc_ctrl = readl(&emif->emif_ecc_ctrl_reg);
-	u32 val1, val2, val3, a_addr;
+	u32 val1, val2, val3;
 
 	/* Disable Caches */
 	debug("Disabling D-Cache before ECC test\n");
@@ -46,9 +46,6 @@ static int ddr_verify_ecc(u32 addr, u32 ecc_err)
 	puts("Testing DDR ECC:\n");
 	puts("\tECC test: Disabling DDR ECC ...\n");
 	writel(0, &emif->emif_ecc_ctrl_reg);
-
-	a_addr = addr & ~(CONFIG_SYS_CACHELINE_SIZE - 1);
-	invalidate_dcache_range(a_addr, a_addr + CONFIG_SYS_CACHELINE_SIZE);
 
 	val1 = readl(addr);
 	val2 = val1 ^ ecc_err;
