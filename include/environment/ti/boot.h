@@ -75,8 +75,10 @@
 			"setenv fdtfile am572x-idk-lcd-osd101t2045.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2587; then " \
 			"setenv fdtfile am572x-idk-lcd-osd101t2587.dtb; fi;" \
-		"if test $board_name = am574x_idk; then " \
+		"if test $board_name = am574x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am574x-idk.dtb; fi;" \
+		"if test $board_name = am574x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am574x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $board_name = am57xx_evm; then " \
 			"setenv fdtfile am57xx-evm.dtb; fi;" \
 		"if test $board_name = am57xx_evm_reva3; then " \
