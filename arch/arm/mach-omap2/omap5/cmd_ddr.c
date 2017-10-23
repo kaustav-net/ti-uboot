@@ -17,13 +17,20 @@ static void ddr_check_ecc_status(void)
 	struct emif_reg_struct *emif = (struct emif_reg_struct *)EMIF1_BASE;
 	u32 err_1b = readl(&emif->emif_1b_ecc_err_cnt);
 	u32 int_status = readl(&emif->emif_irqstatus_raw_sys);
+	int ecc_test = 0;
+	char *env;
+
+	env = getenv("ecc_test");
+	if (env)
+		ecc_test = simple_strtol(env, NULL, 0);
 
 	puts("ECC test Status:\n");
 	if (int_status & EMIF_INT_WR_ECC_ERR_SYS_MASK)
 		puts("\tECC test: DDR ECC write error interrupted\n");
 
 	if (int_status & EMIF_INT_TWOBIT_ECC_ERR_SYS_MASK)
-		panic("\tECC test: DDR ECC 2-bit error interrupted");
+		if (!ecc_test)
+			panic("\tECC test: DDR ECC 2-bit error interrupted");
 
 	if (int_status & EMIF_INT_ONEBIT_ECC_ERR_SYS_MASK)
 		puts("\tECC test: DDR ECC 1-bit error interrupted\n");
