@@ -52,6 +52,7 @@ obj-$(CONFIG_SPL_MMC_SUPPORT) += block/
 obj-$(CONFIG_SPL_FPGA_SUPPORT) += fpga/
 obj-$(CONFIG_SPL_THERMAL) += thermal/
 obj-$(CONFIG_SPL_MAILBOX_SUPPORT) += mailbox/
+obj-$(CONFIG_SPL_REMOTEPROC_SUPPORT) += remoteproc/
 
 endif
 endif
