@@ -11,7 +11,9 @@
 #include <errno.h>
 #include <timer.h>
 #include <asm/io.h>
+#ifdef CONFIG_ARCH_OMAP2PLUS
 #include <asm/arch/clock.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -54,7 +56,7 @@ static int omap_timer_get_count(struct udevice *dev, u64 *count)
 {
 	struct omap_timer_priv *priv = dev_get_priv(dev);
 
-	*count = readl(&priv->regs->tcrr);
+	*count = timer_conv_64(readl(&priv->regs->tcrr));
 
 	return 0;
 }
@@ -68,6 +70,7 @@ static int omap_timer_probe(struct udevice *dev)
 
 	/* start the counter ticking up, reload value on overflow */
 	writel(0, &priv->regs->tldr);
+	writel(0, &priv->regs->tcrr);
 	/* enable timer */
 	writel((CONFIG_SYS_PTV << 2) | TCLR_PRE_EN | TCLR_AUTO_RELOAD |
 	       TCLR_START, &priv->regs->tclr);
