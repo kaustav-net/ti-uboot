@@ -10,6 +10,11 @@
 /{
 	ocp {
 		u-boot,dm-spl;
+
+		bandgap@4a0021e0 {
+			u-boot,dm-spl;
+		};
+
 	};
 };
 
