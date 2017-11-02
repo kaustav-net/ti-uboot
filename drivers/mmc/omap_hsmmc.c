@@ -44,6 +44,7 @@
 #endif
 #include <dm.h>
 #include <power/regulator.h>
+#include <thermal.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -613,6 +614,7 @@ static void omap_hsmmc_disable_tuning(struct mmc *mmc)
 	writel(val, &mmc_base->dll);
 }
 
+#if defined(CONFIG_THERMAL) || defined(CONFIG_SPL_THERMAL)
 static void omap_hsmmc_set_dll(struct mmc *mmc, int count)
 {
 	int i;
@@ -647,6 +649,10 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 	u32 phase_delay = 0;
 	u32 start_window = 0, max_window = 0;
 	u32 length = 0, max_len = 0;
+	bool single_point_failure = false;
+	struct udevice *thermal_dev;
+	int temperature;
+	int i;
 
 	/* clock tuning is not needed for upto 52MHz */
 	if (mmc->clock <= 52000000)
@@ -660,6 +666,21 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 	val = readl(&mmc_base->dll);
 	val |= DLL_SWT;
 	writel(val, &mmc_base->dll);
+
+	ret = uclass_first_device(UCLASS_THERMAL, &thermal_dev);
+	if (ret) {
+		printf("Couldn't get thermal device for tuning\n");
+		goto tuning_error;
+	}
+	ret = thermal_get_temp(thermal_dev, &temperature);
+	if (ret)
+		goto tuning_error;
+
+	/*
+	 * Stage 1: Search for a maximum pass window ignoring any
+	 * any single point failures. If the tuning value ends up
+	 * near it, move away from it in stage 2 below
+	 */
 	while (phase_delay <= MAX_PHASE_DELAY) {
 		omap_hsmmc_set_dll(mmc, phase_delay);
 
@@ -668,10 +689,16 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 		if (cur_match) {
 			if (prev_match) {
 				length++;
+			} else if (single_point_failure) {
+				/* ignore single point failure */
+				length++;
+				single_point_failure = false;
 			} else {
 				start_window = phase_delay;
 				length = 1;
 			}
+		} else {
+			single_point_failure = prev_match;
 		}
 
 		if (length > max_len) {
@@ -681,10 +708,6 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 
 		prev_match = cur_match;
 		phase_delay += 4;
-		udelay(100);
-	val = readl(&mmc_base->dll);
-	val &= ~DLL_FORCE_VALUE;
-	writel(val, &mmc_base->dll);
 	}
 
 	if (!max_len) {
@@ -697,8 +720,71 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 		ret = -EIO;
 		goto tuning_error;
 	}
+	/*
+	 * Assign tuning value as a ratio of maximum pass window based
+	 * on temperature
+	 */
+	if (temperature < -20000)
+		phase_delay = min(max_window + 4 * max_len - 24,
+				  max_window +
+				  DIV_ROUND_UP(13 * max_len, 16) * 4);
+	else if (temperature < 20000)
+		phase_delay = max_window + DIV_ROUND_UP(9 * max_len, 16) * 4;
+	else if (temperature < 40000)
+		phase_delay = max_window + DIV_ROUND_UP(8 * max_len, 16) * 4;
+	else if (temperature < 70000)
+		phase_delay = max_window + DIV_ROUND_UP(7 * max_len, 16) * 4;
+	else if (temperature < 90000)
+		phase_delay = max_window + DIV_ROUND_UP(5 * max_len, 16) * 4;
+	else if (temperature < 120000)
+		phase_delay = max_window + DIV_ROUND_UP(4 * max_len, 16) * 4;
+	else
+		phase_delay = max_window + DIV_ROUND_UP(3 * max_len, 16) * 4;
 
-	phase_delay = max_window + 4 * ((3 * max_len) >> 2);
+	/*
+	 * Stage 2: Search for a single point failure near the chosen tuning
+	 * value in two steps. First in the +3 to +10 range and then in the
+	 * +2 to -10 range. If found, move away from it in the appropriate
+	 * direction by the appropriate amount depending on the temperature.
+	 */
+	for (i = 3; i <= 10; i++) {
+		omap_hsmmc_set_dll(mmc, phase_delay + i);
+		if (mmc_send_tuning(mmc, opcode, NULL)) {
+			if (temperature < 10000)
+				phase_delay += i + 6;
+			else if (temperature < 20000)
+				phase_delay += i - 12;
+			else if (temperature < 70000)
+				phase_delay += i - 8;
+			else if (temperature < 90000)
+				phase_delay += i - 6;
+			else
+				phase_delay += i - 6;
+
+			goto single_failure_found;
+		}
+	}
+
+	for (i = 2; i >= -10; i--) {
+		omap_hsmmc_set_dll(mmc, phase_delay + i);
+		if (mmc_send_tuning(mmc, opcode, NULL)) {
+			if (temperature < 10000)
+				phase_delay += i + 12;
+			else if (temperature < 20000)
+				phase_delay += i + 8;
+			else if (temperature < 70000)
+				phase_delay += i + 8;
+			else if (temperature < 90000)
+				phase_delay += i + 10;
+			else
+				phase_delay += i + 12;
+
+			goto single_failure_found;
+		}
+	}
+
+single_failure_found:
+
 	omap_hsmmc_set_dll(mmc, phase_delay);
 
 	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
@@ -714,6 +800,21 @@ tuning_error:
 
 	return ret;
 }
+
+#else
+static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
+{
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = omap_hsmmc_get_data(mmc);
+
+	mmc_base = priv->base_addr;
+	omap_hsmmc_disable_tuning(mmc);
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRC);
+
+	return -ENODEV;
+}
+#endif
 
 #if CONFIG_IS_ENABLED(DM_REGULATOR) && defined(CONFIG_DM_MMC)
 static int omap_hsmmc_set_vdd(struct mmc *mmc, bool enable)
