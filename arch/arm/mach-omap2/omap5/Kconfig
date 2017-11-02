@@ -53,10 +53,16 @@ config TARGET_DRA7XX_EVM
 	bool "TI DRA7XX"
 	select TI_I2C_BOARD_DETECT
 	select PHYS_64BIT
+	select SPL_THERMAL
+	select DM_THERMAL
+	select TI_DRA7_THERMAL
 
 config TARGET_AM57XX_EVM
 	bool "AM57XX"
 	select TI_I2C_BOARD_DETECT
+	select SPL_THERMAL
+	select DM_THERMAL
+	select TI_DRA7_THERMAL
 
 endchoice
 
