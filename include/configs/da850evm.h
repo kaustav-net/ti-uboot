@@ -270,8 +270,6 @@
 #define CONFIG_CMDLINE_TAG
 #define CONFIG_REVISION_TAG
 #define CONFIG_SETUP_MEMORY_TAGS
-#define CONFIG_BOOTARGS		\
-	"mem=32M console=ttyS2,115200n8 root=/dev/mtdblock2 rw noinitrd ip=dhcp"
 #define CONFIG_EXTRA_ENV_SETTINGS	"hwconfig=dsp:wake=yes"
 
 /*

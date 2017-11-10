@@ -205,12 +205,6 @@
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_INITRD_TAG
 #define CONFIG_BOOTCOMMAND	"cp.b 0xC00C6000 ${loadaddr} 0x294000; bootm"
-#if defined(CONFIG_CMD_NAND)
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 " \
-				"root=/dev/mtdblock0 " \
-				MTDPARTS_DEFAULT \
-				" rw rootfstype=jffs2"
-#endif
 
 /* Misc. u-boot settings */
 #define CONFIG_SYS_CBSIZE		256

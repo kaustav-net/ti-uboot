@@ -20,7 +20,6 @@
 
 /* Booting Linux */
 #define CONFIG_BOOTFILE		"zImage"
-#define CONFIG_BOOTARGS		"console=ttyS0," __stringify(CONFIG_BAUDRATE)
 #define CONFIG_LOADADDR		0x01000000
 #define CONFIG_SYS_LOAD_ADDR	CONFIG_LOADADDR
 #define CONFIG_ENV_IS_IN_SPI_FLASH

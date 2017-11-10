@@ -20,8 +20,6 @@
 #define CONFIG_MAC_PARTITION
 
 #define CONFIG_BAUDRATE		115200
-#define CONFIG_BOOTARGS		"console=ttySC1,115200 root=/dev/nfs ip=dhcp"
-
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	"bootdevice=0:1\0"						\
 	"usbload=usb reset;usbboot;usb stop;bootm\0"

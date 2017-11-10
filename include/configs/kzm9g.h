@@ -26,8 +26,6 @@
 #define CONFIG_DOS_PARTITION
 
 #define CONFIG_BAUDRATE		115200
-#define CONFIG_BOOTARGS		"root=/dev/null console=ttySC4,115200"
-
 #undef  CONFIG_SHOW_BOOT_PROGRESS
 
 /* MEMORY */

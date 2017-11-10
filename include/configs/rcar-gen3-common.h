@@ -80,10 +80,6 @@
 	"fdt_high=0xffffffffffffffff\0"	\
 	"initrd_high=0xffffffffffffffff\0"
 
-#define CONFIG_BOOTARGS	\
-	"console=ttySC0,115200 rw root=/dev/nfs "	\
-	"nfsroot=192.168.0.1:/export/rfs ip=192.168.0.20"
-
 #define CONFIG_BOOTCOMMAND	\
 	"tftp 0x48080000 Image; " \
 	"tftp 0x48000000 Image-r8a7795-salvator-x.dtb; " \

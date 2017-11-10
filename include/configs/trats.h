@@ -46,7 +46,6 @@
 #define MACH_TYPE_TRATS			3928
 #define CONFIG_MACH_TYPE		MACH_TYPE_TRATS
 
-#define CONFIG_BOOTARGS			"Please use defined boot"
 #define CONFIG_BOOTCOMMAND		"run autoboot"
 #define CONFIG_DEFAULT_CONSOLE		"console=ttySAC2,115200n8\0"
 

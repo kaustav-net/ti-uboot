@@ -124,10 +124,6 @@
 				 CONFIG_ENV_OFFSET)
 #define CONFIG_ENV_SIZE		0x2000
 #define CONFIG_BOOTCOMMAND	"nboot 21000000 0"
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 " \
-	"root=/dev/mtdblock1 " \
-	"mtdparts=" MTDPARTS_DEFAULT " " \
-	"rw rootfstype=jffs2"
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"mtdparts=" MTDPARTS_DEFAULT "\0" \
 

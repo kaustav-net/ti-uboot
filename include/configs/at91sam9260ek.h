@@ -188,10 +188,6 @@
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0 + CONFIG_ENV_OFFSET)
 #define CONFIG_ENV_SIZE		0x4200
 #define CONFIG_BOOTCOMMAND	"cp.b 0xC0084000 0x22000000 0x210000; bootm"
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 "			\
-				"root=/dev/mtdblock0 "			\
-				"mtdparts=atmel_nand:-(root) "		\
-				"rw rootfstype=jffs2"
 
 #elif CONFIG_SYS_USE_DATAFLASH_CS1
 
@@ -202,10 +198,6 @@
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS1 + CONFIG_ENV_OFFSET)
 #define CONFIG_ENV_SIZE		0x4200
 #define CONFIG_BOOTCOMMAND	"cp.b 0xD0084000 0x22000000 0x210000; bootm"
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 "			\
-				"root=/dev/mtdblock0 "			\
-				"mtdparts=atmel_nand:-(root) "		\
-				"rw rootfstype=jffs2"
 
 #elif defined(CONFIG_SYS_USE_NANDFLASH)
 
@@ -215,12 +207,6 @@
 #define CONFIG_ENV_OFFSET_REDUND	0x100000
 #define CONFIG_ENV_SIZE		0x20000		/* 1 sector = 128 kB */
 #define CONFIG_BOOTCOMMAND	"nand read 0x22000000 0x200000 0x300000; bootm"
-#define CONFIG_BOOTARGS							\
-	"console=ttyS0,115200 earlyprintk "				\
-	"mtdparts=atmel_nand:256k(bootstrap)ro,512k(uboot)ro,"		\
-	"256k(env),256k(env_redundant),256k(spare),"			\
-	"512k(dtb),6M(kernel)ro,-(rootfs) "				\
-	"root=/dev/mtdblock7 rw rootfstype=jffs2"
 
 #else	/* CONFIG_SYS_USE_MMC */
 /* bootstrap + u-boot + env + linux in mmc */
@@ -232,12 +218,6 @@
 
 #define CONFIG_BOOTCOMMAND						\
 	"fatload mmc 0:1 0x22000000 uImage; bootm"
-#define CONFIG_BOOTARGS							\
-	"console=ttyS0,115200 earlyprintk "				\
-	"mtdparts=atmel_nand:256k(bootstrap)ro,512k(uboot)ro,"		\
-	"256k(env),256k(env_redundant),256k(spare),"			\
-	"512k(dtb),6M(kernel)ro,-(rootfs) "				\
-	"root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait"
 #endif
 
 #define CONFIG_SYS_CBSIZE		256

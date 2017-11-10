@@ -521,10 +521,8 @@ extern unsigned long get_clock_freq(void);
 
 #define CONFIG_LOADADDR	1000000	/*default location for tftp and bootm*/
 
-#undef	CONFIG_BOOTARGS		/* the boot command will set bootargs*/
 
 #define CONFIG_BAUDRATE	115200
-
 #define	CONFIG_EXTRA_ENV_SETTINGS		\
 	"hwconfig=fsl_ddr:ecc=off\0"		\
 	"netdev=eth0\0"				\

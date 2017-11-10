@@ -154,8 +154,6 @@
 /*
  * Default environment variables
  */
-#define CONFIG_BOOTARGS "console=ttyS0,115200"
-
 #define CONFIG_BOOTCOMMAND					\
 	"dhcp && run netconsole; "				\
 	"if run usbload || run diskload; then bootm; fi"

@@ -230,10 +230,6 @@ unsigned long long get_qixis_addr(void);
 	"mcinitcmd=fsl_mc start mc 0x580300000"	\
 	" 0x580800000 \0"
 
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 root=/dev/ram0 " \
-				"earlycon=uart8250,mmio,0x21c0500 " \
-				"ramdisk_size=0x2000000 default_hugepagesz=2m" \
-				" hugepagesz=2m hugepages=256"
 #define CONFIG_BOOTCOMMAND	"fsl_mc apply dpl 0x580700000 &&" \
 				" cp.b $kernel_start $kernel_load" \
 				" $kernel_size && bootm $kernel_load"

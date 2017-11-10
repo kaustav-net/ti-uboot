@@ -178,10 +178,6 @@
 	"kernel_size=0x2800000\0"		\
 	"console=ttyS0,115200\0"                \
 		MTDPARTS_DEFAULT "\0"
-
-#define CONFIG_BOOTARGS			"console=ttyS0,115200 root=/dev/ram0 " \
-					"earlycon=uart8250,mmio,0x21c0500 " \
-					MTDPARTS_DEFAULT
 /* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE		512	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + \

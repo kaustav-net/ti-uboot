@@ -349,12 +349,6 @@ unsigned long get_board_sys_clk(void);
 	" 0x580800000 \0"			\
 	BOOTENV
 
-#undef CONFIG_BOOTARGS
-#define CONFIG_BOOTARGS		"console=ttyS1,115200 root=/dev/ram0 " \
-				"earlycon=uart8250,mmio,0x21c0600 " \
-				"ramdisk_size=0x2000000 default_hugepagesz=2m" \
-				" hugepagesz=2m hugepages=256"
-
 #undef CONFIG_BOOTCOMMAND
 /* Try to boot an on-NOR kernel first, then do normal distro boot */
 #define CONFIG_BOOTCOMMAND "run mcinitcmd && fsl_mc lazyapply dpl 0x580700000" \

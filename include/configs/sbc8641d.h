@@ -519,10 +519,8 @@
 /* default location for tftp and bootm */
 #define CONFIG_LOADADDR		1000000
 
-#undef  CONFIG_BOOTARGS		/* the boot command will set bootargs */
 
 #define CONFIG_BAUDRATE	115200
-
 #define	CONFIG_EXTRA_ENV_SETTINGS					\
    "netdev=eth0\0"							\
    "consoledev=ttyS0\0"							\

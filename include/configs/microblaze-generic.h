@@ -232,7 +232,6 @@
 /* default load address */
 #define	CONFIG_SYS_LOAD_ADDR	0
 
-#define	CONFIG_BOOTARGS		"root=romfs"
 #define	CONFIG_HOSTNAME		XILINX_BOARD_NAME
 #define	CONFIG_BOOTCOMMAND	"base 0;tftp 11000000 image.img;bootm"
 #define	CONFIG_IPADDR		192.168.0.3

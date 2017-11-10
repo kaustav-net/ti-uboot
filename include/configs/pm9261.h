@@ -252,10 +252,6 @@
 		(CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0 + CONFIG_ENV_OFFSET)
 #define CONFIG_ENV_SIZE		0x4200
 #define CONFIG_BOOTCOMMAND	"cp.b 0xC0042000 0x22000000 0x210000; bootm"
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 "			\
-				"root=/dev/mtdblock0 "			\
-				"mtdparts=atmel_nand:-(root) "		\
-				"rw rootfstype=jffs2"
 
 #elif defined(CONFIG_SYS_USE_NANDFLASH) /* CONFIG_SYS_USE_NANDFLASH */
 
@@ -265,12 +261,6 @@
 #define CONFIG_ENV_OFFSET_REDUND	0x80000
 #define CONFIG_ENV_SIZE			0x20000		/* 1 sector = 128 kB */
 #define CONFIG_BOOTCOMMAND	"nand read 0x22000000 0xA0000 0x200000; bootm"
-#define CONFIG_BOOTARGS		"console=ttyS0,115200 "			\
-				"root=/dev/mtdblock5 "			\
-				"mtdparts=atmel_nand:128k(bootstrap)ro,"	\
-				"256k(uboot)ro,128k(env1)ro,"		\
-				"128k(env2)ro,2M(linux),-(root) "	\
-				"rw rootfstype=jffs2"
 
 #elif defined (CONFIG_SYS_USE_FLASH)
 
@@ -299,7 +289,6 @@
 	"nand:-(nand)"
 
 #define CONFIG_CON_ROT "fbcon=rotate:3 "
-#define CONFIG_BOOTARGS "root=/dev/mtdblock4 rootfstype=jffs2 " CONFIG_CON_ROT
 
 #define CONFIG_EXTRA_ENV_SETTINGS				\
 	"mtdids=" MTDIDS_DEFAULT "\0"				\

@@ -20,7 +20,6 @@
 #define CONFIG_BAUDRATE		115200
 
 #define CONFIG_TIMESTAMP		/* Print image info with timestamp */
-#undef CONFIG_BOOTARGS
 
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	"addmisc=setenv bootargs ${bootargs} "				\

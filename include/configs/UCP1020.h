@@ -562,10 +562,8 @@
 /* default location for tftp and bootm */
 #define CONFIG_LOADADDR		1000000
 
-#define CONFIG_BOOTARGS	/* the boot command will set bootargs */
 
 #define CONFIG_BAUDRATE	115200
-
 #if defined(CONFIG_DONGLE)
 
 #define	CONFIG_EXTRA_ENV_SETTINGS					\

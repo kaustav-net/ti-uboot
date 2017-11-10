@@ -237,10 +237,6 @@
 	"console=ttyS0,115200\0"                \
 	"mtdparts=" MTDPARTS_DEFAULT "\0"
 
-#define CONFIG_BOOTARGS			"console=ttyS0,115200 root=/dev/ram0 " \
-					"earlycon=uart8250,mmio,0x21c0500 "    \
-					MTDPARTS_DEFAULT
-
 #if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_SD_BOOT_QSPI)
 #define CONFIG_BOOTCOMMAND		"sf probe && sf read $kernel_load "    \
 					"e0000 f00000 && bootm $kernel_load"
