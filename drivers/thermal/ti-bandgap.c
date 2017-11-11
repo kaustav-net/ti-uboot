@@ -185,6 +185,7 @@ static const struct udevice_id of_ti_bandgap_match[] = {
 	{
 		.compatible = "ti,dra752-bandgap",
 	},
+	{},
 };
 
 U_BOOT_DRIVER(ti_bandgap_thermal) = {
