@@ -146,6 +146,10 @@ quiet_cmd_mkimage = MKIMAGE $@
 cmd_mkimage = $(objtree)/tools/mkimage $(MKIMAGEFLAGS_$(@F)) -d $< $@ \
 	$(if $(KBUILD_VERBOSE:1=), >$(MKIMAGEOUTPUT))
 
+quiet_cmd_mkfitimage = MKIMAGE $@
+cmd_mkfitimage = $(objtree)/tools/mkimage $(MKIMAGEFLAGS_$(@F)) -f $(SPL_ITS) -E $@ \
+	$(if $(KBUILD_VERBOSE:1=), MKIMAGEOUTPUT)
+
 MKIMAGEFLAGS_MLO = -T omapimage -a $(CONFIG_SPL_TEXT_BASE)
 
 MKIMAGEFLAGS_MLO.byteswap = -T omapimage -n byteswap -a $(CONFIG_SPL_TEXT_BASE)
@@ -383,12 +387,29 @@ SHRUNK_ARCH_DTB = $(patsubst %,$(obj)/dts/%.dtb,$(subst ",,$(CONFIG_SPL_OF_LIST)
 $(SHRUNK_ARCH_DTB): $$(patsubst $(obj)/dts/%, arch/$(ARCH)/dts/%, $$@)
 	$(call if_changed,fdtgrep)
 
+ifneq ($(CONFIG_SPL_DTB_FIT_SOURCE),"")
+SPL_ITS = $(subst ",,$(CONFIG_SPL_FIT_SOURCE))
+
+$(obj)/$(SPL_BIN).multidtb.fit: $(SPL_ITS) FORCE
+	$(call if_changed,mkfitimage)
+else
+ifneq ($(CONFIG_SPL_DTB_FIT_GENERATOR),"")
+SPL_ITS := $(SPL_BIN).its
+$(SPL_ITS): FORCE
+	$(srctree)/$(CONFIG_SPL_DTB_FIT_GENERATOR) \
+	$(patsubst %,$(obj)/dts/%.dtb,$(subst ",,$(CONFIG_SPL_OF_LIST))) > $@
+
+$(obj)/$(SPL_BIN).multidtb.fit: $(SHRUNK_ARCH_DTB) $(SPL_ITS) FORCE
+	$(call if_changed,mkfitimage)
+else
 MKIMAGEFLAGS_$(SPL_BIN).multidtb.fit = -f auto -A $(ARCH) -T firmware -C none -O u-boot \
 	-n "Multi DTB fit image for $(SPL_BIN)" -E \
 	$(patsubst %,-b %,$(SHRUNK_ARCH_DTB))
 
 $(obj)/$(SPL_BIN).multidtb.fit: /dev/null $(SHRUNK_ARCH_DTB) FORCE
 	$(call if_changed,mkimage)
+endif
+endif
 
 $(obj)/$(SPL_BIN).multidtb.fit.gz: $(obj)/$(SPL_BIN).multidtb.fit
 	@gzip -kf9 $< > $@

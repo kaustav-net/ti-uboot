@@ -319,6 +319,23 @@ config SPL_FIT_GENERATOR
 	  passed a list of supported device tree file stub names to
 	  include in the generated image.
 
+config SPL_DTB_FIT_SOURCE
+	string ".its source file for SPL DT FIT image"
+	depends on SPL_MULTI_DTB_FIT
+	help
+	  Specifies a (platform specific) FIT source file to generate the
+	  SPL DTB FIT image. This could specify further image to load and/or
+	  execute.
+
+config SPL_DTB_FIT_GENERATOR
+	string ".its file generator script for SPL DT FIT image"
+	depends on SPL_MULTI_DTB_FIT
+	help
+	  Specifies a (platform specific) script file to generate the FIT
+	  source file used to build the SPL DTB FIT image file. This gets
+	  passed a list of supported device tree file stub names to
+	  include in the generated image.
+
 endif # SPL
 
 endif # FIT
