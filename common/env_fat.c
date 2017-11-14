@@ -31,9 +31,11 @@ int env_init(void)
 	gd->env_addr = (ulong)&default_environment[0];
 	gd->env_valid = 1;
 
+#ifdef CONFIG_SPL_BUILD
 	/* intialize the MMC sub-system if env is stored on a MMC*/
 	if (!strcmp(FAT_ENV_INTERFACE, "mmc"))
 		mmc_initialize(NULL);
+#endif
 
 	return 0;
 }
