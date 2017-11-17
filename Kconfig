@@ -374,7 +374,7 @@ config SYS_TEXT_BASE
 	help
 	  TODO: Move CONFIG_SYS_TEXT_BASE for all the architecture
 
-	default 0x80800000 if ARCH_OMAP2PLUS
+	default 0x80800000 if ARCH_OMAP2PLUS || ARCH_K3
 
 
 config SYS_CLK_FREQ
