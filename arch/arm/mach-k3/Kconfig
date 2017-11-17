@@ -40,4 +40,11 @@ config MCU_SCRATCHPAD_SIZE
 	help
 	  Describes the size of MCU Scratchpad RAM.
 
+config BOOT_PARAM_TABLE_INDEX
+	hex "Address of Array Index to be used within BOOT_PARAM_TABLE"
+	default 0x41c7fbfc if SOC_K3_AM6
+	help
+	  Address at which ROM stores the value which determines if SPL
+	  is booted up by primary boot media or secondary boot media.
+
 endif
