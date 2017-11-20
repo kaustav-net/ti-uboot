@@ -45,6 +45,7 @@ struct udevice;
  *
  * @dev: The device which implements the mailbox.
  * @id: The mailbox channel ID within the provider.
+ * @con_priv: Hook for controller driver to attach private data
  *
  * Currently, the mailbox API assumes that a single integer ID is enough to
  * identify and configure any mailbox channel for any mailbox provider. If this
@@ -62,6 +63,7 @@ struct mbox_chan {
 	 * future, we might add more fields here.
 	 */
 	unsigned long id;
+	void *con_priv;
 };
 
 /**
