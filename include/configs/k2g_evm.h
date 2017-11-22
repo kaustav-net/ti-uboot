@@ -86,6 +86,7 @@
 #define CONFIG_KSNET_MDIO_PHY_CONFIG_ENABLE
 #define CONFIG_PHY_MICREL
 #define PHY_ANEG_TIMEOUT	10000 /* PHY needs longer aneg time */
+#define CONFIG_PHY_MICREL_KSZ9031
 
 /* MMC/SD */
 #define CONFIG_GENERIC_MMC
