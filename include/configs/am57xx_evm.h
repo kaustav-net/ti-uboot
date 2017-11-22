@@ -91,6 +91,8 @@
 #define CONFIG_PHY_GIGE			/* per-board part of CPSW */
 #define CONFIG_PHYLIB
 #define PHY_ANEG_TIMEOUT	16000	/* PHY needs longer aneg time at 1G */
+#define CONFIG_PHY_MICREL
+#define CONFIG_PHY_MICREL_KSZ9031
 
 #define CONFIG_SUPPORT_EMMC_BOOT
 
