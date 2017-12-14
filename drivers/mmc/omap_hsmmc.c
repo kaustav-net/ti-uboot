@@ -106,6 +106,7 @@ struct omap_hsmmc_data {
 #endif
 #endif
 	uint signal_voltage;
+	bool is_tuning;
 };
 
 #ifdef CONFIG_DM_MMC
@@ -141,7 +142,8 @@ struct omap_mmc_of_data {
 #define OMAP_HSMMC_USE_ADMA			BIT(2)
 #define OMAP_HSMMC_REQUIRE_IODELAY		BIT(3)
 
-static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size);
+static int mmc_read_data(struct hsmmc *mmc_base, struct omap_hsmmc_data *priv,
+			 char *buf, unsigned int size);
 static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 			unsigned int siz);
 static void omap_hsmmc_start_clock(struct hsmmc *mmc_base);
@@ -676,6 +678,8 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 	if (ret)
 		goto tuning_error;
 
+	priv->is_tuning = true;
+
 	/*
 	 * Stage 1: Search for a maximum pass window ignoring any
 	 * any single point failures. If the tuning value ends up
@@ -784,6 +788,7 @@ static int omap_hsmmc_execute_tuning(struct mmc *mmc, uint opcode)
 	}
 
 single_failure_found:
+	priv->is_tuning = false;
 
 	omap_hsmmc_set_dll(mmc, phase_delay);
 
@@ -793,6 +798,7 @@ single_failure_found:
 	return 0;
 
 tuning_error:
+	priv->is_tuning = false;
 
 	omap_hsmmc_disable_tuning(mmc);
 	mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
@@ -1196,11 +1202,15 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 		}
 	} while (!mmc_stat);
 
-	if ((mmc_stat & IE_CTO) != 0) {
+	if (mmc_stat & IE_CTO) {
 		mmc_reset_controller_fsm(mmc_base, SYSCTL_SRC);
 		return -ETIMEDOUT;
-	} else if ((mmc_stat & ERRI_MASK) != 0)
+	} else if (mmc_stat & (IE_CCRC | IE_CIE | IE_CEB)) {
+		mmc_reset_controller_fsm(mmc_base, SYSCTL_SRC);
+		return -EILSEQ;
+	} else if ((mmc_stat & ERRI_MASK) != 0) {
 		return -1;
+	}
 
 	if (mmc_stat & CC_MASK) {
 		writel(CC_MASK, &mmc_base->stat);
@@ -1236,6 +1246,17 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 
 		omap_hsmmc_dma_cleanup(mmc);
 
+		/* Ignore data errors during tuning */
+		if (!priv->is_tuning) {
+			if (mmc_stat & IE_DTO) {
+				mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+				return -ETIMEDOUT;
+			} else if (mmc_stat & (IE_DCRC | IE_DEB)) {
+				mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+				return -EILSEQ;
+			}
+		}
+
 		if ((mmc_stat & ERRI_MASK) != 0)
 			return 1;
 
@@ -1244,7 +1265,7 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 #endif
 
 	if (data && (data->flags & MMC_DATA_READ)) {
-		return mmc_read_data(mmc_base,	data->dest,
+		return mmc_read_data(mmc_base, priv, data->dest,
 				data->blocksize * data->blocks);
 	} else if (data && (data->flags & MMC_DATA_WRITE)) {
 		return mmc_write_data(mmc_base, data->src,
@@ -1253,7 +1274,8 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 	return 0;
 }
 
-static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size)
+static int mmc_read_data(struct hsmmc *mmc_base, struct omap_hsmmc_data *priv,
+			 char *buf, unsigned int size)
 {
 	unsigned int *output_buf = (unsigned int *)buf;
 	unsigned int mmc_stat;
@@ -1276,8 +1298,16 @@ static int mmc_read_data(struct hsmmc *mmc_base, char *buf, unsigned int size)
 			}
 		} while (mmc_stat == 0);
 
-		if ((mmc_stat & (IE_DTO | IE_DCRC | IE_DEB)) != 0)
-			mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+		/* Ignore data errors during tuning */
+		if (!priv->is_tuning) {
+			if (mmc_stat & IE_DTO) {
+				mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+				return -ETIMEDOUT;
+			} else if (mmc_stat & (IE_DCRC | IE_DEB)) {
+				mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+				return -EILSEQ;
+			}
+		}
 
 		if ((mmc_stat & ERRI_MASK) != 0)
 			return 1;
@@ -1331,8 +1361,13 @@ static int mmc_write_data(struct hsmmc *mmc_base, const char *buf,
 			}
 		} while (mmc_stat == 0);
 
-		if ((mmc_stat & (IE_DTO | IE_DCRC | IE_DEB)) != 0)
+		if (mmc_stat & IE_DTO) {
 			mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+			return -ETIMEDOUT;
+		} else if (mmc_stat & (IE_DCRC | IE_DEB)) {
+			mmc_reset_controller_fsm(mmc_base, SYSCTL_SRD);
+			return -EILSEQ;
+		}
 
 		if ((mmc_stat & ERRI_MASK) != 0)
 			return 1;
