@@ -75,16 +75,26 @@
 			"setenv fdtfile am57xx-beagle-x15-revb1.dtb; fi;" \
 		"if test $board_name = beagle_x15_revc; then " \
 			"setenv fdtfile am57xx-beagle-x15-revc.dtb; fi;" \
-		"if test $board_name = am572x_idk; then " \
+		"if test $board_name = am572x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am572x-idk.dtb; fi;" \
-		"if test $board_name = am574x_idk; then " \
+		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2045; then " \
+			"setenv fdtfile am572x-idk-lcd-osd101t2045.dtb; fi;" \
+		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am572x-idk-lcd-osd101t2587.dtb; fi;" \
+		"if test $board_name = am574x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am574x-idk.dtb; fi;" \
+		"if test $board_name = am574x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am574x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $board_name = am57xx_evm; then " \
 			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
 		"if test $board_name = am57xx_evm_reva3; then " \
 			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
-		"if test $board_name = am571x_idk; then " \
+		"if test $board_name = am571x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am571x-idk.dtb; fi;" \
+		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2045; then " \
+			"setenv fdtfile am571x-idk-lcd-osd101t2045.dtb; fi;" \
+		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am571x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0"
 
