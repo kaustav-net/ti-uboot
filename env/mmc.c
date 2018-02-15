@@ -274,6 +274,8 @@ static int env_mmc_load(void)
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env1, 1);
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env2, 1);
 
+	mmc_initialize(NULL);
+
 	mmc = find_mmc_device(dev);
 
 	errmsg = init_mmc_for_env(mmc);
@@ -332,6 +334,8 @@ static int env_mmc_load(void)
 	int ret;
 	int dev = mmc_get_env_dev();
 	const char *errmsg;
+
+	mmc_initialize(NULL);
 
 	mmc = find_mmc_device(dev);
 

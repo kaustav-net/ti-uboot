@@ -84,6 +84,9 @@ static int env_ext4_load(void)
 	int err;
 	loff_t off;
 
+	if (!strcmp(CONFIG_ENV_EXT4_INTERFACE, "mmc"))
+		mmc_initialize(NULL);
+
 	part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
 					EXT4_ENV_DEVICE_AND_PART,
 					&dev_desc, &info, 1);
