@@ -1783,12 +1783,7 @@ void mmc_set_preinit(struct mmc *mmc, int preinit)
 	mmc->preinit = preinit;
 }
 
-#if CONFIG_IS_ENABLED(DM_MMC) && defined(CONFIG_SPL_BUILD)
-static int mmc_probe(bd_t *bis)
-{
-	return 0;
-}
-#elif CONFIG_IS_ENABLED(DM_MMC)
+#if CONFIG_IS_ENABLED(DM_MMC)
 static int mmc_probe(bd_t *bis)
 {
 	int ret, i;
