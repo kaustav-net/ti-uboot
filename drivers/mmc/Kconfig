@@ -227,6 +227,9 @@ config MMC_OMAP_HS
 	bool "TI OMAP High Speed Multimedia Card Interface support"
 	select DM_REGULATOR_PBIAS if DM_MMC && DM_REGULATOR
 	select DM_REGULATOR_PBIAS if DM_MMC && DM_REGULATOR
+	select DM_THERMAL if DRA7XX
+	select SPL_THERMAL if (DRA7XX && SPL)
+	select TI_DRA7_THERMAL if DRA7XX
 	help
 	  This selects the TI OMAP High Speed Multimedia card Interface.
 	  If you have an omap2plus board with a Multimedia Card slot,
