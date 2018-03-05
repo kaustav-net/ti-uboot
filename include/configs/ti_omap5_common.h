@@ -67,6 +67,7 @@
 	DEFAULT_FDT_TI_ARGS \
 	DFUARGS \
 	NETARGS \
+	NANDARGS \
 
 /*
  * SPL related defines.  The Public RAM memory map the ROM defines the
@@ -102,6 +103,25 @@
 
 #define CONFIG_SYS_SPL_ARGS_ADDR	(CONFIG_SYS_SDRAM_BASE + \
 					 (128 << 20))
+
+#ifdef CONFIG_NAND
+#define NANDARGS \
+	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0" \
+	"mtdparts=" CONFIG_MTDPARTS_DEFAULT "\0" \
+	"nandargs=setenv bootargs console=${console} " \
+		"${optargs} " \
+		"root=${nandroot} " \
+		"rootfstype=${nandrootfstype}\0" \
+	"nandroot=ubi0:rootfs rw ubi.mtd=NAND.file-system,2048\0" \
+	"nandrootfstype=ubifs rootwait=1\0" \
+	"nandboot=echo Booting from nand ...; " \
+		"run nandargs; " \
+		"nand read ${fdtaddr} NAND.u-boot-spl-os; " \
+		"nand read ${loadaddr} NAND.kernel; " \
+		"bootz ${loadaddr} - ${fdtaddr}\0"
+#else
+#define NANDARGS ""
+#endif
 
 #ifdef CONFIG_SPL_BUILD
 #undef CONFIG_TIMER
