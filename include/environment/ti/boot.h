@@ -89,9 +89,9 @@
 		"if test $board_name = am574x_idk && test $idk_lcd = osd101t2587; then " \
 			"setenv fdtfile am574x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $board_name = am57xx_evm; then " \
-			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
+			"setenv fdtfile am57xx-evm.dtb; fi;" \
 		"if test $board_name = am57xx_evm_reva3; then " \
-			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
+			"setenv fdtfile am57xx-evm-reva3.dtb; fi;" \
 		"if test $board_name = am571x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am571x-idk.dtb; fi;" \
 		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2045; then " \
