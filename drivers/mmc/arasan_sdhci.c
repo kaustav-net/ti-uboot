@@ -60,7 +60,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	host->max_clk = clock;
 
 	ret = sdhci_setup_cfg(&plat->cfg, host, plat->f_max,
-			      CONFIG_ZYNQ_SDHCI_MIN_FREQ);
+			      CONFIG_ARASAN_SDHCI_MIN_FREQ);
 	host->mmc = &plat->mmc;
 	if (ret)
 		return ret;

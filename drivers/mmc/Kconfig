@@ -462,7 +462,7 @@ config ARASAN_SDHCI_MAX_FREQ
 	help
 	  Set the maximum frequency of the controller.
 
-config ZYNQ_SDHCI_MIN_FREQ
+config ARASAN_SDHCI_MIN_FREQ
 	int "Set the minimum frequency of the controller"
 	depends on MMC_SDHCI_ARASAN
 	default 0
