@@ -456,7 +456,7 @@ config MMC_SDHCI_ARASAN
 	help
 	  Support for Arasan SDHCI host controller on Zynq/ZynqMP ARM SoCs platform
 
-config ZYNQ_SDHCI_MAX_FREQ
+config ARASAN_SDHCI_MAX_FREQ
 	int "Set the maximum frequency of the controller"
 	depends on MMC_SDHCI_ARASAN
 	help
