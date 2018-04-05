@@ -24,3 +24,4 @@ obj-$(CONFIG_CLK_HSDK) += clk-hsdk-cgu.o
 obj-$(CONFIG_ARCH_ASPEED) += aspeed/
 obj-$(CONFIG_CLK_STM32F) += clk_stm32f.o
 obj-$(CONFIG_STM32H7) += clk_stm32h7.o
+obj-$(CONFIG_CLK_TI_SCI) += clk-ti-sci.o
