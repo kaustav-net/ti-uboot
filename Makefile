@@ -666,7 +666,6 @@ libs-y += drivers/net/
 libs-y += drivers/net/phy/
 libs-y += drivers/pci/
 libs-y += drivers/power/ \
-	drivers/power/domain/ \
 	drivers/power/fuel_gauge/ \
 	drivers/power/mfd/ \
 	drivers/power/pmic/ \

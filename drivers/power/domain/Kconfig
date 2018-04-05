@@ -9,6 +9,16 @@ config POWER_DOMAIN
 	  domains). This may be used to save power. This API provides the
 	  means to control such power management hardware.
 
+config SPL_POWER_DOMAIN_SUPPORT
+	bool "Enable power domain support in SPL"
+	depends on POWER_DOMAIN && SPL && SPL_DM
+	help
+	  The power domain subsystem adds a small amount of overhead to the image.
+	  If this is acceptable and you have a need to use power domain drivers in
+	  SPL, enable this option. It might provide a cleaner interface to setting
+	  up power domains within SPL, and allows the same drivers to be used as
+	  U-Boot proper.
+
 config BCM6328_POWER_DOMAIN
 	bool "Enable the BCM6328 power domain driver"
 	depends on POWER_DOMAIN && ARCH_BMIPS
