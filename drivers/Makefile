@@ -4,7 +4,7 @@
 
 obj-$(CONFIG_$(SPL_TPL_)CLK) += clk/
 obj-$(CONFIG_$(SPL_TPL_)DM) += core/
-obj-$(CONFIG_$(SPL_TPL_)DRIVERS_MISC_SUPPORT) += misc/ sysreset/ firmware/
+obj-$(CONFIG_$(SPL_TPL_)DRIVERS_MISC_SUPPORT) += misc/ sysreset/ firmware/ reset/
 obj-$(CONFIG_$(SPL_TPL_)I2C_SUPPORT) += i2c/
 obj-$(CONFIG_$(SPL_TPL_)LED) += led/
 obj-$(CONFIG_$(SPL_TPL_)MMC_SUPPORT) += mmc/
