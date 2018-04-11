@@ -1086,6 +1086,9 @@ static struct ti_usb_phy_device usb_phy2_device = {
 
 int board_usb_init(int index, enum usb_init_type init)
 {
+	if (board_is_dra71x_lcard())
+		palmas_mmc1_poweron_ldo(LDO4_VOLTAGE, LDO4_CTRL, LDO_VOLT_3V3);
+
 	enable_usb_clocks(index);
 	switch (index) {
 	case 0:
