@@ -79,6 +79,16 @@ config USB_XHCI_DRA7XX_INDEX
 	  Select the DRA7XX xHCI USB index.
 	  Current supported values: 0, 1.
 
+config USB_DM_XHCI_OMAP
+	bool "Support for OMAP family on-chip xHCI USB controller (DM version)"
+	depends on DM_USB
+	depends on ARCH_OMAP2PLUS
+	default y if DRA7XX
+	help
+	  Enables support for the on-chip xHCI controller on TI OMAP family SoCs
+	  using the Driver Model.
+	  This driver provides the glue logic to probe the generic dwc3 driver.
+
 config USB_XHCI_FSL
 	bool "Support for NXP Layerscape on-chip xHCI USB controller"
 	default y if ARCH_LS1021A || FSL_LSCH3 || FSL_LSCH2
