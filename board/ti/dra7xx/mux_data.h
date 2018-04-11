@@ -547,6 +547,8 @@ const struct pad_conf_entry dra71x_lcard_core_padconf_array[] = {
 	{I2C2_SCL, (M1 | PIN_INPUT_PULLUP)},	/* i2c2_scl.hdmi1_ddc_sda */
 	{WAKEUP0, (M14 | PIN_OUTPUT)},	/* N/A.gpio1_0 */
 	{WAKEUP3, (M1 | PIN_OUTPUT)},	/* N/A.sys_nirq1 */
+	{MCASP1_ACLKR, (M10 | PIN_INPUT_PULLUP)},	/* mcasp1_aclkr.i2c4_sda */
+	{MCASP1_FSR, (M10 | PIN_INPUT_PULLUP)},	/* mcasp1_fsr.i2c4_scl */
 };
 
 const struct pad_conf_entry early_padconf[] = {
