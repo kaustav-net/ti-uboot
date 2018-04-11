@@ -143,12 +143,12 @@ static const struct emif_regs emif_1_regs_ddr3_666_mhz_1cs_dra_es1 = {
 };
 
 const struct emif_regs emif_1_regs_ddr3_666_mhz_1cs_dra_es2 = {
-	.sdram_config_init              = 0x61862BB2,
-	.sdram_config                   = 0x61862BB2,
+	.sdram_config_init              = 0x62822BB2,
+	.sdram_config                   = 0x62822BB2,
 	.sdram_config2			= 0x00000000,
 	.ref_ctrl                       = 0x0000514D,
 	.ref_ctrl_final			= 0x0000144A,
-	.sdram_tim1                     = 0xD1137824,
+	.sdram_tim1                     = 0xD113783C,
 	.sdram_tim2                     = 0x30B37FE3,
 	.sdram_tim3                     = 0x409F8AD8,
 	.read_idle_ctrl                 = 0x00050000,
