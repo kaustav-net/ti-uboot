@@ -39,6 +39,7 @@
 #define board_is_dra74x_evm()		board_ti_is("5777xCPU")
 #define board_is_dra72x_evm()		board_ti_is("DRA72x-T")
 #define board_is_dra71x_evm()		board_ti_is("DRA79x,D")
+#define board_is_dra71x_lcard()		board_ti_is("DRA71x_L")
 #define board_is_dra74x_revh_or_later() (board_is_dra74x_evm() &&	\
 				(strncmp("H", board_ti_get_rev(), 1) <= 0))
 #define board_is_dra72x_revc_or_later() (board_is_dra72x_evm() &&	\
