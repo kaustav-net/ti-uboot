@@ -9,3 +9,15 @@
 &pcf_gpio_21{
 	u-boot,i2c-offset-len = <0>;
 };
+
+&pcf_hdmi{
+	u-boot,i2c-offset-len = <0>;
+};
+
+&usb1 {
+	status = "disabled";
+};
+
+&omap_dwc3_1 {
+	status = "disabled";
+};

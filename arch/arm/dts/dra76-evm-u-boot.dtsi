@@ -25,3 +25,11 @@
 &mmc2_iodelay_hs200_conf {
 	u-boot,dm-spl;
 };
+
+&usb1 {
+	status = "disabled";
+};
+
+&omap_dwc3_1 {
+	status = "disabled";
+};
