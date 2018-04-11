@@ -266,10 +266,13 @@ static int pipe3_exit(struct phy *phy)
 		return -EBUSY;
 	}
 
-	val = readl(pipe3->pll_reset_reg);
-	writel(val | SATA_PLL_SOFT_RESET, pipe3->pll_reset_reg);
-	mdelay(1);
-	writel(val & ~SATA_PLL_SOFT_RESET, pipe3->pll_reset_reg);
+	if (pipe3->pll_reset_reg) {
+		val = readl(pipe3->pll_reset_reg);
+		writel(val | SATA_PLL_SOFT_RESET, pipe3->pll_reset_reg);
+		mdelay(1);
+		writel(val & ~SATA_PLL_SOFT_RESET, pipe3->pll_reset_reg);
+	}
+
 	return 0;
 }
 
@@ -332,9 +335,11 @@ static int pipe3_phy_probe(struct udevice *dev)
 	if (!pipe3->power_reg)
 		return -EINVAL;
 
-	pipe3->pll_reset_reg = get_reg(dev, "syscon-pllreset");
-	if (!pipe3->pll_reset_reg)
-		return -EINVAL;
+	if (device_is_compatible(dev, "ti,phy-pipe3-sata")) {
+		pipe3->pll_reset_reg = get_reg(dev, "syscon-pllreset");
+		if (!pipe3->pll_reset_reg)
+			return -EINVAL;
+	}
 
 	pipe3->dpll_map = (struct pipe3_dpll_map *)dev_get_driver_data(dev);
 
@@ -351,8 +356,19 @@ static struct pipe3_dpll_map dpll_map_sata[] = {
 	{ },                                    /* Terminator */
 };
 
+static struct pipe3_dpll_map dpll_map_usb[] = {
+	{12000000, {1250, 5, 4, 20, 0} },	/* 12 MHz */
+	{16800000, {3125, 20, 4, 20, 0} },	/* 16.8 MHz */
+	{19200000, {1172, 8, 4, 20, 65537} },	/* 19.2 MHz */
+	{20000000, {1000, 7, 4, 10, 0} },	/* 20 MHz */
+	{26000000, {1250, 12, 4, 20, 0} },	/* 26 MHz */
+	{38400000, {3125, 47, 4, 20, 92843} },	/* 38.4 MHz */
+	{ },					/* Terminator */
+};
+
 static const struct udevice_id pipe3_phy_ids[] = {
 	{ .compatible = "ti,phy-pipe3-sata", .data = (ulong)&dpll_map_sata },
+	{ .compatible = "ti,omap-usb3", .data = (ulong)&dpll_map_usb},
 	{ }
 };
 
