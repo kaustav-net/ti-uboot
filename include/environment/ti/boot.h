@@ -70,6 +70,8 @@
 			"setenv fdtfile dra71-evm-nand.dtb; fi;" \
 		"if test $board_name = dra71x && test $boot_nand = 0; then " \
 			"setenv fdtfile dra71-evm.dtb; fi;" \
+		"if test $board_name = dra71-lcard; then " \
+			"setenv fdtfile dra71-lcard.dtb; fi;" \
 		"if test $board_name = dra76x_acd; then " \
 			"setenv fdtfile dra76-evm.dtb; fi;" \
 		"if test $board_name = beagle_x15; then " \

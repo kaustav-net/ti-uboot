@@ -726,6 +726,8 @@ int board_late_init(void)
 			name = "dra72x-revc";
 		else if (board_is_dra71x_evm())
 			name = "dra71x";
+		else if (board_is_dra71x_lcard())
+			name = "dra71-lcard";
 		else
 			name = "dra72x";
 	} else if (is_dra76x_abz()) {
