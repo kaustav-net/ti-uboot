@@ -487,7 +487,7 @@ const struct pad_conf_entry dra71x_lcard_core_padconf_array[] = {
 	{RGMII0_RXD2, (M14 | PIN_INPUT_PULLDOWN)},	/* rgmii0_rxd2.gpio5_29 */
 	{RGMII0_RXD1, (M14 | PIN_INPUT_PULLDOWN)},	/* rgmii0_rxd1.gpio5_30 */
 	{RGMII0_RXD0, (M14 | PIN_INPUT_PULLDOWN)},	/* rgmii0_rxd0.gpio5_31 */
-	{USB1_DRVVBUS, (M14 | PIN_OUTPUT)},	/* usb1_drvvbus.gpio6_12 */
+	{USB1_DRVVBUS, (M0 | PIN_OUTPUT)},	/* usb1_drvvbus.usb1_drvvbus  */
 	{USB2_DRVVBUS, (M0 | PIN_OUTPUT)},	/* usb2_drvvbus.usb2_drvvbus */
 	{GPIO6_14, (M14 | PIN_INPUT_PULLUP)},	/* gpio6_14.gpio6_14 */
 	{GPIO6_15, (M14 | PIN_INPUT_PULLUP)},	/* gpio6_15.gpio6_15 */
