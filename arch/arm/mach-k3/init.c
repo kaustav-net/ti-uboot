@@ -143,6 +143,8 @@ void board_init_f(ulong dummy)
 	int ret, fw_addr, len;
 	struct ti_sci_handle *ti_sci;
 	struct ti_sci_misc_ops *misc_ops;
+#endif
+#if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM654_DDRSS)
 	struct udevice *dev;
 #endif
 
@@ -233,6 +235,14 @@ void board_init_f(ulong dummy)
 	       ti_sci->version.firmware_revision,
 	       sizeof(ti_sci->version.firmware_description),
 	       ti_sci->version.firmware_description);
+#endif
+
+#ifdef CONFIG_K3_AM654_DDRSS
+	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+	if (ret) {
+		printf("DRAM init failed: %d\n", ret);
+		return;
+	}
 #endif
 }
 

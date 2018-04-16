@@ -15,6 +15,7 @@ config TARGET_AM654_R5_EVM
 	select SYS_THUMB_BUILD
 	select SOC_K3_AM6
 	select K3_LOAD_SYSFW
+	select K3_AM654_DDRSS
 	imply K3_SPL_ATF
 
 config TARGET_AM654_A53_EVM
