@@ -25,21 +25,6 @@
 	};
 };
 
-&mdio {
-	status = "okay";
-	ethphy0: ethernet-phy@0 {
-		reg = <0>;
-	};
-};
-
-&gbe0 {
-	phy-handle = <&ethphy0>;
-};
-
-&netcp {
-	status = "okay";
-};
-
 &spi1 {
 	status = "okay";
 
@@ -122,5 +107,34 @@
 };
 
 &i2c1 {
+	status = "okay";
+};
+
+&qmss {
+	status = "okay";
+};
+
+&knav_dmas {
+	status = "okay";
+};
+
+&mdio {
+	pinctrl-names = "default";
+	//pinctrl-0 = <&mdio_pins>;
+	status = "okay";
+	ethphy0: ethernet-phy@0 {
+		reg = <0>;
+	};
+};
+
+&gbe0 {
+	phy-handle = <&ethphy0>;
+	phy-mode = "rgmii-id";
+	status = "okay";
+};
+
+&netcp {
+	pinctrl-names = "default";
+	//pinctrl-0 = <&emac_pins>;
 	status = "okay";
 };
