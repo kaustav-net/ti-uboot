@@ -103,4 +103,5 @@
 
 #include <configs/ti_armv7_keystone2.h>
 
+#define CONFIG_PHY_TI
 #endif /* __CONFIG_K2G_EVM_H */
