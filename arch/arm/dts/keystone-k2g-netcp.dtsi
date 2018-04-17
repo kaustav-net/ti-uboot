@@ -1,24 +1,21 @@
 /*
  * Device Tree Source for K2G Netcp driver
  *
- * Copyright 2015 Texas Instruments, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
  */
 
 qmss: qmss@4020000 {
-	compatible = "ti,keystone-navigator-qmss-l";
+	compatible = "ti,66ak2g-navss-qm";
 	dma-coherent;
 	#address-cells = <1>;
 	#size-cells = <1>;
-	/* power-domains = <&k2g_pds K2G_DEV_NSS0>; */
-	/* clocks = <&k2g_clks K2G_DEV_NSS0 K2G_DEV_NSS_VCLK>; */
+	//power-domains = <&k2g_pds 0x0018>;
+	//clocks = <&k2g_clks 0x0018 0>;
 	clock-names = "nss_vclk";
 	ranges;
-	queue-range	= <0 0x80>;
-	linkram0	= <0x4020000 0x7ff>;
+	queue-range = <0 0x80>;
+	linkram0 = <0x4020000 0x7ff>;
+	status = "disabled";
 
 	qmgrs {
 		#address-cells = <1>;
@@ -72,39 +69,40 @@ knav_dmas: knav_dmas@0 {
 	compatible = "ti,keystone-navigator-dma";
 	#address-cells = <1>;
 	#size-cells = <1>;
-	/* power-domains = <&k2g_pds K2G_DEV_NSS0>; */
-	/* clocks = <&k2g_clks K2G_DEV_NSS0 K2G_DEV_NSS_VCLK>; */
+	status = "disabled";
+	//power-domains = <&k2g_pds 0x0018>;
+	//clocks = <&k2g_clks 0x0018 0>;
 	clock-names = "nss_vclk";
 	ranges;
 	ti,navigator-cloud-address = <0x40c0000 0x40c0000 0x40c0000 0x40c0000>;
 
 	dma_gbe: dma_gbe@0 {
 		reg = <0x4010000 0x100>,
-			  <0x4011000 0x2a0>, /* 21 Tx channels */
-			  <0x4012000 0x400>, /* 32 Rx channels */
-			  <0x4010100 0x80>,
-			  <0x4013000 0x400>; /* 32 Rx flows */
+		      <0x4011000 0x2a0>, /* 21 Tx channels */
+		      <0x4012000 0x400>, /* 32 Rx channels */
+		      <0x4010100 0x80>,
+		      <0x4013000 0x400>; /* 32 Rx flows */
 		reg-names = "global", "txchan", "rxchan",
-				"txsched", "rxflow";
+			    "txsched", "rxflow";
 	};
 
 };
 
 gbe_subsys: subsys@4200000 {
 	compatible = "syscon";
-	reg = <0x4200000 0x100>;
+	reg = <0x4200000 0x20>;
 };
 
 netcp: netcp@4000000 {
 	reg = <0x2620110 0x8>;
 	reg-names = "efuse";
 	compatible = "ti,netcp-1.0";
-	status = "disabled";
 	#address-cells = <1>;
 	#size-cells = <1>;
-	/* power-domains = <&k2g_pds K2G_DEV_NSS0>; */
-	/* clocks = <&k2g_clks K2G_DEV_NSS0 K2G_DEV_NSS_ESW_CLK>; */
-	clock-names = "ethss_clk";
+	status = "disabled";
+	//power-domains = <&k2g_pds 0x0018>;
+	//clocks = <&k2g_clks 0x0018 3>, <&k2g_clks 0x0018 8>;
+	clock-names = "ethss_clk", "cpts";
 
 	/* NetCP address range */
 	ranges = <0 0x4000000 0x1000000>;
@@ -118,14 +116,16 @@ netcp: netcp@4000000 {
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
-		gbe@200000 {
+		gbe: gbe@200000 {
 			label = "netcp-gbe";
 			compatible = "ti,netcp-gbe-2";
 			syscon-subsys = <&gbe_subsys>;
-			reg = <0x200100 0xe00>, <0x220000 0x20000>;
-			/* enable-ale; */
+			reg = <0x220000 0x20000>;
+			enable-ale;
 			tx-queue = <5>;
 			tx-channel = "nettx";
+			cpts-rftclk-sel = <0>;
+			cpts-ext-ts-inputs = <8>;
 
 			interfaces {
 				gbe0: interface-0 {
