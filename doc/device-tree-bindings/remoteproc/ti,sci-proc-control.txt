@@ -1,0 +1,43 @@
+Texas Instruments TI SCI processor control
+==========================================
+
+Some TI SoCs contain a system controller (like the SYSFW, etc...) that is
+responsible for controlling the processing entities that are present.
+Communication between the host processor running an OS and the system
+controller happens through a protocol known as TI SCI [1].
+
+[1] http://processors.wiki.ti.com/index.php/TISCI
+
+Processor Conrtol Node
+=====================
+The processor control node is used represents the physical processing entities
+present on the SoC managed by the SYSFW. Because this relies on the TI SCI
+protocol to communicate with the SYSFW it must be a child of the SYSFW node.
+
+Required Properties:
+--------------------
+ - compatible:		Must be "ti,sci-proc-control"
+ - #proc-cells: 	Must be 2.
+			First is the processor id as identified by TISCI
+			Second is the Host ID to which the processor control
+			is transferred to.
+Example (AM65x):
+----------------
+	sysfw: sysfw {
+		compatible = "ti,am654-system-controller";
+		...
+		k3_proc_control: proc-control {
+			compatible = "ti,sci-proc-control";
+			#proc-cells = <2>;
+		};
+	};
+
+Processor control Consumers
+===========================
+Example:
+----------------
+	a53_0: a53@0 {
+		compatible = "ti,am654-rproc";
+		...
+		proc-controls = <&k3_proc_control 0 1>;
+	};

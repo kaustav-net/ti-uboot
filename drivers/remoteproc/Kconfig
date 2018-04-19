@@ -40,4 +40,14 @@ config REMOTEPROC_TI_POWER
 	help
 	  Say 'y' here to add support for TI power processors such as those
 	  found on certain TI keystone and OMAP generation SoCs.
+
+config TI_SCI_PROC_CONTROL
+	bool "Support for TISCI processor controller driver"
+	select REMOTEPROC
+	depends on DM
+	depends on ARCH_K3
+	depends on OF_CONTROL
+	depends on TI_SCI_PROTOCOL
+	help
+	  Say 'y' here to add support for TISCI processor controller driver.
 endmenu
