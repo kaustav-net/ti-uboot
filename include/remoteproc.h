@@ -168,4 +168,74 @@ static inline int rproc_ping(int id) { return -ENOSYS; }
 static inline int rproc_is_running(int id) { return -ENOSYS; }
 #endif
 
+/**
+ * struct proc_ctrl - A handle to Remote Processor control data
+ * @dev:	Processor control device pointer
+ * @id:		ID of the remote processor ID as
+ *		understood by the Processor control
+ * @data:	Private data of the remote processor (Optional)
+ *
+ * @id and @data is updated by the xlate api. This information is used by
+ * other services provided by the processor control.
+ */
+struct proc_ctrl {
+	struct udevice *dev;
+	unsigned long id;
+	unsigned long data;
+};
+
+/**
+ * struct proc_ctrl_ops - Operations that are provided by the processor control
+ *				driver.
+ * @request:	Request for controlling the remote core.
+ * @release:	Release the access to the remote core.
+ * @init:	Initialize the remoteproc device.
+ * @load:	Load the remoteproc device using data provided(mandatory)
+ *		This takes the following additional arguments.
+ *			addr- Address of the binary image to be loaded
+ *			size- Size of the binary image to be loaded
+ * @start:	Start the remoteproc device
+ * @stop:	Stop the remoteproc device
+ * @reset:	Reset the remote proc device
+ * @is_running:	Check if the remote processor is running
+ * @ping:	Ping the remote device for basic communication check
+ * @of_xlate:	Convert the DT information to proc_ctrl structure.
+ */
+struct proc_ctrl_ops {
+	int (*request)(struct proc_ctrl *ctrl);
+	int (*release)(struct proc_ctrl *ctrl);
+	int (*init)(struct proc_ctrl *ctrl);
+	int (*load)(struct proc_ctrl *ctrl, ulong addr, ulong size);
+	int (*start)(struct proc_ctrl *ctrl);
+	int (*stop)(struct proc_ctrl *ctrl);
+	int (*reset)(struct proc_ctrl *ctrl);
+	int (*is_running)(struct proc_ctrl *ctrl);
+	int (*ping)(struct proc_ctrl *ctrl);
+	int (*of_xlate)(struct proc_ctrl *ctrl,
+			struct ofnode_phandle_args *args);
+};
+
+int proc_ctrl_get_by_index(struct udevice *dev, int index,
+			   struct proc_ctrl *proc);
+/**
+ * Processor control apis that act as wrapper between the remoteproc driver
+ * and the processing entity that can control the remote core. All the services
+ * that are provided by the remoteproc driver are support here, additionally
+ * there are two other apis that are supported:
+ * proc_ctrl_rproc_request() -  API to request access for controlling the
+ *				remote processor.
+ * proc_ctrl_rproc_release() - API to release access for controlling the
+ *				remote core.
+ * These apis should be called by the remoteproc driver in their respective
+ * service calls.
+ */
+int proc_ctrl_rproc_request(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_release(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_init(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_load(struct proc_ctrl *ctrl, ulong addr, ulong size);
+int proc_ctrl_rproc_start(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_stop(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_reset(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_is_running(struct proc_ctrl *ctrl);
+int proc_ctrl_rproc_ping(struct proc_ctrl *ctrl);
 #endif	/* _RPROC_H_ */

@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <malloc.h>
+#include <dm/ofnode.h>
 #include <remoteproc.h>
 #include <asm/io.h>
 #include <dm/device-internal.h>
@@ -433,4 +434,116 @@ int rproc_ping(int id)
 int rproc_is_running(int id)
 {
 	return _rproc_ops_wrapper(id, RPROC_RUNNING);
+};
+
+/*------------------------------------------------------------------------*/
+/* Processor Control operations						  */
+/*------------------------------------------------------------------------*/
+static inline struct proc_ctrl_ops *proc_ctrl_dev_ops(struct udevice *dev)
+{
+	return (struct proc_ctrl_ops *)dev->driver->ops;
+}
+
+static int proc_ctrl_of_xlate_default(struct proc_ctrl *ctrl,
+				      struct ofnode_phandle_args *args)
+{
+	debug("%s(ctrl=%p)\n", __func__, ctrl);
+
+	if (args->args_count > 1) {
+		debug("Invalid args_count: %d\n", args->args_count);
+		return -EINVAL;
+	}
+
+	if (args->args_count)
+		ctrl->id = args->args[0];
+	else
+		ctrl->id = 0;
+
+	return 0;
+}
+
+static int proc_ctrl_get_by_indexed_prop(struct udevice *rproc_dev,
+					 const char *prop_name, int index,
+					 struct proc_ctrl *ctrl)
+{
+	struct ofnode_phandle_args args;
+	const struct proc_ctrl_ops *ops;
+	struct udevice *dev;
+	int ret;
+
+	debug("%s(rproc_dev=%p, index=%d, ctrl=%p)\n", __func__,
+	      rproc_dev, index, ctrl);
+
+	assert(ctrl);
+	ctrl->dev = NULL;
+
+	ret = dev_read_phandle_with_args(rproc_dev, prop_name, "#proc-cells",
+					 0, index, &args);
+	if (ret) {
+		debug("%s: dev_read_phandle_with_args failed: err=%d\n",
+		      __func__, ret);
+		return ret;
+	}
+
+	ret = uclass_get_device_by_ofnode(UCLASS_PROC_CONTROL, args.node, &dev);
+	if (ret) {
+		debug("%s: uclass_get_device_by_ofnode failed: err=%d\n",
+		      __func__, ret);
+		return ret;
+	}
+
+	ctrl->dev = dev;
+
+	ops = proc_ctrl_dev_ops(dev);
+
+	if (ops->of_xlate)
+		ret = ops->of_xlate(ctrl, &args);
+	else
+		ret = proc_ctrl_of_xlate_default(ctrl, &args);
+
+	if (ret) {
+		debug("of_xlate() failed: %d\n", ret);
+		return ret;
+	}
+
+	return 0;
+}
+
+int proc_ctrl_get_by_index(struct udevice *dev, int index,
+			   struct proc_ctrl *proc)
+{
+	return proc_ctrl_get_by_indexed_prop(dev, "proc-controls", index, proc);
+}
+
+int proc_ctrl_rproc_load(struct proc_ctrl *ctrl, ulong addr, ulong size)
+{
+	struct proc_ctrl_ops *ops = proc_ctrl_dev_ops(ctrl->dev);
+
+	debug("%s(proc_ctrl=%p)\n", __func__, ctrl);
+
+	return ops->load(ctrl, addr, size);
+}
+
+#define PROC_CTRL_API(fn)						\
+int proc_ctrl_rproc_##fn(struct proc_ctrl *ctrl)			\
+{									\
+	struct proc_ctrl_ops *ops = proc_ctrl_dev_ops(ctrl->dev);	\
+									\
+	debug("%s(proc_ctrl=%p)\n", __func__, ctrl);			\
+									\
+	return ops->fn(ctrl);						\
+}
+
+PROC_CTRL_API(request)
+PROC_CTRL_API(release)
+PROC_CTRL_API(init)
+PROC_CTRL_API(start)
+PROC_CTRL_API(stop)
+PROC_CTRL_API(reset)
+PROC_CTRL_API(is_running)
+PROC_CTRL_API(ping)
+
+UCLASS_DRIVER(proccontrol) = {
+	.id = UCLASS_PROC_CONTROL,
+	.name = "procctrl",
 };
