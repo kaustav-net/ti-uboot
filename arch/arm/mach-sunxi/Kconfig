@@ -69,21 +69,21 @@ choice
 
 config MACH_SUN4I
 	bool "sun4i (Allwinner A10)"
-	select CPU_V7
+	select CPU_V7A
 	select ARM_CORTEX_CPU_IS_UP
 	select SUNXI_GEN_SUN4I
 	select SUPPORT_SPL
 
 config MACH_SUN5I
 	bool "sun5i (Allwinner A13)"
-	select CPU_V7
+	select CPU_V7A
 	select ARM_CORTEX_CPU_IS_UP
 	select SUNXI_GEN_SUN4I
 	select SUPPORT_SPL
 
 config MACH_SUN6I
 	bool "sun6i (Allwinner A31)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -93,7 +93,7 @@ config MACH_SUN6I
 
 config MACH_SUN7I
 	bool "sun7i (Allwinner A20)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -103,7 +103,7 @@ config MACH_SUN7I
 
 config MACH_SUN8I_A23
 	bool "sun8i (Allwinner A23)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -113,7 +113,7 @@ config MACH_SUN8I_A23
 
 config MACH_SUN8I_A33
 	bool "sun8i (Allwinner A33)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -123,14 +123,14 @@ config MACH_SUN8I_A33
 
 config MACH_SUN8I_A83T
 	bool "sun8i (Allwinner A83T)"
-	select CPU_V7
+	select CPU_V7A
 	select SUNXI_GEN_SUN6I
 	select MMC_SUNXI_HAS_NEW_MODE
 	select SUPPORT_SPL
 
 config MACH_SUN8I_H3
 	bool "sun8i (Allwinner H3)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -139,7 +139,7 @@ config MACH_SUN8I_H3
 
 config MACH_SUN8I_R40
 	bool "sun8i (Allwinner R40)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -150,7 +150,7 @@ config MACH_SUN8I_R40
 
 config MACH_SUN8I_V3S
 	bool "sun8i (Allwinner V3s)"
-	select CPU_V7
+	select CPU_V7A
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
@@ -162,7 +162,7 @@ config MACH_SUN8I_V3S
 
 config MACH_SUN9I
 	bool "sun9i (Allwinner A80)"
-	select CPU_V7
+	select CPU_V7A
 	select SUNXI_HIGH_SRAM
 	select SUNXI_GEN_SUN6I
 	select SUPPORT_SPL
