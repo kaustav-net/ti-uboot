@@ -11,6 +11,8 @@
 #include <asm/io.h>
 #include <spl.h>
 #include <dm.h>
+#include <dm/uclass-internal.h>
+#include <dm/pinctrl.h>
 #include <remoteproc.h>
 #include <linux/libfdt.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
@@ -165,6 +167,19 @@ void board_init_f(ulong dummy)
 	spl_early_init();
 
 #ifdef CONFIG_K3_LOAD_SYSFW
+	/*
+	 * Process pinctrl for the serial0 a.k.a. WKUP_UART0 module and continue
+	 * regardless of the result of pinctrl. Do this without probing the
+	 * device, but instead by searching the device that would request the
+	 * given sequence number if probed. The UART will be used by the system
+	 * firmware (SYSFW) image for various purposes and SYSFW depends on us
+	 * to initialize its pin settings.
+	 */
+	ret = uclass_find_device_by_seq(UCLASS_SERIAL, 0, true, &dev);
+	if (!ret) {
+		pinctrl_select_state(dev, "default");
+	}
+
 	/* Try to locate firmware image and load it to system controller */
 	if (!locate_system_controller_firmware(&fw_addr, &len)) {
 		debug("Firmware located. Now try to load\n");
