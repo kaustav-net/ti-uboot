@@ -91,6 +91,18 @@ struct power_domain {
 int power_domain_get(struct udevice *dev, struct power_domain *power_domain);
 
 /**
+ * power_domain_get_by_index - Get the indexed power domain for a device.
+ *
+ * @dev:		The client device.
+ * @power_domain:	A pointer to a power domain struct to initialize.
+ * @index:		Power domain index to be powered on.
+ *
+ * @return 0 if OK, or a negative error code.
+ */
+int power_domain_get_by_index(struct udevice *dev,
+			      struct power_domain *power_domain, int index);
+
+/**
  * power_domain_free - Free a previously requested power domain.
  *
  * @power_domain:	A power domain struct that was previously successfully
