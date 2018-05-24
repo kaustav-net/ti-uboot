@@ -142,7 +142,7 @@ static int omap_pipe3_dpll_program(struct omap_pipe3 *pipe3)
 	omap_pipe3_writel(pipe3->pll_ctrl_base, PLL_CONFIGURATION1, val);
 
 	val = omap_pipe3_readl(pipe3->pll_ctrl_base, PLL_CONFIGURATION2);
-	val &= ~PLL_SELFREQDCO_MASK;
+	val &= ~(PLL_SELFREQDCO_MASK | PLL_IDLE);
 	val |= dpll_params->freq << PLL_SELFREQDCO_SHIFT;
 	omap_pipe3_writel(pipe3->pll_ctrl_base, PLL_CONFIGURATION2, val);
 
