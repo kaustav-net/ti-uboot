@@ -63,4 +63,11 @@ config K3_LOAD_SYSFW
 	depends on SPL
 	default n
 
+config K3_SPL_ATF
+	bool "Start Cortex-A from SPL"
+	depends on SPL && CPU_V7R
+	help
+	  Enabling this will try to start Cortex-A (typically with ATF)
+	  after SPL from R5.
+
 endif
