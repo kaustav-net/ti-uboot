@@ -478,6 +478,8 @@ dtb-$(CONFIG_ARCH_ASPEED) += ast2500-evb.dtb
 
 dtb-$(CONFIG_ARCH_STI) += stih410-b2260.dtb
 
+dtb-$(CONFIG_SOC_K3_AM6) += k3-am654-base-board.dtb
+
 targets += $(dtb-y)
 
 # Add any required device tree compiler flags here
