@@ -66,6 +66,16 @@ tiboot3.bin: u-boot-spl-cert.bin $(obj)/u-boot-spl.bin FORCE
 ALL-y	+= tiboot3.bin
 endif
 
+ifdef CONFIG_ARM64
+
+SPL_ITS := u-boot-sp-k3.its
+$(SPL_ITS): FORCE
+	$(srctree)/tools/k3/k3_fit_atf.sh \
+	$(patsubst %,$(obj)/dts/%.dtb,$(subst ",,$(CONFIG_SPL_OF_LIST))) > $@
+
+ALL-y	+= tispl.bin
+endif
+
 else
 ALL-y	+= u-boot.img
 endif
