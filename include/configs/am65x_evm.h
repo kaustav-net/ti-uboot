@@ -17,7 +17,11 @@
 #define CONFIG_NR_DRAM_BANKS		2
 
 /* SPL Loader Configuration */
+#ifdef CONFIG_TARGET_AM654_A53_EVM
+#define CONFIG_SPL_TEXT_BASE		0x80080000
+#else
 #define CONFIG_SPL_TEXT_BASE		0x41c00000
+#endif
 
 /* Clock Defines */
 #define V_OSCK				24000000
