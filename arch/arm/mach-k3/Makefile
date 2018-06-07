@@ -6,3 +6,4 @@
 #
 
 obj-y += init.o
+obj-$(CONFIG_ARM64) += arm64-mmu.o
