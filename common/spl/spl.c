@@ -412,7 +412,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #endif
 
 #if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
-		defined(CONFIG_ARM)
+		defined(CONFIG_CPU_V7A)
 	dram_init_banksize();
 	reserve_mmu();
 	enable_caches();
