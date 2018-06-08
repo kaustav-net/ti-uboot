@@ -67,7 +67,7 @@
 #endif
 #define CONFIG_AUTO_COMPLETE
 
-#if defined(CONFIG_MMC_SDHCI_ZYNQ)
+#if defined(CONFIG_MMC_SDHCI_ARASAN)
 # define CONFIG_SUPPORT_EMMC_BOOT
 #endif
 
@@ -175,7 +175,7 @@
 	"scriptaddr=0x02000000\0" \
 	"ramdisk_addr_r=0x02100000\0" \
 
-#if defined(CONFIG_MMC_SDHCI_ZYNQ)
+#if defined(CONFIG_MMC_SDHCI_ARASAN)
 # define BOOT_TARGET_DEVICES_MMC(func)	func(MMC, mmc, 0) func(MMC, mmc, 1)
 #else
 # define BOOT_TARGET_DEVICES_MMC(func)
@@ -251,7 +251,7 @@
 #define CONFIG_SPL_LOAD_FIT_ADDRESS	0x10000000
 
 /* MMC support */
-#ifdef CONFIG_MMC_SDHCI_ZYNQ
+#ifdef CONFIG_MMC_SDHCI_ARASAN
 # define CONFIG_SYS_MMCSD_FS_BOOT_PARTITION	1
 # define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR	0 /* unused */
 # define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS	0 /* unused */

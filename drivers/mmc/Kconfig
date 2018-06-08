@@ -448,7 +448,7 @@ config MMC_SDHCI_TEGRA
 
 	  If unsure, say N.
 
-config MMC_SDHCI_ZYNQ
+config MMC_SDHCI_ARASAN
 	bool "Arasan SDHCI controller support"
 	depends on ARCH_ZYNQ || ARCH_ZYNQMP
 	depends on DM_MMC && OF_CONTROL && BLK
@@ -458,13 +458,13 @@ config MMC_SDHCI_ZYNQ
 
 config ZYNQ_SDHCI_MAX_FREQ
 	int "Set the maximum frequency of the controller"
-	depends on MMC_SDHCI_ZYNQ
+	depends on MMC_SDHCI_ARASAN
 	help
 	  Set the maximum frequency of the controller.
 
 config ZYNQ_SDHCI_MIN_FREQ
 	int "Set the minimum frequency of the controller"
-	depends on MMC_SDHCI_ZYNQ
+	depends on MMC_SDHCI_ARASAN
 	default 0
 	help
 	  Set the minimum frequency of the controller.

@@ -13,7 +13,7 @@ config SPL_LIBGENERIC_SUPPORT
 	default y
 
 config SPL_MMC_SUPPORT
-	default y if MMC_SDHCI_ZYNQ
+	default y if MMC_SDHCI_ARASAN
 
 config SPL_SERIAL_SUPPORT
 	default y
