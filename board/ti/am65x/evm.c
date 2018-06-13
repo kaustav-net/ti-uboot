@@ -32,6 +32,10 @@ int board_fit_config_name_match(const char *name)
 	if (!strcmp(name, "k3-am654-base-board"))
 		return 0;
 #endif
+#ifdef CONFIG_TARGET_AM654_R5_EVM
+	if (!strcmp(name, "k3-am654-r5-base-board"))
+		return 0;
+#endif
 
 	return -1;
 }

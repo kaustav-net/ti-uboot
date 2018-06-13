@@ -1,0 +1,144 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2016-2018 Texas Instruments Incorporated - http://www.ti.com/
+ */
+
+/dts-v1/;
+
+#include "k3-am6.dtsi"
+#include "k3-am654-base-board-u-boot.dtsi"
+
+/ {
+	compatible =  "ti,am654-evm", "ti,am654";
+	model = "Texas Instruments AM654 R5 Base Board";
+
+	aliases {
+		remoteproc0 = &sysctrler;
+		remoteproc1 = &a53_0;
+	};
+
+	soc0 {
+		mcu_secproxy: secproxy@28380000 {
+			compatible = "ti,am654-secure-proxy";
+			reg = <0x2a380000 0x80000>,
+			      <0x2a400000 0x80000>,
+			      <0x2a480000 0x80000>;
+			reg-names = "rt", "scfg", "target_data";
+			#mbox-cells = <1>;
+			u-boot,dm-spl;
+		};
+
+		sysctrler: sysctrler {
+			compatible = "ti,am654-system-controller";
+			mboxes= <&mcu_secproxy 4>, <&mcu_secproxy 5>;
+			mbox-names = "tx", "rx";
+			u-boot,dm-spl;
+		};
+
+		a53_0: a53@0 {
+			compatible = "ti,am654-rproc";
+			power-domains = <&k3_pds 202>,
+					<&k3_pds 61>;
+			resets = <&k3_reset 202 0>;
+			proc-controls = <&k3_proc_ctrl 32 10>;
+			assigned-clocks = <&k3_clks 202 0>;
+			assigned-clock-rates = <800000000>;
+			u-boot,dm-spl;
+		};
+
+		memorycontroller: memorycontroller@0298e000 {
+			compatible = "ti,am654-ddrss";
+			reg = <0x0298e000 0x200>,
+			      <0x02980000 0x4000>,
+			      <0x02988000 0x2000>;
+			reg-names = "ss", "ctl", "phy";
+			clocks = <&k3_clks 20 0>;
+			power-domains = <&k3_pds 20>,
+					<&k3_pds 244>;
+			u-boot,dm-spl;
+		};
+	};
+};
+
+&dmsc {
+	u-boot,dm-spl;
+	mboxes= <&mcu_secproxy 7>, <&mcu_secproxy 6>, <&mcu_secproxy 5>;
+	mbox-names = "tx", "rx", "notify";
+	ti,host-id = <4>;
+
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+	};
+
+	k3_proc_ctrl: processor-contol {
+		compatible = "ti,sci-proc-control";
+		#proc-cells = <2>;
+		u-boot,dm-spl;
+	};
+};
+
+&main_uart0 {
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_uart0_pins_default>;
+	status = "okay";
+};
+
+&main_pmx0 {
+	u-boot,dm-spl;
+	main_uart0_pins_default: main_uart0_pins_default {
+		pinctrl-single,pins = <
+			AM65X_IOPAD(0x01e4, PIN_INPUT | MUX_MODE0)	/* (AF11) UART0_RXD */
+			AM65X_IOPAD(0x01e8, PIN_OUTPUT | MUX_MODE0)	/* (AE11) UART0_TXD */
+			AM65X_IOPAD(0x01ec, PIN_INPUT | MUX_MODE0)	/* (AG11) UART0_CTSn */
+			AM65X_IOPAD(0x01f0, PIN_OUTPUT | MUX_MODE0)	/* (AD11) UART0_RTSn */
+		>;
+		u-boot,dm-spl;
+	};
+
+	main_mmc0_pins_default: main_mmc0_pins_default {
+		u-boot,dm-pre-reloc;
+		pinctrl-single,pins = <
+			AM65X_IOPAD(0x01A8, PIN_INPUT_PULLDOWN | MUX_MODE0) /* (B25) MMC0_CLK */
+			AM65X_IOPAD(0x01AC, PIN_INPUT_PULLUP | MUX_MODE0) /* (B27) MMC0_CMD */
+			AM65X_IOPAD(0x01A4, PIN_INPUT_PULLUP | MUX_MODE0) /* (A26) MMC0_DAT0 */
+			AM65X_IOPAD(0x01A0, PIN_INPUT_PULLUP | MUX_MODE0) /* (E25) MMC0_DAT1 */
+			AM65X_IOPAD(0x019C, PIN_INPUT_PULLUP | MUX_MODE0) /* (C26) MMC0_DAT2 */
+			AM65X_IOPAD(0x0198, PIN_INPUT_PULLUP | MUX_MODE0) /* (A25) MMC0_DAT3 */
+			AM65X_IOPAD(0x0194, PIN_INPUT_PULLUP | MUX_MODE0) /* (E24) MMC0_DAT4 */
+			AM65X_IOPAD(0x0190, PIN_INPUT_PULLUP | MUX_MODE0) /* (A24) MMC0_DAT5 */
+			AM65X_IOPAD(0x018C, PIN_INPUT_PULLUP | MUX_MODE0) /* (B26) MMC0_DAT6 */
+			AM65X_IOPAD(0x0188, PIN_INPUT_PULLUP | MUX_MODE0) /* (D25) MMC0_DAT7 */
+			AM65X_IOPAD(0x01B4, PIN_INPUT_PULLUP | MUX_MODE0) /* (A23) MMC0_SDCD */
+			AM65X_IOPAD(0x01B8, PIN_INPUT | MUX_MODE0) /* (B23) MMC0_SDWP */
+			AM65X_IOPAD(0x01B0, PIN_INPUT | MUX_MODE0) /* (C25) MMC0_DS */
+		>;
+		u-boot,dm-spl;
+	};
+
+	main_mmc1_pins_default: main_mmc1_pins_default {
+		pinctrl-single,pins = <
+			AM65X_IOPAD(0x02D4, PIN_INPUT_PULLDOWN | MUX_MODE0) /* (C27) MMC1_CLK */
+			AM65X_IOPAD(0x02D8, PIN_INPUT_PULLUP | MUX_MODE0) /* (C28) MMC1_CMD */
+			AM65X_IOPAD(0x02D0, PIN_INPUT_PULLUP | MUX_MODE0) /* (D28) MMC1_DAT0 */
+			AM65X_IOPAD(0x02CC, PIN_INPUT_PULLUP | MUX_MODE0) /* (E27) MMC1_DAT1 */
+			AM65X_IOPAD(0x02C8, PIN_INPUT_PULLUP | MUX_MODE0) /* (D26) MMC1_DAT2 */
+			AM65X_IOPAD(0x02C4, PIN_INPUT_PULLUP | MUX_MODE0) /* (D27) MMC1_DAT3 */
+			AM65X_IOPAD(0x02DC, PIN_INPUT_PULLUP | MUX_MODE0) /* (B24) MMC1_SDCD */
+			AM65X_IOPAD(0x02E0, PIN_INPUT | MUX_MODE0) /* (C24) MMC1_SDWP */
+		>;
+		u-boot,dm-spl;
+	};
+};
+
+&sdhci0 {
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc0_pins_default>;
+};
+
+&sdhci1 {
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc1_pins_default>;
+};
