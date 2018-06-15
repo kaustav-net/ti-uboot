@@ -44,4 +44,44 @@ struct ti_sci_msg_hdr {
 	u32 flags;
 } __packed;
 
+/**
+ * struct ti_sci_msg_resp_version - Response for a message
+ * @hdr:		Generic header
+ * @firmware_description: String describing the firmware
+ * @firmware_revision:	Firmware revision
+ * @abi_major:		Major version of the ABI that firmware supports
+ * @abi_minor:		Minor version of the ABI that firmware supports
+ *
+ * In general, ABI version changes follow the rule that minor version increments
+ * are backward compatible. Major revision changes in ABI may not be
+ * backward compatible.
+ *
+ * Response to a generic message with message type TI_SCI_MSG_VERSION
+ */
+struct ti_sci_msg_resp_version {
+	struct ti_sci_msg_hdr hdr;
+	char firmware_description[32];
+	u16 firmware_revision;
+	u8 abi_major;
+	u8 abi_minor;
+} __packed;
+
+/**
+ * struct ti_sci_msg_board_config - Board configuration message
+ * @hdr:		Generic Header
+ * @boardcfgp_low:	Lower 32 bit of the pointer pointing to the board
+ *			configuration data
+ * @boardcfgp_high:	Upper 32 bit of the pointer pointing to the board
+ *			configuration data
+ * @boardcfg_size:	Size of board configuration data object
+ * Request type is TI_SCI_MSG_BOARD_CONFIG, responded with a generic
+ * ACK/NACK message.
+ */
+struct ti_sci_msg_board_config {
+	struct ti_sci_msg_hdr hdr;
+	u32 boardcfgp_low;
+	u32 boardcfgp_high;
+	u16 boardcfg_size;
+} __packed;
+
 #endif /* __TI_SCI_H */

@@ -13,11 +13,54 @@
 #define __TISCI_PROTOCOL_H
 
 /**
+ * struct ti_sci_version_info - version information structure
+ * @abi_major:	Major ABI version. Change here implies risk of backward
+ *		compatibility break.
+ * @abi_minor:	Minor ABI version. Change here implies new feature addition,
+ *		or compatible change in ABI.
+ * @firmware_revision:	Firmware revision (not usually used).
+ * @firmware_description: Firmware description (not usually used).
+ */
+struct ti_sci_version_info {
+	u8 abi_major;
+	u8 abi_minor;
+	u16 firmware_revision;
+	char firmware_description[32];
+};
+
+struct ti_sci_handle;
+
+/**
+ * struct ti_sci_misc_ops - Miscellaneous operations
+ * @get_revision: Command to obtain and populate SYSFW revision
+ *		  Returns 0 for successful exclusive request, else returns
+ *		  corresponding error message.
+ * @board_config: Command to set the board configuration
+ *		  Returns 0 for successful exclusive request, else returns
+ *		  corresponding error message.
+ */
+struct ti_sci_misc_ops {
+	int (*get_revision)(struct ti_sci_handle *handle);
+	int (*board_config)(const struct ti_sci_handle *handle,
+			    u64 addr, u32 size);
+};
+
+/**
+ * struct ti_sci_ops - Function support for TI SCI
+ * @misc_ops:	Miscellaneous operations
+ */
+struct ti_sci_ops {
+	struct ti_sci_misc_ops misc_ops;
+};
+
+/**
  * struct ti_sci_handle - Handle returned to TI SCI clients for usage.
  * @ops:	operations that are made available to TI SCI clients
+ * @version:	structure containing version information
  */
 struct ti_sci_handle {
 	struct ti_sci_ops ops;
+	struct ti_sci_version_info version;
 };
 
 #if IS_ENABLED(CONFIG_TI_SCI_PROTOCOL)

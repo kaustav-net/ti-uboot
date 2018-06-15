@@ -63,6 +63,8 @@ struct ti_sci_info {
 	u8 seq;
 };
 
+#define handle_to_ti_sci_info(h) container_of(h, struct ti_sci_info, handle)
+
 /**
  * ti_sci_setup_one_xfer() - Setup one message type
  * @info:	Pointer to SCI entity information
@@ -182,6 +184,133 @@ static inline int ti_sci_do_xfer(struct ti_sci_info *info,
 }
 
 /**
+ * ti_sci_cmd_get_revision() - command to get the revision of the SCI entity
+ * @handle:	pointer to TI SCI handle
+ *
+ * Updates the SCI information in the internal data structure.
+ *
+ * Return: 0 if all went fine, else return appropriate error.
+ */
+static int ti_sci_cmd_get_revision(struct ti_sci_handle *handle)
+{
+	struct ti_sci_msg_resp_version *rev_info;
+	struct ti_sci_version_info *ver;
+	struct ti_sci_msg_hdr hdr;
+	struct ti_sci_info *info;
+	struct ti_sci_xfer *xfer;
+	int ret;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_VERSION, 0x0,
+				     (u32 *)&hdr, sizeof(struct ti_sci_msg_hdr),
+				     sizeof(*rev_info));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev, "Message alloc failed(%d)\n", ret);
+		return ret;
+	}
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "Mbox communication fail %d\n", ret);
+		return ret;
+	}
+
+	rev_info = (struct ti_sci_msg_resp_version *)xfer->tx_message.buf;
+
+	ver = &handle->version;
+	ver->abi_major = rev_info->abi_major;
+	ver->abi_minor = rev_info->abi_minor;
+	ver->firmware_revision = rev_info->firmware_revision;
+	strncpy(ver->firmware_description, rev_info->firmware_description,
+		sizeof(ver->firmware_description));
+
+	return 0;
+}
+
+/**
+ * ti_sci_is_response_ack() - Generic ACK/NACK message checkup
+ * @r:	pointer to response buffer
+ *
+ * Return: true if the response was an ACK, else returns false.
+ */
+static inline bool ti_sci_is_response_ack(void *r)
+{
+	struct ti_sci_msg_hdr *hdr = r;
+
+	return hdr->flags & TI_SCI_FLAG_RESP_GENERIC_ACK ? true : false;
+}
+
+/**
+ * ti_sci_cmd_set_board_config() - Command to send board configuration message
+ * @handle:	pointer to TI SCI handle
+ * @addr:	Address where the board config structure is located
+ * @size:	Size of the board config structure
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ */
+static int ti_sci_cmd_set_board_config(const struct ti_sci_handle *handle,
+				       u64 addr, u32 size)
+{
+	struct ti_sci_msg_board_config req;
+	struct ti_sci_msg_hdr *resp;
+	struct ti_sci_info *info;
+	struct ti_sci_xfer *xfer;
+	int ret = 0;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_BOARD_CONFIG,
+				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
+				     (u32 *)&req, sizeof(req), sizeof(*resp));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev, "Message alloc failed(%d)\n", ret);
+		return ret;
+	}
+	req.boardcfgp_high = (addr >> 32) & 0xffffffff;
+	req.boardcfgp_low = addr & 0xffffffff;
+	req.boardcfg_size = size;
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "Mbox send fail %d\n", ret);
+		return ret;
+	}
+
+	resp = (struct ti_sci_msg_hdr *)xfer->tx_message.buf;
+
+	if (!ti_sci_is_response_ack(resp))
+		return -ENODEV;
+
+	return ret;
+}
+
+/*
+ * ti_sci_setup_ops() - Setup the operations structures
+ * @info:	pointer to TISCI pointer
+ */
+static void ti_sci_setup_ops(struct ti_sci_info *info)
+{
+	struct ti_sci_ops *ops = &info->handle.ops;
+	struct ti_sci_misc_ops *mops = &ops->misc_ops;
+
+	mops->get_revision = ti_sci_cmd_get_revision;
+	mops->board_config = ti_sci_cmd_set_board_config;
+}
+
+/**
  * ti_sci_get_handle_from_sysfw() - Get the TI SCI handle of the SYSFW
  * @dev:	Pointer to the SYSFW device
  *
@@ -285,6 +414,8 @@ static int ti_sci_probe(struct udevice *dev)
 
 	info->dev = dev;
 	info->seq = 0xA;
+
+	ti_sci_setup_ops(info);
 
 	return 0;
 }
