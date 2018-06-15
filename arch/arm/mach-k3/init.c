@@ -10,12 +10,15 @@
 #include <common.h>
 #include <asm/io.h>
 #include <spl.h>
+#include <dm.h>
 #include <remoteproc.h>
 #include <linux/libfdt.h>
+#include <linux/soc/ti/ti_sci_protocol.h>
 #include <image.h>
 #include <asm/sections.h>
 #include <asm/armv7_mpu.h>
 #include <asm/arch/hardware.h>
+#include <asm/arch/boardcfg_data.h>
 
 #ifdef CONFIG_SPL_BUILD
 #ifdef CONFIG_CPU_V7R
@@ -138,6 +141,9 @@ void board_init_f(ulong dummy)
 {
 #ifdef CONFIG_K3_LOAD_SYSFW
 	int ret, fw_addr, len;
+	struct ti_sci_handle *ti_sci;
+	struct ti_sci_misc_ops *misc_ops;
+	struct udevice *dev;
 #endif
 
 	/*
@@ -186,10 +192,48 @@ void board_init_f(ulong dummy)
 			return;
 		}
 	}
+
+	/* Bring up the Device Management and Security Controller (SYSFW) */
+	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
+	if (ret) {
+		debug("Failed to initialize SYSFW (%d)\n", ret);
+		return;
+	}
+
+	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
+	misc_ops = &ti_sci->ops.misc_ops;
+
+	/* Apply board (and use-case) specific configuration to SYSFW */
+	ret = misc_ops->board_config(ti_sci,
+				     (u64)(u32)&k3_boardcfg_data,
+				     sizeof(struct k3_boardcfg));
+	if (ret) {
+		debug("Failed to set board configuration (%d)\n", ret);
+		return;
+	}
+
+	/*
+	 * Obtain and populate the SYSFW System Firmware version to complete the
+	 * basic SYSFW and TI SCI bringup.
+	 */
+	ret = misc_ops->get_revision(ti_sci);
+	if (ret) {
+		debug("Failed to get SYSFW revision (%d)\n", ret);
+		return;
+	}
 #endif
 
 	/* Prepare console output */
 	preloader_console_init();
+
+#ifdef CONFIG_K3_LOAD_SYSFW
+	/* Output System Firmware version info */
+	printf("SYSFW: ABI: %d.%d (firmware rev 0x%04x '%.*s')\n",
+	       ti_sci->version.abi_major, ti_sci->version.abi_minor,
+	       ti_sci->version.firmware_revision,
+	       sizeof(ti_sci->version.firmware_description),
+	       ti_sci->version.firmware_description);
+#endif
 }
 
 static u32 __get_backup_bootmedia(u32 devstat)
