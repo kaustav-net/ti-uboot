@@ -84,6 +84,13 @@
 	status = "okay";
 };
 
+&wkup_uart0 {
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_uart0_pins_default>;
+	status = "okay";
+};
+
 &main_pmx0 {
 	u-boot,dm-spl;
 	main_uart0_pins_default: main_uart0_pins_default {
@@ -129,6 +136,20 @@
 		>;
 		u-boot,dm-spl;
 	};
+};
+
+&wkup_pmx0 {
+	u-boot,dm-spl;
+	wkup_uart0_pins_default: wkup_uart0_pins_default {
+		pinctrl-single,pins = <
+			AM65X_WKUP_IOPAD(0x00a0, PIN_INPUT | MUX_MODE0) /* (AB1) WKUP_UART0_RXD */
+			AM65X_WKUP_IOPAD(0x00a4, PIN_OUTPUT | MUX_MODE0) /* (AB5) WKUP_UART0_TXD */
+			AM65X_WKUP_IOPAD(0x00c8, PIN_INPUT | MUX_MODE1) /* (AC2) WKUP_GPIO0_6.WKUP_UART0_CTSn */
+			AM65X_WKUP_IOPAD(0x00cc, PIN_OUTPUT | MUX_MODE1) /* (AC1) WKUP_GPIO0_7.WKUP_UART0_RTSn */
+		>;
+		u-boot,dm-spl;
+	};
+
 };
 
 &sdhci0 {
