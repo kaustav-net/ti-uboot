@@ -12,6 +12,7 @@
 #include <fdtdec.h>
 #include <libfdt.h>
 #include <malloc.h>
+#include <power-domain.h>
 #include <sdhci.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -27,9 +28,18 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	struct arasan_sdhci_plat *plat = dev_get_platdata(dev);
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
 	struct sdhci_host *host = dev_get_priv(dev);
+	struct power_domain sdhci_pwrdmn;
 	struct clk clk;
 	unsigned long clock;
 	int ret;
+
+	ret = power_domain_get_by_index(dev, &sdhci_pwrdmn, 0);
+	if (!ret) {
+		power_domain_on(&sdhci_pwrdmn);
+	} else if (ret != -ENOENT && ret != -ENODEV && ret != -ENOSYS) {
+		dev_err(dev, "power_domain_get() failed: %d\n", ret);
+		return ret;
+	}
 
 	ret = clk_get_by_index(dev, 0, &clk);
 	if (ret < 0) {
