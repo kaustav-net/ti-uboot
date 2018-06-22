@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <malloc.h>
-#include <dm/ofnode.h>
 #include <remoteproc.h>
 #include <asm/io.h>
 #include <dm/device-internal.h>
