@@ -20,8 +20,10 @@
 /* SPL Loader Configuration */
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define CONFIG_SPL_TEXT_BASE		0x80080000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x300000
 #else
 #define CONFIG_SPL_TEXT_BASE		0x41c00000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x100000
 #endif
 
 /* Clock Defines */
@@ -71,6 +73,11 @@
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC
+
+/* Non Kconfig SF configs */
+#define CONFIG_SPL_SPI_LOAD
+#define CONFIG_SF_DEFAULT_SPEED		0
+#define CONFIG_SF_DEFAULT_MODE		0
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
