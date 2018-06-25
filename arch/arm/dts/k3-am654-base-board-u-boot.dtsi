@@ -62,6 +62,22 @@
 	u-boot,dm-spl;
 };
 
+&mmc0 {
+	u-boot,dm-spl;
+};
+
+&mmc1 {
+	u-boot,dm-spl;
+};
+
+&main_mmc0_pins_default {
+	u-boot,dm-spl;
+};
+
+&main_mmc1_pins_default {
+	u-boot,dm-spl;
+};
+
 &sdhci0 {
 	u-boot,dm-spl;
 };
@@ -80,4 +96,12 @@
 	 flash@0{
 		u-boot,dm-spl;
 	};
+};
+
+&mmc_phy0 {
+	u-boot,dm-spl;
+};
+
+&mmc_phy1 {
+	u-boot,dm-spl;
 };
