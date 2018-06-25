@@ -93,4 +93,11 @@ config OMAP_USB2_PHY
 	  Support for the OMAP's USB2 PHY.
 	  This PHY is found on OMAP devices supporting USB2.
 
+config AM654_MMC_PHY
+	bool "Support MMC PHY on TI's AM654 SOCs"
+	depends on PHY
+	depends on REGMAP
+	help
+	  Support for MMC PHY on TI's AM654 SOCs
+
 endmenu
