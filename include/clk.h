@@ -204,6 +204,7 @@ static inline int clk_release_bulk(struct clk_bulk *bulk)
 	return clk_release_all(bulk->clks, bulk->count);
 }
 
+#if CONFIG_IS_ENABLED(CLK)
 /**
  * clk_request - Request a clock by provider-specific ID.
  *
@@ -294,6 +295,53 @@ int clk_disable(struct clk *clk);
  * @return zero on success, or -ve error code.
  */
 int clk_disable_bulk(struct clk_bulk *bulk);
+
+#else
+static inline int clk_request(struct udevice *dev, struct clk *clk)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_free(struct clk *clk)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_get_rate(struct clk *clk)
+{
+	return -ENOSYS;
+}
+
+static inline int  clk_set_rate(struct clk *clk, ulong rate)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_set_parent(struct clk *clk, struct clk *parent)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_enable(struct clk *clk)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_enable_bulk(struct clk_bulk *bulk)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_disable(struct clk *clk)
+{
+	return -ENOSYS;
+}
+
+static inline int clk_disable_bulk(struct clk_bulk *bulk)
+{
+	return -ENOSYS;
+}
+#endif /* CONFIG_IS_ENABLED(CLK) */
 
 int soc_clk_dump(void);
 
