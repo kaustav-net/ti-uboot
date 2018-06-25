@@ -158,6 +158,8 @@ static int cadence_spi_probe(struct udevice *bus)
 
 	priv->regbase = plat->regbase;
 	priv->ahbbase = plat->ahbbase;
+	if (device_is_compatible(bus, "ti,am654-ospi"))
+		priv->direct_mode = true;
 
 	if (!priv->qspi_is_init) {
 		cadence_qspi_apb_controller_init(plat);
@@ -248,20 +250,28 @@ static int cadence_spi_xfer(struct udevice *dev, unsigned int bitlen,
 				data_bytes, dout);
 		break;
 		case CQSPI_INDIRECT_READ:
-			err = cadence_qspi_apb_indirect_read_setup(plat,
-				priv->cmd_len, dm_plat->mode, cmd_buf);
-			if (!err) {
+			err = cadence_qspi_apb_read_setup
+				(plat, priv->cmd_len, dm_plat->mode, cmd_buf);
+			if (err)
+				break;
+			if (priv->direct_mode)
+				err = cadence_qspi_apb_direct_read_execute
+				(plat, data_bytes, din);
+			else
 				err = cadence_qspi_apb_indirect_read_execute
 				(plat, data_bytes, din);
-			}
 		break;
 		case CQSPI_INDIRECT_WRITE:
-			err = cadence_qspi_apb_indirect_write_setup
+			err = cadence_qspi_apb_write_setup
 				(plat, priv->cmd_len, cmd_buf);
-			if (!err) {
+			if (err)
+				break;
+			if (priv->direct_mode)
+				err = cadence_qspi_apb_direct_write_execute
+				(plat, data_bytes, dout);
+			else
 				err = cadence_qspi_apb_indirect_write_execute
 				(plat, data_bytes, dout);
-			}
 		break;
 		default:
 			err = -1;
@@ -331,6 +341,8 @@ static const struct dm_spi_ops cadence_spi_ops = {
 
 static const struct udevice_id cadence_spi_ids[] = {
 	{ .compatible = "cadence,qspi" },
+	{ .compatible = "cdns,qspi-nor" },
+	{ .compatible = "ti,am654-ospi" },
 	{ }
 };
 

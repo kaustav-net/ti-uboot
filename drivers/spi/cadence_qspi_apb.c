@@ -41,6 +41,7 @@
 #define CQSPI_INST_TYPE_SINGLE			0
 #define CQSPI_INST_TYPE_DUAL			1
 #define CQSPI_INST_TYPE_QUAD			2
+#define CQSPI_INST_TYPE_OCTAL			3
 
 #define CQSPI_STIG_DATA_LEN_MAX			8
 
@@ -528,8 +529,9 @@ int cadence_qspi_apb_command_write(void *reg_base, unsigned int cmdlen,
 }
 
 /* Opcode + Address (3/4 bytes) + dummy bytes (0-4 bytes) */
-int cadence_qspi_apb_indirect_read_setup(struct cadence_spi_platdata *plat,
-	unsigned int cmdlen, unsigned int rx_width, const u8 *cmdbuf)
+int cadence_qspi_apb_read_setup(struct cadence_spi_platdata *plat,
+				unsigned int cmdlen, unsigned int rx_width,
+				const u8 *cmdbuf)
 {
 	unsigned int reg;
 	unsigned int rd_reg;
@@ -552,16 +554,14 @@ int cadence_qspi_apb_indirect_read_setup(struct cadence_spi_platdata *plat,
 		/* for normal read (only ramtron as of now) */
 		addr_bytes = cmdlen - 1;
 
-	/* Setup the indirect trigger address */
-	writel(plat->trigger_address,
-	       plat->regbase + CQSPI_REG_INDIRECTTRIGGER);
-
 	/* Configure the opcode */
 	rd_reg = cmdbuf[0] << CQSPI_REG_RD_INSTR_OPCODE_LSB;
 
 	if (rx_width & SPI_RX_QUAD)
 		/* Instruction and address at DQ0, data at DQ0-3. */
 		rd_reg |= CQSPI_INST_TYPE_QUAD << CQSPI_REG_RD_INSTR_TYPE_DATA_LSB;
+	else if (rx_width & SPI_RX_OCTAL)
+		rd_reg |= CQSPI_INST_TYPE_OCTAL << CQSPI_REG_RD_INSTR_TYPE_DATA_LSB;
 
 	/* Get address */
 	addr_value = cadence_qspi_apb_cmd2addr(&cmdbuf[1], addr_bytes);
@@ -629,6 +629,9 @@ int cadence_qspi_apb_indirect_read_execute(struct cadence_spi_platdata *plat,
 	unsigned int bytes_to_read = 0;
 	int ret;
 
+	/* Setup the indirect trigger address */
+	writel((uintptr_t)plat->ahbbase,
+	       plat->regbase + CQSPI_REG_INDIRECTTRIGGER);
 	writel(n_rx, plat->regbase + CQSPI_REG_INDIRECTRDBYTES);
 
 	/* Start the indirect read transfer */
@@ -684,9 +687,28 @@ failrd:
 	return ret;
 }
 
+int cadence_qspi_apb_direct_read_execute(struct cadence_spi_platdata *plat,
+					 unsigned int n_rx, u8 *rxbuf)
+{
+	u32 addr_value;
+	u32 reg;
+
+	addr_value = readl(plat->regbase + CQSPI_REG_INDIRECTRDSTARTADDR);
+	/* enable dir access and 4 byte addressing */
+	reg = readl(plat->regbase + CQSPI_REG_CONFIG);
+	reg |= CQSPI_REG_CONFIG_DIRECT;
+	writel(reg, plat->regbase + CQSPI_REG_CONFIG);
+	reg = readl(plat->regbase + CQSPI_REG_SIZE);
+	reg |= 0x3;
+	writel(reg, plat->regbase + CQSPI_REG_SIZE);
+	memcpy(rxbuf, plat->ahbbase + addr_value, n_rx);
+
+	return 0;
+}
+
 /* Opcode + Address (3/4 bytes) */
-int cadence_qspi_apb_indirect_write_setup(struct cadence_spi_platdata *plat,
-	unsigned int cmdlen, const u8 *cmdbuf)
+int cadence_qspi_apb_write_setup(struct cadence_spi_platdata *plat,
+				 unsigned int cmdlen, const u8 *cmdbuf)
 {
 	unsigned int reg;
 	unsigned int addr_bytes = cmdlen > 4 ? 4 : 3;
@@ -696,9 +718,6 @@ int cadence_qspi_apb_indirect_write_setup(struct cadence_spi_platdata *plat,
 		       cmdlen, cmdbuf);
 		return -EINVAL;
 	}
-	/* Setup the indirect trigger address */
-	writel(plat->trigger_address,
-	       plat->regbase + CQSPI_REG_INDIRECTTRIGGER);
 
 	/* Configure the opcode */
 	reg = cmdbuf[0] << CQSPI_REG_WR_INSTR_OPCODE_LSB;
@@ -725,6 +744,9 @@ int cadence_qspi_apb_indirect_write_execute(struct cadence_spi_platdata *plat,
 	unsigned int write_bytes;
 	int ret;
 
+	/* Setup the indirect trigger address */
+	writel((uintptr_t)plat->ahbbase,
+	       plat->regbase + CQSPI_REG_INDIRECTTRIGGER);
 	/*
 	 * Use bounce buffer for non 32 bit aligned txbuf to avoid data
 	 * aborts
@@ -788,6 +810,26 @@ failwr:
 	return ret;
 }
 
+int cadence_qspi_apb_direct_write_execute(struct cadence_spi_platdata *plat,
+					  unsigned int n_tx, const u8 *txbuf)
+{
+	u32 addr_value;
+	u32 reg;
+
+	addr_value = readl(plat->regbase + CQSPI_REG_INDIRECTWRSTARTADDR);
+	/* enable dir access */
+	reg = readl(plat->regbase + CQSPI_REG_CONFIG);
+	reg |= CQSPI_REG_CONFIG_DIRECT;
+	writel(reg, plat->regbase + CQSPI_REG_CONFIG);
+	reg = readl(plat->regbase + CQSPI_REG_SIZE);
+	reg |= 0x3;
+	writel(reg, plat->regbase + CQSPI_REG_SIZE);
+	memcpy(plat->ahbbase + addr_value, txbuf, n_tx);
+	if (!cadence_qspi_wait_idle(plat->regbase))
+		return -EIO;
+
+	return 0;
+}
 void cadence_qspi_apb_enter_xip(void *reg_base, char xip_dummy)
 {
 	unsigned int reg;
