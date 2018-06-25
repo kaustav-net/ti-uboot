@@ -970,6 +970,8 @@ int spi_flash_scan(struct spi_flash *flash)
 		flash->read_cmd = CMD_READ_ARRAY_SLOW;
 	else if (spi->mode & SPI_RX_QUAD && info->flags & RD_QUAD)
 		flash->read_cmd = CMD_READ_QUAD_OUTPUT_FAST;
+	else if (spi->mode & SPI_RX_OCTAL && info->flags & RD_OCTAL)
+		flash->read_cmd = CMD_READ_OCTAL_OUTPUT;
 	else if (spi->mode & SPI_RX_DUAL && info->flags & RD_DUAL)
 		flash->read_cmd = CMD_READ_DUAL_OUTPUT_FAST;
 
