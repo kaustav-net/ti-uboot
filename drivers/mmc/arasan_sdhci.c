@@ -10,6 +10,7 @@
 #include <common.h>
 #include <dm.h>
 #include <fdtdec.h>
+#include <generic-phy.h>
 #include <libfdt.h>
 #include <malloc.h>
 #include <power-domain.h>
@@ -21,6 +22,7 @@ struct arasan_sdhci_plat {
 	struct mmc_config cfg;
 	struct mmc mmc;
 	unsigned int f_max;
+	struct phy *phy;
 };
 
 static int arasan_sdhci_probe(struct udevice *dev)
@@ -58,6 +60,21 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	if (ret && ret != -ENOSYS) {
 		dev_err(dev, "failed to enable clock\n");
 		return ret;
+	}
+
+	if (!of_machine_is_compatible("ti,am654-sdhci-5.1")) {
+		/* Get and init phy */
+		ret = generic_phy_get_by_name(dev, "phy_arasan", plat->phy);
+		if (ret) {
+			pr_err("can't get phy from DT\n");
+			return ret;
+		}
+
+		ret = generic_phy_init(plat->phy);
+		if (ret) {
+			pr_err("couldn't initialize MMC PHY\n");
+			return ret;
+		}
 	}
 
 	host->quirks = SDHCI_QUIRK_WAIT_SEND_CMD |
@@ -103,7 +120,9 @@ static int arasan_sdhci_bind(struct udevice *dev)
 }
 
 static const struct udevice_id arasan_sdhci_ids[] = {
+	{ .compatible = "ti,am654-sdhci-5.1"},
 	{ .compatible = "arasan,sdhci-8.9a" },
+	{ .compatible = "arasan,sdhci-5.1"  },
 	{ }
 };
 
