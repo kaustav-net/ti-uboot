@@ -8,6 +8,9 @@
 #ifndef __CADENCE_QSPI_H__
 #define __CADENCE_QSPI_H__
 
+#include <clk.h>
+#include <power-domain.h>
+
 #define CQSPI_IS_ADDR(cmd_len)		(cmd_len > 1 ? 1 : 0)
 
 #define CQSPI_NO_DECODER_MAX_CS		4
@@ -22,6 +25,9 @@ struct cadence_spi_platdata {
 	u32		fifo_depth;
 	u32		fifo_width;
 	u32		trigger_address;
+
+	struct clk	clk;
+	struct power_domain	pwrdmn;
 
 	/* Flash parameters */
 	u32		page_size;
@@ -42,6 +48,7 @@ struct cadence_spi_priv {
 	int		qspi_is_init;
 	unsigned int	qspi_calibrated_hz;
 	unsigned int	qspi_calibrated_cs;
+	unsigned long	ref_clk_hz;
 	unsigned int	previous_hz;
 	bool		direct_mode;
 };

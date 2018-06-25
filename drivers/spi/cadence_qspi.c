@@ -6,9 +6,11 @@
  */
 
 #include <common.h>
+#include <clk.h>
 #include <dm.h>
 #include <fdtdec.h>
 #include <malloc.h>
+#include <power-domain.h>
 #include <spi.h>
 #include <linux/errno.h>
 #include "cadence_qspi.h"
@@ -18,6 +20,10 @@
 #define CQSPI_INDIRECT_READ		2
 #define CQSPI_INDIRECT_WRITE		3
 
+#ifndef CONFIG_CQSPI_REF_CLK
+#define CONFIG_CQSPI_REF_CLK  0
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static int cadence_spi_write_speed(struct udevice *bus, uint hz)
@@ -26,10 +32,10 @@ static int cadence_spi_write_speed(struct udevice *bus, uint hz)
 	struct cadence_spi_priv *priv = dev_get_priv(bus);
 
 	cadence_qspi_apb_config_baudrate_div(priv->regbase,
-					     CONFIG_CQSPI_REF_CLK, hz);
+					     priv->ref_clk_hz, hz);
 
 	/* Reconfigure delay timing if speed is changed. */
-	cadence_qspi_apb_delay(priv->regbase, CONFIG_CQSPI_REF_CLK, hz,
+	cadence_qspi_apb_delay(priv->regbase, priv->ref_clk_hz, hz,
 			       plat->tshsl_ns, plat->tsd2d_ns,
 			       plat->tchsh_ns, plat->tslch_ns);
 
@@ -155,11 +161,28 @@ static int cadence_spi_probe(struct udevice *bus)
 {
 	struct cadence_spi_platdata *plat = bus->platdata;
 	struct cadence_spi_priv *priv = dev_get_priv(bus);
+	long int clk_rate = 0;
 
 	priv->regbase = plat->regbase;
 	priv->ahbbase = plat->ahbbase;
 	if (device_is_compatible(bus, "ti,am654-ospi"))
 		priv->direct_mode = true;
+
+	if (plat->clk.dev)
+		clk_rate = clk_get_rate(&plat->clk);
+
+	if (clk_rate <= 0) {
+		clk_rate = dev_read_u32_default(bus, "clock-frequency",
+						CONFIG_CQSPI_REF_CLK);
+		if (!clk_rate) {
+			printf("cqspi: refclk frequency unavailable\n");
+			return -EINVAL;
+		}
+	}
+	priv->ref_clk_hz = clk_rate;
+
+	if (plat->pwrdmn.dev)
+		power_domain_on(&plat->pwrdmn);
 
 	if (!priv->qspi_is_init) {
 		cadence_qspi_apb_controller_init(plat);
@@ -294,6 +317,7 @@ static int cadence_spi_ofdata_to_platdata(struct udevice *bus)
 	const void *blob = gd->fdt_blob;
 	int node = dev_of_offset(bus);
 	int subnode;
+	int ret;
 
 	plat->regbase = (void *)devfdt_get_addr_index(bus, 0);
 	plat->ahbbase = (void *)devfdt_get_addr_index(bus, 1);
@@ -302,6 +326,18 @@ static int cadence_spi_ofdata_to_platdata(struct udevice *bus)
 	plat->fifo_width = fdtdec_get_uint(blob, node, "cdns,fifo-width", 4);
 	plat->trigger_address = fdtdec_get_uint(blob, node,
 						"cdns,trigger-address", 0);
+
+	ret = clk_get_by_index(bus, 0, &plat->clk);
+	if (ret && ret != -ENOENT && ret != -ENODEV && ret != -ENOSYS) {
+		debug("cqspi: failed to get clock\n");
+		return ret;
+	}
+
+	ret = power_domain_get_by_index(bus, &plat->pwrdmn, 0);
+	if (ret && ret != -ENOENT && ret != -ENODEV && ret != -ENOSYS) {
+		debug("cqspi: failed to get pwrdmn\n");
+		return ret;
+	}
 
 	/* All other paramters are embedded in the child node */
 	subnode = fdt_first_subnode(blob, node);
