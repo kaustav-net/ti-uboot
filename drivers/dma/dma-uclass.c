@@ -171,7 +171,7 @@ int dma_disable(struct dma *dma)
 	return ops->disable(dma);
 }
 
-int dma_receive(struct dma *dma, void **dst)
+int dma_receive(struct dma *dma, void **dst, void* metadata)
 {
 	struct dma_ops *ops = dma_dev_ops(dma->dev);
 
@@ -180,10 +180,10 @@ int dma_receive(struct dma *dma, void **dst)
 	if (!ops->receive)
 		return -1;
 
-	return ops->receive(dma, dst);
+	return ops->receive(dma, dst, metadata);
 }
 
-int dma_send(struct dma *dma, void *src, size_t len)
+int dma_send(struct dma *dma, void *src, size_t len, void* metadata)
 {
 	struct dma_ops *ops = dma_dev_ops(dma->dev);
 
@@ -192,7 +192,7 @@ int dma_send(struct dma *dma, void *src, size_t len)
 	if (!ops->send)
 		return -1;
 
-	return ops->send(dma, src, len);
+	return ops->send(dma, src, len, metadata);
 }
 #endif /* CONFIG_DMA_CHANNELS */
 

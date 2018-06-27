@@ -85,18 +85,20 @@ struct dma_ops {
 	 *
 	 * @dma: The DMA Channel to manipulate.
 	 * @dst: The destination pointer.
+	 * @metadata: DMA driver specific data
 	 * @return zero on success, or -ve error code.
 	 */
-	int (*receive)(struct dma *dma, void **dst);
+	int (*receive)(struct dma *dma, void **dst, void *metadata);
 	/**
 	 * send() - Send a DMA transfer.
 	 *
 	 * @dma: The DMA Channel to manipulate.
 	 * @src: The source pointer.
 	 * @len: Length of the data to be sent (number of bytes).
+	 * @metadata: DMA driver specific data
 	 * @return zero on success, or -ve error code.
 	 */
-	int (*send)(struct dma *dma, void *src, size_t len);
+	int (*send)(struct dma *dma, void *src, size_t len, void *metadata);
 #endif /* CONFIG_DMA_CHANNELS */
 	/**
 	 * transfer() - Issue a DMA transfer. The implementation must

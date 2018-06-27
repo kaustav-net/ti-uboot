@@ -194,7 +194,7 @@ int dma_disable(struct dma *dma);
  * @dst: The destination pointer.
  * @return zero on success, or -ve error code.
  */
-int dma_receive(struct dma *dma, void **dst);
+int dma_receive(struct dma *dma, void **dst, void *metadata);
 
 /**
  * dma_send() - Send a DMA transfer.
@@ -205,7 +205,7 @@ int dma_receive(struct dma *dma, void **dst);
  * @len: Length of the data to be sent (number of bytes).
  * @return zero on success, or -ve error code.
  */
-int dma_send(struct dma *dma, void *src, size_t len);
+int dma_send(struct dma *dma, void *src, size_t len, void *metadata);
 #endif /* CONFIG_DMA_CHANNELS */
 
 /*
