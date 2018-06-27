@@ -372,7 +372,7 @@ int spi_flash_read_common(struct spi_flash *flash, const u8 *cmd,
  */
 void __weak spi_flash_copy_mmap(void *data, void *offset, size_t len)
 {
-#ifdef CONFIG_DMA
+#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_DMA)
 	if (!dma_memcpy(data, offset, len))
 		return;
 #endif
