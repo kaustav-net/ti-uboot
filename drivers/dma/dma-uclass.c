@@ -10,10 +10,10 @@
  */
 
 #include <common.h>
-#include <dma.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
 #include <dm/device-internal.h>
+#include <dma-uclass.h>
 #include <errno.h>
 
 DECLARE_GLOBAL_DATA_PTR;
