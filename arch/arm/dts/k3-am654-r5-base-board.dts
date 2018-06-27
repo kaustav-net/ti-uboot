@@ -65,10 +65,6 @@
 	mbox-names = "tx", "rx", "notify";
 	ti,host-id = <4>;
 
-	k3_sysreset: sysreset-controller {
-		compatible = "ti,sci-sysreset";
-	};
-
 	k3_proc_ctrl: processor-contol {
 		compatible = "ti,sci-proc-control";
 		#proc-cells = <2>;
