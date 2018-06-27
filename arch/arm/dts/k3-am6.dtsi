@@ -26,6 +26,7 @@
 		serial4 = &main_uart2;
 		spi0 = &ospi0;
 		spi1 = &ospi1;
+		ethernet0 = &cpsw_port1;
 	};
 
 	chosen { };
@@ -359,13 +360,9 @@
 			main_udmap: udmap@31150000 {
 				compatible = "ti,k3-navss-udmap";
 				reg =	<0x31150000 0x100>,
-					<0x30C00000 0x100000>,
 					<0x34000000 0x100000>,
-					<0x30B00000 0x100000>,
-					<0x35000000 0x100000>,
-					<0x30D00000 0x100000>;
-				reg-names = "gcfg", "rchan", "rchanrt", "tchan",
-					    "tchanrt", "rflow";
+					<0x35000000 0x100000>;
+				reg-names = "gcfg", "rchanrt", "tchanrt";
 				#dma-cells = <3>;
 				dma-channels = <270>;
 
@@ -408,13 +405,9 @@
 			mcu_udmap: udmap@285c0000 {
 				compatible = "ti,k3-navss-udmap";
 				reg =	<0x285c0000 0x100>,
-					<0x284c0000 0x4000>,
 					<0x2a800000 0x40000>,
-					<0x284a0000 0x4000>,
-					<0x2aa00000 0x40000>,
-					<0x28400000 0x2000>;
-				reg-names = "gcfg", "rchan", "rchanrt", "tchan",
-					    "tchanrt", "rflow";
+					<0x2aa00000 0x40000>;
+				reg-names = "gcfg", "rchanrt", "tchanrt";
 				#dma-cells = <3>;
 				dma-channels = <96>;
 
@@ -423,6 +416,117 @@
 				ti,psil-base = <0x6000>;
 				ti,sci = <&dmsc>;
 				ti,sci-dev-id = <194>;
+			};
+		};
+
+		mcu_cpsw: cpsw_nuss@046000000 {
+			compatible = "ti,am654-cpsw-nuss";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x46000000 0x200000>, <0x40f00200 0x2>;
+			reg-names = "cpsw_nuss", "mac_efuse";
+			ranges;
+			dma-coherent;
+			clocks = <&k3_clks 5 10>;
+			clock-names = "fck";
+			power-domains = <&k3_pds 5>;
+			ti,psil-base = <0x7000>;
+
+			dmas = <&mcu_udmap &mcu_cpsw 0 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 1 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 2 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 3 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 4 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 5 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 6 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 7 UDMA_DIR_TX>,
+			       <&mcu_udmap &mcu_cpsw 0 UDMA_DIR_RX>;
+			dma-names = "tx0", "tx1", "tx2", "tx3",
+				    "tx4", "tx5", "tx6", "tx7",
+				    "rx";
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				host: host@0 {
+					reg = <0>;
+					ti,label = "host";
+				};
+
+				cpsw_port1: port@1 {
+					reg = <1>;
+					ti,mac-only;
+					ti,label = "port1";
+				};
+			};
+
+			davinci_mdio: mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				bus_freq = <1000000>;
+			};
+
+			cpsw-phy-sel@40f04040 {
+				compatible = "ti,am654-cpsw-phy-sel";
+				reg= <0x40f04040 0x4>;
+				reg-names = "gmii-sel";
+			};
+
+			ti,psil-config0 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config1 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config2 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config3 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config4 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config5 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config6 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
+			};
+
+			ti,psil-config7 {
+				linux,udma-mode = <UDMA_PKT_MODE>;
+				statictr-type = <PSIL_STATIC_TR_NONE>;
+				ti,needs-epib;
+				ti,psd-size = <16>;
 			};
 		};
 	};
