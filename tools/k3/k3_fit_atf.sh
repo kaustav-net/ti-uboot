@@ -28,16 +28,6 @@ cat << __HEADER_EOF
 	#address-cells = <1>;
 
 	images {
-		spl {
-			description = "SPL (64-bit)";
-			data = /incbin/("spl/u-boot-spl-nodtb.bin");
-			type = "standalone";
-			os = "U-Boot";
-			arch = "arm64";
-			compression = "none";
-			load = <0x80080000>;
-			entry = <0x80080000>;
-		};
 		atf {
 			description = "ARM Trusted Firmware";
 			data = /incbin/("$ATF");
@@ -57,6 +47,16 @@ cat << __HEADER_EOF
 			os = "tee";
 			load = <0x9e800000>;
 			entry = <0x9e800000>;
+		};
+		spl {
+			description = "SPL (64-bit)";
+			data = /incbin/("spl/u-boot-spl-nodtb.bin");
+			type = "standalone";
+			os = "U-Boot";
+			arch = "arm64";
+			compression = "none";
+			load = <0x80080000>;
+			entry = <0x80080000>;
 		};
 __HEADER_EOF
 
@@ -86,7 +86,7 @@ do
 		$(basename $dtname) {
 			description = "$(basename $dtname .dtb)";
 			firmware = "atf";
-			loadables = "spl", "tee";
+			loadables = "tee", "spl";
 			fdt = "$(basename $dtname)";
 		};
 __CONF_SECTION_EOF
