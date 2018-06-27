@@ -1971,6 +1971,92 @@ fail:
 	return ret;
 }
 
+static int ti_sci_cmd_rm_psil_pair(const struct ti_sci_handle *handle,
+				   u32 nav_id, u32 src_thread, u32 dst_thread)
+{
+	struct ti_sci_msg_hdr *resp;
+	struct ti_sci_msg_psil_pair req;
+	struct ti_sci_xfer *xfer;
+	struct ti_sci_info *info;
+	int ret = 0;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_RM_PSIL_PAIR,
+				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
+				     (u32 *)&req, sizeof(req), sizeof(*resp));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev, "RM_PSIL:Message alloc failed(%d)\n", ret);
+		return ret;
+	}
+	req.nav_id = nav_id;
+	req.src_thread = src_thread;
+	req.dst_thread = dst_thread;
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "RM_PSIL:Mbox send fail %d\n", ret);
+		goto fail;
+	}
+
+	resp = (struct ti_sci_msg_hdr *)xfer->tx_message.buf;
+	ret = ti_sci_is_response_ack(resp) ? 0 : -ENODEV;
+
+fail:
+	dev_dbg(info->dev, "RM_PSIL: nav: %u link pair %u->%u ret:%u\n",
+		nav_id, src_thread, dst_thread, ret);
+	return ret;
+}
+
+static int ti_sci_cmd_rm_psil_unpair(const struct ti_sci_handle *handle,
+				     u32 nav_id, u32 src_thread, u32 dst_thread)
+{
+	struct ti_sci_msg_hdr *resp;
+	struct ti_sci_msg_psil_unpair req;
+	struct ti_sci_xfer *xfer;
+	struct ti_sci_info *info;
+	int ret = 0;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_RM_PSIL_UNPAIR,
+				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
+				     (u32 *)&req, sizeof(req), sizeof(*resp));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev, "RM_PSIL:Message alloc failed(%d)\n", ret);
+		return ret;
+	}
+	req.nav_id = nav_id;
+	req.src_thread = src_thread;
+	req.dst_thread = dst_thread;
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "RM_PSIL:Mbox send fail %d\n", ret);
+		goto fail;
+	}
+
+	resp = (struct ti_sci_msg_hdr *)xfer->tx_message.buf;
+	ret = ti_sci_is_response_ack(resp) ? 0 : -ENODEV;
+
+fail:
+	dev_dbg(info->dev, "RM_PSIL: link unpair %u->%u ret:%u\n",
+		src_thread, dst_thread, ret);
+	return ret;
+}
+
 /*
  * ti_sci_setup_ops() - Setup the operations structures
  * @info:	pointer to TISCI pointer
@@ -1984,6 +2070,7 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	struct ti_sci_core_ops *core_ops = &ops->core_ops;
 	struct ti_sci_proc_ops *pops = &ops->proc_ops;
 	struct ti_sci_rm_ringacc_ops *rops = &ops->rm_ring_ops;
+	struct ti_sci_rm_psil_ops *psilops = &ops->rm_psil_ops;
 
 	mops->get_revision = ti_sci_cmd_get_revision;
 	mops->board_config = ti_sci_cmd_set_board_config;
@@ -2029,6 +2116,9 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	rops->free = ti_sci_cmd_ring_free;
 	rops->reset = ti_sci_cmd_ring_reset;
 	rops->reconfig = ti_sci_cmd_ring_reconfig;
+
+	psilops->pair = ti_sci_cmd_rm_psil_pair;
+	psilops->unpair = ti_sci_cmd_rm_psil_unpair;
 }
 
 /**
