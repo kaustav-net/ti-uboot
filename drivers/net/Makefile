@@ -61,6 +61,7 @@ obj-$(CONFIG_DRIVER_TI_EMAC) += davinci_emac.o
 obj-$(CONFIG_TSEC_ENET) += tsec.o fsl_mdio.o
 obj-$(CONFIG_DRIVER_TI_CPSW) += cpsw.o cpsw-common.o
 obj-$(CONFIG_FMAN_ENET) += fsl_mdio.o
+obj-$(CONFIG_TI_AM65_CPSW_NUSS) += am65-cpsw-nuss.o
 obj-$(CONFIG_TSI108_ETH) += tsi108_eth.o
 obj-$(CONFIG_ULI526X) += uli526x.o
 obj-$(CONFIG_VSC7385_ENET) += vsc7385.o
