@@ -5,3 +5,4 @@
 #
 
 obj-$(CONFIG_ARCH_KEYSTONE)	+= keystone/
+obj-$(CONFIG_SOC_TI) += ti/
