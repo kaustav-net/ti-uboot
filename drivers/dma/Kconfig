@@ -26,4 +26,6 @@ config TI_EDMA3
 	  This driver support data transfer between memory
 	  regions.
 
+source "drivers/dma/ti/Kconfig"
+
 endmenu # menu "DMA Support"
