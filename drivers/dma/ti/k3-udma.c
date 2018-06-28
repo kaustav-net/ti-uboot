@@ -523,8 +523,8 @@ static void udma_poll_completion(struct udma_chan *uc, dma_addr_t *paddr)
 	int i = 1;
 
 	while (udma_pop_from_ring(uc, paddr)) {
-		mdelay(1);
-		if (!(i % 1000))
+		udelay(1);
+		if (!(i % 1000000))
 			printf(".");
 		i++;
 	}
