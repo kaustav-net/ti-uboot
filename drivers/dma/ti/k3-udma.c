@@ -17,7 +17,7 @@
 #include <dma-uclass.h>
 #include <linux/delay.h>
 #include <linux/soc/ti/k3-navss-psilcfg.h>
-#include <dt-bindings/dma/ti-udma.h>
+#include <dt-bindings/dma/k3-udma.h>
 #include <linux/soc/ti/k3-navss-ringacc.h>
 #include <linux/soc/ti/cppi5.h>
 #include <linux/soc/ti/ti-udma.h>
