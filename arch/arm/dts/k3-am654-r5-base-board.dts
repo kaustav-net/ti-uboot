@@ -19,9 +19,9 @@
 	soc0 {
 		mcu_secproxy: secproxy@28380000 {
 			compatible = "ti,am654-secure-proxy";
-			reg = <0x2a380000 0x80000>,
-			      <0x2a400000 0x80000>,
-			      <0x2a480000 0x80000>;
+			reg = <0x0 0x2a380000 0x0 0x80000>,
+			      <0x0 0x2a400000 0x0 0x80000>,
+			      <0x0 0x2a480000 0x0 0x80000>;
 			reg-names = "rt", "scfg", "target_data";
 			#mbox-cells = <1>;
 			u-boot,dm-spl;
@@ -47,9 +47,9 @@
 
 		memorycontroller: memorycontroller@0298e000 {
 			compatible = "ti,am654-ddrss";
-			reg = <0x0298e000 0x200>,
-			      <0x02980000 0x4000>,
-			      <0x02988000 0x2000>;
+			reg = <0x0 0x0298e000 0x0 0x200>,
+			      <0x0 0x02980000 0x0 0x4000>,
+			      <0x0 0x02988000 0x0 0x2000>;
 			reg-names = "ss", "ctl", "phy";
 			clocks = <&k3_clks 20 0>;
 			power-domains = <&k3_pds 20>,
