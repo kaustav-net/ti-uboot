@@ -50,7 +50,7 @@
 			"setenv name_overlays \"k3-am654-pcie-usb2.dtbo k3-am654-idk.dtbo\"; fi;"\
 		"if test $board_name = am65x_evm; then "         \
 			"setenv name_fdt k3-am654-base-board.dtb; "	\
-			"setenv name_overlays \"k3-am654-evm-csi2-ov490.dtbo k3-am654-evm-oldi-lcd1evm.dtbo\"; "\
+			"setenv name_overlays \"k3-am654-pcie-usb3.dtbo k3-am654-evm-csi2-ov490.dtbo k3-am654-evm-oldi-lcd1evm.dtbo\"; "\
 		"else if test $name_fdt = undefined; then "		\
 			"echo WARNING: Could not determine device tree to use;"\
 		"fi; fi; "						\
