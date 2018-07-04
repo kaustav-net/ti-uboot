@@ -20,10 +20,10 @@
 /* SPL Loader Configuration */
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define CONFIG_SPL_TEXT_BASE		0x80080000
-#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x300000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x280000
 #else
 #define CONFIG_SPL_TEXT_BASE		0x41c00000
-#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x100000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x80000
 #endif
 
 /* Clock Defines */
@@ -61,7 +61,8 @@
 	"overlayaddr=0x83000000\0"					\
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
-	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000\0" \
+	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000 "	\
+		"${mtdparts}\0"						\
 	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"
 
 /* U-Boot MMC-specific configuration */
@@ -84,16 +85,37 @@
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
 		"${bootdir}/${name_kern}\0"
 
+#ifdef CONFIG_TARGET_AM654_A53_EVM
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
+	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
+	"mtdparts=" CONFIG_MTDPARTS_DEFAULT "\0"
+#else
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD
+#endif
+
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI				\
+	"init_ubi=run args_all args_ubi; sf probe; "			\
+		"ubi part ospi.rootfs; ubifsmount ubi:rootfs;\0"	\
+	"get_kern_ubi=ubifsload ${loadaddr} ${bootdir}/${name_kern}\0"	\
+	"get_fdt_ubi=ubifsload ${fdtaddr} ${bootdir}/${name_fdt}\0"	\
+	"args_ubi=setenv bootargs ${console} ${optargs} rootfstype=ubifs "\
+	"root=ubi0:rootfs rw ubi.mtd=ospi.rootfs\0"
+
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS					\
-	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC				\
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI
 
 /* Non Kconfig SF configs */
 #define CONFIG_SPL_SPI_LOAD
 #define CONFIG_SF_DEFAULT_SPEED		0
 #define CONFIG_SF_DEFAULT_MODE		0
+#define CONFIG_MTD_PARTITIONS
+#define CONFIG_ENV_OFFSET		0x780000
+#define CONFIG_ENV_SECT_SIZE		0x20000
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
