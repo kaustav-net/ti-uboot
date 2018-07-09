@@ -36,6 +36,13 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
 		timeout--;
 		udelay(1000);
 	}
+	/*
+	 * Some eMMC cards require forced card detect to work
+	 * properly
+	 */
+	if (host->quirks & SDHCI_QUIRK_FORCE_CD_TEST)
+		sdhci_writeb(host, SDHCI_CTRL_CD_TEST |
+			     SDHCI_CTRL_CD_TEST_INS, SDHCI_HOST_CONTROL);
 }
 
 static void sdhci_cmd_done(struct sdhci_host *host, struct mmc_cmd *cmd)
