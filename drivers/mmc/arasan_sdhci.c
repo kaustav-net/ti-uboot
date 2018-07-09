@@ -83,6 +83,9 @@ static int arasan_sdhci_probe(struct udevice *dev)
 #ifdef CONFIG_ZYNQ_HISPD_BROKEN
 	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
 #endif
+	if (fdtdec_get_bool(gd->fdt_blob, dev_of_offset(dev),
+			    "xlnx,fails-without-test-cd"))
+		host->quirks |= SDHCI_QUIRK_FORCE_CD_TEST;
 
 	host->max_clk = clock;
 
