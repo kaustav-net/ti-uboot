@@ -261,6 +261,16 @@ void board_init_f(ulong dummy)
 #endif
 }
 
+u32 spl_boot_mode(const u32 boot_device)
+{
+	switch (boot_device) {
+	case BOOT_DEVICE_MMC2:
+		return MMCSD_MODE_FS;
+	default:
+		return MMCSD_MODE_EMMCBOOT;
+	}
+}
+
 static u32 __get_backup_bootmedia(u32 devstat)
 {
 	u32 bkup_boot = (devstat & CTRLMMR_MAIN_DEVSTAT_BKUP_BOOTMODE_MASK) >>
