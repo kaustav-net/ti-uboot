@@ -439,6 +439,8 @@ static int sdhci_set_ios(struct mmc *mmc)
 	if (mmc->clock != host->clock)
 		sdhci_set_clock(mmc, mmc->clock);
 
+	sdhci_set_power(host, fls(mmc->cfg->voltages) - 1);
+
 	/* Set bus width */
 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
 	if (mmc->bus_width == 8) {
