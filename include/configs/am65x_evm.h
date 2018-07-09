@@ -39,6 +39,9 @@
 #define CONFIG_SPL_MAX_SIZE		CONFIG_MAX_DOWNLODABLE_IMAGE_SIZE
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SPL_TEXT_BASE +	\
 					CONFIG_NON_SECURE_MSRAM_SIZE - 4)
+#define PARTS_DEFAULT \
+	/* Linux partitions */ \
+	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
 
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS					\
@@ -83,7 +86,8 @@
 		"fdt apply ${overlayaddr};"				\
 		"done;\0"						\
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
-		"${bootdir}/${name_kern}\0"
+		"${bootdir}/${name_kern}\0"				\
+	"partitions=" PARTS_DEFAULT "\0"
 
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
