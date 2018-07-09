@@ -120,8 +120,20 @@
 #define CONFIG_SF_DEFAULT_SPEED		0
 #define CONFIG_SF_DEFAULT_MODE		0
 #define CONFIG_MTD_PARTITIONS
+#ifdef CONFIG_ENV_IS_IN_SPI_FLASH
 #define CONFIG_ENV_OFFSET		0x780000
 #define CONFIG_ENV_SECT_SIZE		0x20000
+#endif
+
+/* MMC ENV related defines */
+#ifdef CONFIG_ENV_IS_IN_MMC
+#define CONFIG_SYS_MMC_ENV_DEV		0
+#define CONFIG_SYS_MMC_ENV_PART	1
+#define CONFIG_ENV_SIZE		(128 << 10)
+#define CONFIG_ENV_OFFSET		0x780000
+#define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
+#define CONFIG_SYS_REDUNDAND_ENVIRONMENT
+#endif
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
