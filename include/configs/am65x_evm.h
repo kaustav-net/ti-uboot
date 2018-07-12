@@ -90,7 +90,7 @@
 		"done;\0"						\
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
 		"${bootdir}/${name_kern}\0"				\
-	"partitions=" PARTS_DEFAULT "\0"
+	"partitions=" PARTS_DEFAULT
 
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
