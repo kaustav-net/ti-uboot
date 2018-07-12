@@ -78,70 +78,6 @@ struct boardcfg_orderid {
 	u32 allowed;
 } __attribute__((__packed__));
 
-struct boardcfg_one_resasg {
-	u16	start_resource;
-	u16	num_resource;
-} __attribute__((__packed__));
-
-struct boardcfg_udma_resasg {
-	struct boardcfg_one_resasg	udma_ext_ch;
-	struct boardcfg_one_resasg	udma_tx_ch;
-	struct boardcfg_one_resasg	udma_rx_ch;
-	struct boardcfg_one_resasg	udma_h_ch;
-	struct boardcfg_one_resasg	udma_rx_flow;
-} __attribute__((__packed__));
-
-struct boardcfg_ringacc_resasg {
-	struct boardcfg_one_resasg	ringacc_tx_ring;
-	struct boardcfg_one_resasg	ringacc_rx_ring;
-	struct boardcfg_one_resasg	ringacc_gp_ring;
-} __attribute__((__packed__));
-
-struct boardcfg_proxy_resasg {
-	struct boardcfg_one_resasg proxy;
-} __attribute__((__packed__));
-
-struct boardcfg_com_nav_resasg {
-	struct boardcfg_udma_resasg	udma;
-	struct boardcfg_ringacc_resasg	ringacc;
-	struct boardcfg_proxy_resasg	proxy;
-} __attribute__((__packed__));
-
-struct boardcfg_main_nav_resasg {
-	struct boardcfg_com_nav_resasg	nav;
-	struct boardcfg_one_resasg	modss0_ia;
-	struct boardcfg_one_resasg	modss1_ia;
-	struct boardcfg_one_resasg	udmass0_ia;
-} __attribute__((__packed__));
-
-struct boardcfg_mcu_nav_resasg {
-	struct boardcfg_com_nav_resasg	nav;
-	struct boardcfg_one_resasg	udmass0_ia;
-} __attribute__((__packed__));
-
-struct boardcfg_one_host_main_resasg {
-	u8				host_id;
-	struct boardcfg_orderid		orderid;
-	struct boardcfg_main_nav_resasg main_nav;
-	struct boardcfg_one_resasg	wkup_gpio_ir;
-	struct boardcfg_one_resasg	main_gpio_ir;
-} __attribute__((__packed__));
-
-struct boardcfg_one_host_mcu_resasg {
-	u8				host_id;
-	struct boardcfg_orderid		orderid;
-	struct boardcfg_main_nav_resasg main_nav;
-	struct boardcfg_one_resasg	main2mcu_ir;
-} __attribute__((__packed__));
-
-struct boardcfg_resasg {
-	struct boardcfg_substructure_header	subhdr;
-	struct boardcfg_one_host_main_resasg	main_cfg[
-		BOARDCFG_MAX_MAIN_HOST_COUNT];
-	struct boardcfg_one_host_mcu_resasg	mcu_cfg[
-		BOARDCFG_MAX_MCU_HOST_COUNT];
-} __attribute__((__packed__));
-
 #define BOARDCFG_TRACE_DST_UART0                BIT(0)
 #define BOARDCFG_TRACE_DST_I2C0_UART            BIT(1)
 #define BOARDCFG_TRACE_DST_ITM                  BIT(2)
@@ -170,7 +106,6 @@ struct k3_boardcfg {
 	struct boardcfg_secproxy	secproxy;
 	struct boardcfg_msmc		msmc;
 	struct boardcfg_proc_acl	processor_acl_list;
-	struct boardcfg_resasg		resasg;
 	struct boardcfg_dbg_cfg		debug_cfg;
 	struct boardcfg_pmic_cfg	pmic_cfg;
 } __attribute__((__packed__));

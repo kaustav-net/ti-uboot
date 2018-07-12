@@ -55,14 +55,6 @@ const struct k3_boardcfg k3_boardcfg_data = {
 		.proc_acl_entries = {{0}},
 	},
 
-	/* boardcfg_resasg */
-	.resasg = {
-		.subhdr = {
-			.magic = BOARDCFG_RESASG_MAGIC_NUM,
-			.size = sizeof(struct k3_boardcfg),
-		},
-	},
-
 	/* boardcfg_dbg_cfg */
 	.debug_cfg = {
 		.subhdr = {
