@@ -15,6 +15,7 @@
 #include <power-domain.h>
 #include <dm.h>
 #include <asm/arch/k3-am654-ddrss.h>
+#include <asm/arch/sys_proto.h>
 
 #define LDELAY 10000
 
@@ -83,7 +84,10 @@ static u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
  */
 static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 {
+	u32 val;
+
 	debug("%s: DDR controller register configuration started\n", __func__);
+
 	ddrss_ctl_writel(DDRSS_DDRCTL_MSTR, 0x41040010);
 	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHCTL0, 0x00210070);
 	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHTMG, 0x00510075);
@@ -102,7 +106,7 @@ static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 
 	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG0, 0x0b0a160b);
 	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG1, 0x00020310);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2, 0x0506060B);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2, 0x0506040a);
 	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG3, 0x0000400C);
 	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG4, 0x05020205);
 	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG5, 0x04040302);
@@ -137,11 +141,26 @@ static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_ctl_writel(DDRSS_DDRCTL_ODTCFG, 0x06000608);
 	ddrss_ctl_writel(DDRSS_DDRCTL_ODTMAP, 0x00000001);
 
-	debug("%s: DDR controller configuration done\n", __func__);
+	/* Disable refreshes */
+	val = ddrss_ctl_readl(DDRSS_DDRCTL_RFSHCTL3);
+	val |= 0x01;
+	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHCTL3, val);
+
+	debug("%s: DDR controller configuration completed\n", __func__);
 }
 
-#define ddrss_phy_writel(off, val) ddrss_writel(ddrss->ddrss_phy_cfg, off, val)
-#define ddrss_phy_readl(off) ddrss_readl(ddrss->ddrss_phy_cfg, off)
+#define ddrss_phy_writel(off, val)					\
+	do {								\
+		ddrss_writel(ddrss->ddrss_phy_cfg, off, val);		\
+		sdelay(10);	/* Delay at least 20 clock cycles */	\
+	} while (0)
+
+#define ddrss_phy_readl(off)						\
+	({								\
+		u32 val = ddrss_readl(ddrss->ddrss_phy_cfg, off);	\
+		sdelay(10);	/* Delay at least 20 clock cycles */	\
+		val;							\
+	})
 
 /**
  * am654_ddrss_phy_configuration() - Configure PHY specific registers
@@ -151,6 +170,7 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 {
 	debug("%s: DDR phy register configuration started\n", __func__);
 
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR1, 0x020046C0);
 	ddrss_phy_writel(DDRSS_DDRPHY_PGCR2, 0x00F09f60);
 	ddrss_phy_writel(DDRSS_DDRPHY_PGCR3, 0x55AA0080);
 	ddrss_phy_writel(DDRSS_DDRPHY_PGCR6, 0x00013001);
@@ -176,10 +196,10 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_phy_writel(DDRSS_DDRPHY_DTPR6, 0x00000505);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_ZQCR, 0x008A2A58);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ0PR0, 0x000073DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ1PR0, 0x000073DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ2PR0, 0x000073DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ3PR0, 0x000073DD);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ0PR0, 0x000077DD);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ1PR0, 0x000077DD);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ2PR0, 0x000077DD);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ3PR0, 0x000077DD);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_MR0, 0x00000010);
 	ddrss_phy_writel(DDRSS_DDRPHY_MR1, 0x00000501);
@@ -197,31 +217,16 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2PLLCR0, 0x021c4000);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_DTCR0, 0x8000B1c7);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTCR1, 0x00010237);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTCR1, 0x00010236);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_ACIOCR5, 0x04800000);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_IOVCR0, 0x0F0C0C0C);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR0, 0x40f00204);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR0, 0x40f00204);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR0, 0x40f00204);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR0, 0x40f00204);
-
 	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR0, 0x40703260);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR1, 0x55556000);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR2, 0xaaaa0000);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR3, 0xffe18587);
-
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR2, 0x00005555);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR2, 0x00005555);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR2, 0x00005555);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR2, 0x00005555);
-
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR3, 0xFFCA012B);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR3, 0xFFCA012B);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR3, 0xFFCA012B);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR3, 0xFFCA012B);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR4, 0x0E00c93C);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR4, 0x0E00c93C);
@@ -245,8 +250,11 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0IOCR, 0x04800000);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1IOCR, 0x04800000);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2IOCR, 0x04800000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL3IOCR, 0x04800000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL4IOCR, 0x04800000);
+
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0DXCTL2, 0x00141830);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1DXCTL2, 0x00141830);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2DXCTL2, 0x00141830);
+
 	debug("%s: DDR phy register configuration completed\n", __func__);
 }
 
@@ -254,19 +262,17 @@ static int __phy_builtin_init_routine(struct am654_ddrss_desc *ddrss,
 				      u32 init_value, u32 sts_mask,
 				      u32 err_mask)
 {
-	int i, ret;
+	int ret;
 
 	ddrss_phy_writel(DDRSS_DDRPHY_PIR, init_value | PIR_INIT_MASK);
 
-	for (i = 0; i < 100; i++)
-		;
+	sdelay(5);	/* Delay at least 10 clock cycles */
 
 	if (!wait_on_value(sts_mask, sts_mask,
 			   ddrss->ddrss_phy_cfg + DDRSS_DDRPHY_PGSR0, LDELAY))
 		return -ETIMEDOUT;
 
-	for (i = 0; i < 100; i++)
-		;
+	sdelay(16);	/* Delay at least 32 clock cycles */
 
 	ret = ddrss_phy_readl(DDRSS_DDRPHY_PGSR0);
 	debug("%s: PGSR0 val = 0x%x\n", __func__, ret);
@@ -289,7 +295,7 @@ int write_leveling(struct am654_ddrss_desc *ddrss)
 			printf("%s: ERROR: Write leveling timedout\n",
 			       __func__);
 		else
-			printf("%s:ERROR: Write leveling failed.\n", __func__);
+			printf("%s:ERROR: Write leveling failed\n", __func__);
 		return ret;
 	}
 
@@ -309,7 +315,7 @@ int read_dqs_training(struct am654_ddrss_desc *ddrss)
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Read DQS timedout\n", __func__);
 		else
-			printf("%s:ERROR: Read DQS Gate training failed.\n",
+			printf("%s:ERROR: Read DQS Gate training failed\n",
 			       __func__);
 		return ret;
 	}
@@ -322,19 +328,19 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 {
 	int ret;
 	u32 val;
-	u32 dgsl0, dgsl1, dgsl2, dgsl3, rddly;
+	u32 dgsl0, dgsl1, dgsl2, dgsl3, rddly, rd2wr_wr2rd;
 
 	debug("%s: Rest of the training started\n", __func__);
 
-	debug("%s: Write leveling adjustment\n", __func__);
+	debug("%s: Write Leveling adjustment\n", __func__);
 	ret = __phy_builtin_init_routine(ddrss, 0x800, PGSR0_WLADONE_MASK,
 					 PGSR0_WLAERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
-			printf("%s: ERROR:Write leveling adjustment timedout\n",
+			printf("%s:ERROR: Write Leveling adjustment timedout\n",
 			       __func__);
 		else
-			printf("%s: ERROR: Write leveling adjustment failed.\n",
+			printf("%s: ERROR: Write Leveling adjustment failed\n",
 			       __func__);
 		return ret;
 	}
@@ -346,7 +352,7 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Read Deskew timedout\n", __func__);
 		else
-			printf("%s: ERROR: Read Deskew failed.\n", __func__);
+			printf("%s: ERROR: Read Deskew failed\n", __func__);
 		return ret;
 	}
 
@@ -357,44 +363,44 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Write Deskew timedout\n", __func__);
 		else
-			printf("%s: ERROR: Write Deskew Failed.\n", __func__);
+			printf("%s: ERROR: Write Deskew failed\n", __func__);
 		return ret;
 	}
 
-	debug("%s: Read eye Training\n", __func__);
+	debug("%s: Read Eye training\n", __func__);
 	ret = __phy_builtin_init_routine(ddrss, 0x4000, PGSR0_REDONE_MASK,
 					 PGSR0_REERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
-			printf("%s: ERROR: Read eye training timedout\n",
+			printf("%s: ERROR: Read Eye training timedout\n",
 			       __func__);
 		else
-			printf("%s: ERROR: Read eye training failed. \n",
+			printf("%s: ERROR: Read Eye training failed\n",
 			       __func__);
 		return ret;
 	}
 
-	debug("%s: Write eye training\n", __func__);
+	debug("%s: Write Eye training\n", __func__);
 	ret = __phy_builtin_init_routine(ddrss, 0x8000, PGSR0_WEDONE_MASK,
 					 PGSR0_WEERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
-			printf("%s: ERROR: Write eye training 1 timedout\n",
+			printf("%s: ERROR: Write Eye training timedout\n",
 			       __func__);
 		else
-			printf("%s: ERROR: Write eye training failed.\n",
+			printf("%s: ERROR: Write Eye training failed\n",
 			       __func__);
 		return ret;
 	}
 
-	debug("%s:  VREF training\n", __func__);
+	debug("%s: VREF training\n", __func__);
 	ret = __phy_builtin_init_routine(ddrss, 0x20000, PGSR0_VDONE_MASK,
 					 PGSR0_VERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: VREF training timedout\n", __func__);
 		else
-			printf("%s: ERROR: VREF training failed.\n", __func__);
+			printf("%s: ERROR: VREF training failed\n", __func__);
 		return ret;
 	}
 
@@ -412,14 +418,9 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	if (dgsl3 < rddly)
 		rddly = dgsl3;
 
-	/*
-	 * from spec: It is recommended that DXnGCR0.rddly be set to
-	 * 5 + minn,x(DXnGTR0.Rxdgsl[4:2]),
-	 * where n is the byte lane index and x is the rank index.
-	 */
 	rddly += 5;
 
-	/* update rddly based on dgsl value*/
+	/* Update rddly based on dgsl values */
 	val = (ddrss_phy_readl(DDRSS_DDRPHY_DX0GCR0) & ~0xF00000);
 	val |= (rddly << 20);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR0, val);
@@ -436,25 +437,50 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	val |= (rddly << 20);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR0, val);
 
-	val = ddrss_phy_readl(DDRSS_DDRPHY_DX8SL0DXCTL2) & ~(0xc0000);
-	val |= 0x40030;
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0DXCTL2, val);
+	/*
+	 * Add system latency derived from training back into rd2wr and wr2rd
+	 * rd2wr = RL + BL/2 + 1 + WR_PREAMBLE - WL + max(DXnGTR0.DGSL) / 2
+	 * wr2rd = CWL + PL + BL/2 + tWTR_L + max(DXnGTR0.DGSL) / 2
+	 */
 
-	val = ddrss_phy_readl(DDRSS_DDRPHY_DX8SL1DXCTL2) & ~(0xc0000);
-	val |= 0x40030;
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1DXCTL2, val);
+	/* Select rank 0 */
+	ddrss_phy_writel(DDRSS_DDRPHY_RANKIDR, 0x00000000);
 
-	val = ddrss_phy_readl(DDRSS_DDRPHY_DX8SL2DXCTL2) & ~(0xc0000);
-	val |= 0x40030;
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2DXCTL2, val);
+	dgsl0 = (ddrss_phy_readl(DDRSS_DDRPHY_DX0GTR0) & 0x1F);
+	dgsl1 = (ddrss_phy_readl(DDRSS_DDRPHY_DX1GTR0) & 0x1F);
+	dgsl2 = (ddrss_phy_readl(DDRSS_DDRPHY_DX2GTR0) & 0x1F);
+	dgsl3 = (ddrss_phy_readl(DDRSS_DDRPHY_DX3GTR0) & 0x1F);
 
-	val = ddrss_phy_readl(DDRSS_DDRPHY_DX8SL3DXCTL2) & ~(0xc0000);
-	val |= 0x40030;
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL3DXCTL2, val);
+	/* Find maximum value across all bytes */
+	rd2wr_wr2rd = dgsl0;
+	if (dgsl1 > rd2wr_wr2rd)
+		rd2wr_wr2rd = dgsl1;
+	if (dgsl2 > rd2wr_wr2rd)
+		rd2wr_wr2rd = dgsl2;
+	if (dgsl3 > rd2wr_wr2rd)
+		rd2wr_wr2rd = dgsl3;
 
-	val = ddrss_phy_readl(DDRSS_DDRPHY_DX8SL4DXCTL2) & ~(0xc0000);
-	val |= 0x40030;
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL4DXCTL2, val);
+	rd2wr_wr2rd >>= 1;
+
+	/* Now add in adjustment to DRAMTMG2 bit fields for rd2wr and wr2rd */
+	/* Clear VSWCTL.sw_done */
+	ddrss_ctl_writel(DDRSS_DDRCTL_SWCTL,
+			 ddrss_ctl_readl(DDRSS_DDRCTL_SWCTL) & ~0x1);
+	/* Adjust rd2wr */
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2,
+			 ddrss_ctl_readl(DDRSS_DDRCTL_DRAMTMG2) +
+			 (rd2wr_wr2rd << 8));
+	/* Adjust wr2rd */
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2,
+			 ddrss_ctl_readl(DDRSS_DDRCTL_DRAMTMG2) +
+			 rd2wr_wr2rd);
+	/* Set VSWCTL.sw_done */
+	ddrss_ctl_writel(DDRSS_DDRCTL_SWCTL,
+			 ddrss_ctl_readl(DDRSS_DDRCTL_SWCTL) | 0x1);
+	/* Wait until settings are applied */
+	while (!(ddrss_ctl_readl(DDRSS_DDRCTL_SWSTAT) & 0x1)) {
+		/* Do nothing */
+	};
 
 	debug("%s: Rest of the training completed\n", __func__);
 	return 0;
@@ -475,8 +501,7 @@ static int am654_ddrss_init(struct am654_ddrss_desc *ddrss)
 
 	debug("%s(ddrss=%p)\n", __func__, ddrss);
 
-	ddrss_writel(ddrss->ddrss_ss_cfg, DDRSS_V2H_CTL_REG,
-		     0x000073FF);
+	ddrss_writel(ddrss->ddrss_ss_cfg, DDRSS_V2H_CTL_REG, 0x000073FF);
 
 	am654_ddrss_ctrl_configuration(ddrss);
 
@@ -486,8 +511,7 @@ static int am654_ddrss_init(struct am654_ddrss_desc *ddrss)
 
 	am654_ddrss_phy_configuration(ddrss);
 
-	ret = __phy_builtin_init_routine(ddrss, PIR_PHY_INIT,
-					 0x1, 0);
+	ret = __phy_builtin_init_routine(ddrss, PIR_PHY_INIT, 0x1, 0);
 	if (ret) {
 		dev_err(ddrss->dev, "PHY initialization failed %d\n", ret);
 		return ret;
@@ -498,20 +522,6 @@ static int am654_ddrss_init(struct am654_ddrss_desc *ddrss)
 	if (ret) {
 		dev_err(ddrss->dev, "DRAM initialization failed %d\n", ret);
 		return ret;
-	}
-
-	ddrss_ctl_writel(DDRSS_DDRCTL_SWCTL, 0);
-	ret = ddrss_ctl_readl(DDRSS_DDRCTL_DFIMISC);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DFIMISC, ret | 0x1);
-	ddrss_ctl_writel(DDRSS_DDRCTL_SWCTL, 1);
-
-	for (ret = 0; ret < 100; ret++)
-		;
-
-	if (!wait_on_value(0x7, 0x1,
-			   ddrss->ddrss_ctl_cfg + DDRSS_DDRCTL_STAT, LDELAY)) {
-		dev_err(ddrss->dev, "Wait for normal operation mode timeout\n");
-		return -ETIMEDOUT;
 	}
 
 	ret = write_leveling(ddrss);
@@ -526,8 +536,13 @@ static int am654_ddrss_init(struct am654_ddrss_desc *ddrss)
 	if (ret)
 		return ret;
 
+	/* Enabling refreshes after training is done */
 	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHCTL3,
 			 ddrss_ctl_readl(DDRSS_DDRCTL_RFSHCTL3) & ~0x1);
+
+	/* Disable PUBMODE after training is done */
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR1,
+			 ddrss_phy_readl(DDRSS_DDRPHY_PGCR1) & ~0x40);
 
 	return 0;
 }
@@ -575,7 +590,7 @@ static int am654_ddrss_power_on(struct am654_ddrss_desc *ddrss)
 	writel(ret, 0x42110010);
 	writel(0x10000000, 0x42110014);
 
-	debug("VTT regulator enabled.\n");
+	debug("VTT regulator enabled\n");
 
 	return 0;
 }
@@ -673,7 +688,7 @@ static struct ram_ops am654_ddrss_ops = {
 };
 
 static const struct udevice_id am654_ddrss_ids[] = {
-	{ .compatible = "ti,am654-ddrss"},
+	{ .compatible = "ti,am654-ddrss" },
 	{ }
 };
 
