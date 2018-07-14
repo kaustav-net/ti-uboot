@@ -15,7 +15,10 @@
 #include <environment/ti/mmc.h>
 
 #define CONFIG_ENV_SIZE			(128 << 10)
+
+/* DDR Configuration */
 #define CONFIG_NR_DRAM_BANKS		2
+#define CONFIG_SYS_SDRAM_BASE1		0x880000000
 
 /* SPL Loader Configuration */
 #ifdef CONFIG_TARGET_AM654_A53_EVM
