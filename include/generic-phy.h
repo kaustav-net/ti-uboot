@@ -19,11 +19,13 @@
  *
  * @dev: The device which implements the PHY port.
  * @id: The PHY ID within the provider.
+ * @priv: private data that can sent to a phy
  *
  */
 struct phy {
 	struct udevice *dev;
 	unsigned long id;
+	void *priv;
 };
 
 /*
