@@ -245,6 +245,7 @@
 				#clock-cells = <0>;
 				phys=<&mmc_phy0>;
 				phy-names = "phy_arasan";
+				max-frequency = <200000000>;
 				status = "disabled";
 			};
 
