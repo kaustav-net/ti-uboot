@@ -206,10 +206,12 @@
 
 &mmc_phy0 {
 	status = "okay";
+	ti,drv-strength-ohm = <50>;
 };
 
 &mmc_phy1 {
 	status = "okay";
+	ti,drv-strength-ohm = <50>;
 };
 
 #include "k3-am654-base-board-u-boot.dtsi"
