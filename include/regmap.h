@@ -95,4 +95,38 @@ void *regmap_get_range(struct regmap *map, unsigned int range_num);
  */
 int regmap_uninit(struct regmap *map);
 
+/**
+ * regmap_read_poll_timeout - Poll until a condition is met or a timeout occurs
+ *
+ * @map: Regmap to read from
+ * @addr: Address to poll
+ * @val: Unsigned integer variable to read the value into
+ * @cond: Break condition (usually involving @val)
+ * @timeout_us: Timeout in us, 0 means never timeout
+ *
+ * Returns 0 on success and -ETIMEDOUT upon a timeout or the regmap_read
+ * error return value in case of a error read. In the two former cases,
+ * the last read value at @addr is stored in @val.
+ *
+ * Modelled after readx_poll_timeout macro in linux/iopoll.h
+ */
+
+#define regmap_read_poll_timeout(map, addr, val, cond, timeout_us)	\
+({ \
+	unsigned long timeout = timer_get_us() + timeout_us; \
+	int pollret; \
+	for (;;) { \
+		pollret = regmap_read((map), (addr), &(val)); \
+		if (pollret) \
+			break; \
+		if (cond) \
+			break; \
+		if (timeout_us && time_after(timer_get_us(), timeout)) { \
+			pollret = regmap_read((map), (addr), &(val)); \
+			break; \
+		} \
+	} \
+	pollret ?: ((cond) ? 0 : -ETIMEDOUT); \
+})
+
 #endif
