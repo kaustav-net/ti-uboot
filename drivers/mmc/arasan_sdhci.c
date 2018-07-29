@@ -103,6 +103,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	}
 
 	host->max_clk = clock;
+	host->mmc->dev = dev;
 
 	ret = sdhci_setup_cfg(&plat->cfg, host, plat->f_max,
 			      CONFIG_ARASAN_SDHCI_MIN_FREQ);
@@ -110,7 +111,6 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 	host->mmc->priv = host;
-	host->mmc->dev = dev;
 	upriv->mmc = host->mmc;
 
 	return sdhci_probe(dev);
