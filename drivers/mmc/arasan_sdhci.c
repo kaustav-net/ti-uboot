@@ -22,7 +22,7 @@ struct arasan_sdhci_plat {
 	struct mmc_config cfg;
 	struct mmc mmc;
 	unsigned int f_max;
-	struct phy *phy;
+	struct phy phy;
 };
 
 static int arasan_sdhci_probe(struct udevice *dev)
@@ -64,13 +64,13 @@ static int arasan_sdhci_probe(struct udevice *dev)
 
 	if (device_is_compatible(dev, "ti,am654-sdhci-5.1")) {
 		/* Get and init phy */
-		ret = generic_phy_get_by_name(dev, "phy_arasan", plat->phy);
+		ret = generic_phy_get_by_name(dev, "phy_arasan", &plat->phy);
 		if (ret) {
 			pr_err("can't get phy from DT\n");
 			return ret;
 		}
 
-		ret = generic_phy_init(plat->phy);
+		ret = generic_phy_init(&plat->phy);
 		if (ret) {
 			pr_err("couldn't initialize MMC PHY\n");
 			return ret;
