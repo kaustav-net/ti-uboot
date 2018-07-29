@@ -43,7 +43,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 		return ret;
 	}
 
-	ret = clk_get_by_index(dev, 0, &clk);
+	ret = clk_get_by_name(dev, "clk_xin", &clk);
 	if (ret < 0) {
 		dev_err(dev, "failed to get clock\n");
 		return ret;
