@@ -62,7 +62,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 		return ret;
 	}
 
-	if (!of_machine_is_compatible("ti,am654-sdhci-5.1")) {
+	if (device_is_compatible(dev, "ti,am654-sdhci-5.1")) {
 		/* Get and init phy */
 		ret = generic_phy_get_by_name(dev, "phy_arasan", plat->phy);
 		if (ret) {
