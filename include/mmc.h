@@ -142,6 +142,7 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
 #define UHS_SDR50_BUS_SPEED	2
 #define UHS_SDR104_BUS_SPEED	3
 #define UHS_DDR50_BUS_SPEED	4
+#define UHS_HS400_BUS_SPEED	5 /* non standard */
 
 #define SD_MODE_UHS_SDR12	BIT(UHS_SDR12_BUS_SPEED)
 #define SD_MODE_UHS_SDR25	BIT(UHS_SDR25_BUS_SPEED)
