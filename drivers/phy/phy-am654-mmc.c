@@ -54,6 +54,11 @@ static int am654_mmc_phy_init(struct phy *phy)
 {
 	struct am654_mmc_phy *mmc_phy = dev_get_priv(phy->dev);
 
+	/* Reset registers to default values */
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL1_REG, 0x10000);
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL4_REG, 0x0);
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL5_REG, 0x0);
+
 	/* Enable pins by setting the IO mux to 0 */
 	regmap_update_bits(mmc_phy->reg_base, PHYCTRL_CTRL1_REG,
 			   IOMUX_ENABLE_MASK, 0);
@@ -131,6 +136,11 @@ static int am654_mmc_phy_power_off(struct phy *phy)
 	/* Disable DLL */
 	regmap_update_bits(mmc_phy->reg_base, PHYCTRL_CTRL1_REG,
 			   ENDLL_MASK, 0);
+
+	/* Reset registers to default values */
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL1_REG, 0x10000);
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL4_REG, 0x0);
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL5_REG, 0x0);
 
 	return 0;
 }
