@@ -66,6 +66,17 @@
 #define TI_SCI_MSG_RM_UDMAP_OPT_FLOW_CFG	0x1221
 
 /**
+ * struct ti_sci_secure_msg_hdr - Header that prefixes all TISCI messages sent
+ *				  via secure transport.
+ * @checksum:	crc16 checksum for the entire message
+ * @reserved:	Reserved for future use.
+ */
+struct ti_sci_secure_msg_hdr {
+	u16 checksum;
+	u16 reserved;
+} __packed;
+
+/**
  * struct ti_sci_msg_hdr - Generic Message Header for All messages and responses
  * @type:	Type of messages: One of TI_SCI_MSG* values
  * @host:	Host of the message

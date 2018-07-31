@@ -50,6 +50,7 @@ struct ti_sci_desc {
  * @chan_tx:	Transmit mailbox channel
  * @chan_rx:	Receive mailbox channel
  * @xfer:	xfer info
+ * @is_secure:	Determines if the communication is through secure threads.
  * @seq:	Seq id used for verification for tx and rx message.
  */
 struct ti_sci_info {
@@ -60,6 +61,7 @@ struct ti_sci_info {
 	struct mbox_chan chan_rx;
 	struct mbox_chan chan_notify;
 	struct ti_sci_xfer xfer;
+	bool is_secure;
 	u8 host_id;
 	u8 seq;
 };
@@ -125,6 +127,7 @@ static inline int ti_sci_get_response(struct ti_sci_info *info,
 				      struct mbox_chan *chan)
 {
 	struct k3_sec_proxy_msg *msg = &xfer->tx_message;
+	struct ti_sci_secure_msg_hdr *secure_hdr;
 	struct ti_sci_msg_hdr *hdr;
 	int ret;
 
@@ -134,6 +137,12 @@ static inline int ti_sci_get_response(struct ti_sci_info *info,
 		dev_err(info->dev, "%s: Message receive failed. ret = %d\n",
 			__func__, ret);
 		return ret;
+	}
+
+	/* ToDo: Verify checksum */
+	if (info->is_secure) {
+		secure_hdr = (struct ti_sci_secure_msg_hdr *)msg->buf;
+		msg->buf = (u32 *)((void *)msg->buf + sizeof(*secure_hdr));
 	}
 
 	/* msg is updated by mailbox driver */
@@ -171,7 +180,21 @@ static inline int ti_sci_do_xfer(struct ti_sci_info *info,
 				 struct ti_sci_xfer *xfer)
 {
 	struct k3_sec_proxy_msg *msg = &xfer->tx_message;
+	u8 secure_buf[info->desc->max_msg_size];
+	struct ti_sci_secure_msg_hdr secure_hdr;
 	int ret;
+
+	if (info->is_secure) {
+		/* ToDo: get checksum of the entire message */
+		secure_hdr.checksum = 0;
+		secure_hdr.reserved = 0;
+		memcpy(&secure_buf[sizeof(secure_hdr)], xfer->tx_message.buf,
+		       xfer->tx_message.len);
+
+		xfer->tx_message.buf = (u32 *)secure_buf;
+		xfer->tx_message.len += sizeof(secure_hdr);
+		xfer->rx_len += sizeof(secure_hdr);
+	}
 
 	/* Send the message */
 	ret = mbox_send(&info->chan_tx, msg);
@@ -2533,6 +2556,8 @@ static int ti_sci_of_to_info(struct udevice *dev, struct ti_sci_info *info)
 
 	info->host_id = dev_read_u32_default(dev, "ti,host-id",
 					     info->desc->host_id);
+
+	info->is_secure = dev_read_bool(dev, "ti,secure-host");
 
 	return 0;
 }
