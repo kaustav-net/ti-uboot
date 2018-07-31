@@ -272,15 +272,17 @@ static inline bool ti_sci_is_response_ack(void *r)
 }
 
 /**
- * ti_sci_cmd_set_board_config() - Command to send board configuration message
+ * cmd_set_board_config_using_msg() - Common command to send board configuration
+ *                                    message
  * @handle:	pointer to TI SCI handle
+ * @msg_type:	One of the TISCI message types to set board configuration
  * @addr:	Address where the board config structure is located
  * @size:	Size of the board config structure
  *
  * Return: 0 if all went well, else returns appropriate error value.
  */
-static int ti_sci_cmd_set_board_config(const struct ti_sci_handle *handle,
-				       u64 addr, u32 size)
+static int cmd_set_board_config_using_msg(const struct ti_sci_handle *handle,
+					  u16 msg_type, u64 addr, u32 size)
 {
 	struct ti_sci_msg_board_config req;
 	struct ti_sci_msg_hdr *resp;
@@ -295,7 +297,7 @@ static int ti_sci_cmd_set_board_config(const struct ti_sci_handle *handle,
 
 	info = handle_to_ti_sci_info(handle);
 
-	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_BOARD_CONFIG,
+	xfer = ti_sci_setup_one_xfer(info, msg_type,
 				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
 				     (u32 *)&req, sizeof(req), sizeof(*resp));
 	if (IS_ERR(xfer)) {
@@ -319,6 +321,75 @@ static int ti_sci_cmd_set_board_config(const struct ti_sci_handle *handle,
 		return -ENODEV;
 
 	return ret;
+}
+
+/**
+ * ti_sci_cmd_set_board_config() - Command to send board configuration message
+ * @handle:	pointer to TI SCI handle
+ * @addr:	Address where the board config structure is located
+ * @size:	Size of the board config structure
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ */
+static int ti_sci_cmd_set_board_config(const struct ti_sci_handle *handle,
+				       u64 addr, u32 size)
+{
+	return cmd_set_board_config_using_msg(handle,
+					      TI_SCI_MSG_BOARD_CONFIG,
+					      addr, size);
+}
+
+/**
+ * ti_sci_cmd_set_board_config_rm() - Command to send board resource
+ *				      management configuration
+ * @handle:	pointer to TI SCI handle
+ * @addr:	Address where the board RM config structure is located
+ * @size:	Size of the RM config structure
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ */
+static
+int ti_sci_cmd_set_board_config_rm(const struct ti_sci_handle *handle,
+				   u64 addr, u32 size)
+{
+	return cmd_set_board_config_using_msg(handle,
+					      TI_SCI_MSG_BOARD_CONFIG_RM,
+					      addr, size);
+}
+
+/**
+ * ti_sci_cmd_set_board_config_security() - Command to send board security
+ *					    configuration message
+ * @handle:	pointer to TI SCI handle
+ * @addr:	Address where the board security config structure is located
+ * @size:	Size of the security config structure
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ */
+static
+int ti_sci_cmd_set_board_config_security(const struct ti_sci_handle *handle,
+					 u64 addr, u32 size)
+{
+	return cmd_set_board_config_using_msg(handle,
+					      TI_SCI_MSG_BOARD_CONFIG_SECURITY,
+					      addr, size);
+}
+
+/**
+ * ti_sci_cmd_set_board_config_pm() - Command to send board power and clock
+ *				      configuration message
+ * @handle:	pointer to TI SCI handle
+ * @addr:	Address where the board PM config structure is located
+ * @size:	Size of the PM config structure
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ */
+static int ti_sci_cmd_set_board_config_pm(const struct ti_sci_handle *handle,
+					  u64 addr, u32 size)
+{
+	return cmd_set_board_config_using_msg(handle,
+					      TI_SCI_MSG_BOARD_CONFIG_PM,
+					      addr, size);
 }
 
 /**
@@ -2426,6 +2497,9 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 
 	mops->get_revision = ti_sci_cmd_get_revision;
 	mops->board_config = ti_sci_cmd_set_board_config;
+	mops->board_config_rm = ti_sci_cmd_set_board_config_rm;
+	mops->board_config_security = ti_sci_cmd_set_board_config_security;
+	mops->board_config_pm = ti_sci_cmd_set_board_config_pm;
 
 	dops->get_device = ti_sci_cmd_get_device;
 	dops->idle_device = ti_sci_cmd_idle_device;

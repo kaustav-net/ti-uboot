@@ -38,11 +38,28 @@ struct ti_sci_handle;
  * @board_config: Command to set the board configuration
  *		  Returns 0 for successful exclusive request, else returns
  *		  corresponding error message.
+ * @board_config_rm: Command to set the board resource management
+ *		  configuration
+ *		  Returns 0 for successful exclusive request, else returns
+ *		  corresponding error message.
+ * @board_config_security: Command to set the board security configuration
+ *		  Returns 0 for successful exclusive request, else returns
+ *		  corresponding error message.
+ * @board_config_pm: Command to trigger and set the board power and clock
+ *		  management related configuration
+ *		  Returns 0 for successful exclusive request, else returns
+ *		  corresponding error message.
  */
 struct ti_sci_misc_ops {
 	int (*get_revision)(struct ti_sci_handle *handle);
 	int (*board_config)(const struct ti_sci_handle *handle,
 			    u64 addr, u32 size);
+	int (*board_config_rm)(const struct ti_sci_handle *handle,
+			       u64 addr, u32 size);
+	int (*board_config_security)(const struct ti_sci_handle *handle,
+				     u64 addr, u32 size);
+	int (*board_config_pm)(const struct ti_sci_handle *handle,
+			       u64 addr, u32 size);
 };
 
 /**
