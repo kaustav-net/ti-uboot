@@ -53,6 +53,8 @@ struct k3_sysctrler_load_msg {
  * @hdr:		Generic message hdr
  */
 struct k3_sysctrler_boot_notification_msg {
+	u16 checksum;
+	u16 reserved;
 	struct k3_sysctrler_msg_hdr hdr;
 } __attribute__ ((__packed__));
 
@@ -129,6 +131,8 @@ static int k3_sysctrler_boot_notification_response(u32 *buf)
 	struct k3_sysctrler_boot_notification_msg *boot;
 
 	boot = (struct k3_sysctrler_boot_notification_msg *)buf;
+
+	/* ToDo: Verify checksum */
 
 	/* Check for proper response ID */
 	if (boot->hdr.cmd_id != K3_MSG_M3_TO_R5_BOOT_NOTIFICATION) {
