@@ -144,7 +144,7 @@ void board_init_f(ulong dummy)
 #ifdef CONFIG_K3_LOAD_SYSFW
 	int ret, fw_addr, len;
 	struct ti_sci_handle *ti_sci;
-	struct ti_sci_misc_ops *misc_ops;
+	struct ti_sci_board_ops *board_ops;
 #endif
 #if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM654_DDRSS)
 	struct udevice *dev;
@@ -218,26 +218,26 @@ void board_init_f(ulong dummy)
 	}
 
 	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
-	misc_ops = &ti_sci->ops.misc_ops;
+	board_ops = &ti_sci->ops.board_ops;
 
 	/* Apply board (and use-case) specific configuration to SYSFW */
-	ret = misc_ops->board_config(ti_sci,
-				     (u64)(u32)&am65_boardcfg_data,
-				     sizeof(am65_boardcfg_data));
+	ret = board_ops->board_config(ti_sci,
+				      (u64)(u32)&am65_boardcfg_data,
+				      sizeof(am65_boardcfg_data));
 	if (ret) {
 		debug("Failed to set board configuration (%d)\n", ret);
 		return;
 	}
 
-	ret = misc_ops->board_config_rm(ti_sci,
-					(u64)(u32)&am65_boardcfg_rm_data,
-					sizeof(am65_boardcfg_rm_data));
+	ret = board_ops->board_config_rm(ti_sci,
+					 (u64)(u32)&am65_boardcfg_rm_data,
+					 sizeof(am65_boardcfg_rm_data));
 	if (ret) {
 		debug("Failed to set board RM configuration (%d)\n", ret);
 		return;
 	}
 
-	ret = misc_ops->board_config_security(ti_sci,
+	ret = board_ops->board_config_security(ti_sci,
 					 (u64)(u32)&am65_boardcfg_security_data,
 					 sizeof(am65_boardcfg_security_data));
 	if (ret) {
@@ -245,9 +245,9 @@ void board_init_f(ulong dummy)
 		return;
 	}
 
-	ret = misc_ops->board_config_pm(ti_sci,
-					(u64)(u32)&am65_boardcfg_pm_data,
-					sizeof(am65_boardcfg_pm_data));
+	ret = board_ops->board_config_pm(ti_sci,
+					 (u64)(u32)&am65_boardcfg_pm_data,
+					 sizeof(am65_boardcfg_pm_data));
 	if (ret) {
 		debug("Failed to set board PM configuration (%d)\n", ret);
 		return;

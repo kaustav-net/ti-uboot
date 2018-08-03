@@ -31,7 +31,7 @@ struct ti_sci_version_info {
 struct ti_sci_handle;
 
 /**
- * struct ti_sci_misc_ops - Miscellaneous operations
+ * struct ti_sci_board_ops - Board config operations
  * @board_config: Command to set the board configuration
  *		  Returns 0 for successful exclusive request, else returns
  *		  corresponding error message.
@@ -47,7 +47,7 @@ struct ti_sci_handle;
  *		  Returns 0 for successful exclusive request, else returns
  *		  corresponding error message.
  */
-struct ti_sci_misc_ops {
+struct ti_sci_board_ops {
 	int (*board_config)(const struct ti_sci_handle *handle,
 			    u64 addr, u32 size);
 	int (*board_config_rm)(const struct ti_sci_handle *handle,
@@ -601,7 +601,7 @@ struct ti_sci_rm_udmap_ops {
 
 /**
  * struct ti_sci_ops - Function support for TI SCI
- * @misc_ops:	Miscellaneous operations
+ * @board_ops:	Board config operations
  * @dev_ops:	Device specific operations
  * @clk_ops:	Clock specific operations
  * @core_ops:	Core specific operations
@@ -609,7 +609,7 @@ struct ti_sci_rm_udmap_ops {
  * @ring_ops: Ring Accelerator Management operations
  */
 struct ti_sci_ops {
-	struct ti_sci_misc_ops misc_ops;
+	struct ti_sci_board_ops board_ops;
 	struct ti_sci_dev_ops dev_ops;
 	struct ti_sci_clk_ops clk_ops;
 	struct ti_sci_core_ops core_ops;

@@ -2486,7 +2486,7 @@ fail:
 static void ti_sci_setup_ops(struct ti_sci_info *info)
 {
 	struct ti_sci_ops *ops = &info->handle.ops;
-	struct ti_sci_misc_ops *mops = &ops->misc_ops;
+	struct ti_sci_board_ops *bops = &ops->board_ops;
 	struct ti_sci_dev_ops *dops = &ops->dev_ops;
 	struct ti_sci_clk_ops *cops = &ops->clk_ops;
 	struct ti_sci_core_ops *core_ops = &ops->core_ops;
@@ -2495,10 +2495,10 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	struct ti_sci_rm_psil_ops *psilops = &ops->rm_psil_ops;
 	struct ti_sci_rm_udmap_ops *udmap_ops = &ops->rm_udmap_ops;
 
-	mops->board_config = ti_sci_cmd_set_board_config;
-	mops->board_config_rm = ti_sci_cmd_set_board_config_rm;
-	mops->board_config_security = ti_sci_cmd_set_board_config_security;
-	mops->board_config_pm = ti_sci_cmd_set_board_config_pm;
+	bops->board_config = ti_sci_cmd_set_board_config;
+	bops->board_config_rm = ti_sci_cmd_set_board_config_rm;
+	bops->board_config_security = ti_sci_cmd_set_board_config_security;
+	bops->board_config_pm = ti_sci_cmd_set_board_config_pm;
 
 	dops->get_device = ti_sci_cmd_get_device;
 	dops->idle_device = ti_sci_cmd_idle_device;
