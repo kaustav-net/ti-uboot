@@ -2495,7 +2495,6 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	struct ti_sci_rm_psil_ops *psilops = &ops->rm_psil_ops;
 	struct ti_sci_rm_udmap_ops *udmap_ops = &ops->rm_udmap_ops;
 
-	mops->get_revision = ti_sci_cmd_get_revision;
 	mops->board_config = ti_sci_cmd_set_board_config;
 	mops->board_config_rm = ti_sci_cmd_set_board_config_rm;
 	mops->board_config_security = ti_sci_cmd_set_board_config_security;
@@ -2637,7 +2636,9 @@ static int ti_sci_of_to_info(struct udevice *dev, struct ti_sci_info *info)
 }
 
 /**
- * ti_sci_probe() - Basic probe
+ * ti_sci_probe() - Basic probe. Also queries and populates the SYSFW firmware
+ *                  version which is a good validation that basic functionality
+ *                  is working and the driver is indeed ready to be used.
  * @dev:	corresponding system controller interface device
  *
  * Return: 0 if all goes good, else appropriate error message.
@@ -2660,6 +2661,10 @@ static int ti_sci_probe(struct udevice *dev)
 
 	info->dev = dev;
 	info->seq = 0xA;
+
+	ret = ti_sci_cmd_get_revision(&info->handle);
+	if (ret)
+		return ret;
 
 	ti_sci_setup_ops(info);
 

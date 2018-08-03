@@ -32,9 +32,6 @@ struct ti_sci_handle;
 
 /**
  * struct ti_sci_misc_ops - Miscellaneous operations
- * @get_revision: Command to obtain and populate SYSFW revision
- *		  Returns 0 for successful exclusive request, else returns
- *		  corresponding error message.
  * @board_config: Command to set the board configuration
  *		  Returns 0 for successful exclusive request, else returns
  *		  corresponding error message.
@@ -51,7 +48,6 @@ struct ti_sci_handle;
  *		  corresponding error message.
  */
 struct ti_sci_misc_ops {
-	int (*get_revision)(struct ti_sci_handle *handle);
 	int (*board_config)(const struct ti_sci_handle *handle,
 			    u64 addr, u32 size);
 	int (*board_config_rm)(const struct ti_sci_handle *handle,

@@ -252,16 +252,6 @@ void board_init_f(ulong dummy)
 		debug("Failed to set board PM configuration (%d)\n", ret);
 		return;
 	}
-
-	/*
-	 * Obtain and populate the SYSFW System Firmware version to complete the
-	 * basic SYSFW and TI SCI bringup.
-	 */
-	ret = misc_ops->get_revision(ti_sci);
-	if (ret) {
-		debug("Failed to get SYSFW revision (%d)\n", ret);
-		return;
-	}
 #endif
 
 	/* Prepare console output */
