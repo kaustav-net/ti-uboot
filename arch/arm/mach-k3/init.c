@@ -220,7 +220,29 @@ void board_init_f(ulong dummy)
 	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
 	board_ops = &ti_sci->ops.board_ops;
 
-	/* Apply board (and use-case) specific configuration to SYSFW */
+	/* Apply power/clock (PM) specific configuration to SYSFW */
+	ret = board_ops->board_config_pm(ti_sci,
+					 (u64)(u32)&am65_boardcfg_pm_data,
+					 sizeof(am65_boardcfg_pm_data));
+	if (ret) {
+		debug("Failed to set board PM configuration (%d)\n", ret);
+		return;
+	}
+
+	/*
+	 * Now with the SYSFW having the PM configuration applied successfully,
+	 * we can finally bring up our regular U-Boot console.
+	 */
+	preloader_console_init();
+
+	/* Output System Firmware version info */
+	printf("SYSFW ABI: %d.%d (firmware rev 0x%04x '%.*s')\n",
+	       ti_sci->version.abi_major, ti_sci->version.abi_minor,
+	       ti_sci->version.firmware_revision,
+	       sizeof(ti_sci->version.firmware_description),
+	       ti_sci->version.firmware_description);
+
+	/* Apply the remainder of the board configuration to SYSFW */
 	ret = board_ops->board_config(ti_sci,
 				      (u64)(u32)&am65_boardcfg_data,
 				      sizeof(am65_boardcfg_data));
@@ -244,26 +266,9 @@ void board_init_f(ulong dummy)
 		debug("Failed to set board security configuration (%d)\n", ret);
 		return;
 	}
-
-	ret = board_ops->board_config_pm(ti_sci,
-					 (u64)(u32)&am65_boardcfg_pm_data,
-					 sizeof(am65_boardcfg_pm_data));
-	if (ret) {
-		debug("Failed to set board PM configuration (%d)\n", ret);
-		return;
-	}
-#endif
-
+#else
 	/* Prepare console output */
 	preloader_console_init();
-
-#ifdef CONFIG_K3_LOAD_SYSFW
-	/* Output System Firmware version info */
-	printf("SYSFW: ABI: %d.%d (firmware rev 0x%04x '%.*s')\n",
-	       ti_sci->version.abi_major, ti_sci->version.abi_minor,
-	       ti_sci->version.firmware_revision,
-	       sizeof(ti_sci->version.firmware_description),
-	       ti_sci->version.firmware_description);
 #endif
 
 #ifdef CONFIG_K3_AM654_DDRSS
