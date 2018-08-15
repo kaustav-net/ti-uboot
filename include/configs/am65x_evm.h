@@ -65,6 +65,8 @@
 
 #define CONFIG_SPL_MAX_SIZE		CONFIG_MAX_DOWNLODABLE_IMAGE_SIZE
 
+#define CONFIG_SYS_BOOTM_LEN 		SZ_64M
+
 #define PARTS_DEFAULT \
 	/* Linux partitions */ \
 	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
