@@ -138,7 +138,7 @@ static int ti_sci_clk_set_parent(struct clk *clk, struct clk *parent)
 		return -EINVAL;
 	}
 
-	/* Determine parent clock ID and make sure its valid */
+	/* Make sure parent clock ID is valid */
 	parent_cid = parent->data - clk->data - 1;
 	if (parent_cid >= num_parents) {
 		dev_err(clk->dev, "%s: invalid parent clock!\n", __func__);
@@ -146,7 +146,7 @@ static int ti_sci_clk_set_parent(struct clk *clk, struct clk *parent)
 	}
 
 	/* Ready to proceed to configure the new clock parent */
-	ret = cops->set_parent(sci, clk->id, clk->data, parent_cid);
+	ret = cops->set_parent(sci, clk->id, clk->data, parent->data);
 	if (ret)
 		dev_err(clk->dev, "%s: set_parent failed (%d)\n", __func__,
 			ret);
