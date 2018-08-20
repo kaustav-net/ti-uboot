@@ -26,6 +26,12 @@
 
 #define PHY_CLK_TOO_SLOW_HZ 25000000
 
+#define SDHCI_ARASAN_CTL_CFG_2         0x14
+
+#define SLOTTYPE_MASK                  GENMASK(31, 30)
+#define SLOTTYPE_EMBEDDED              BIT(30)
+
+
 DECLARE_GLOBAL_DATA_PTR;
 
 struct arasan_sdhci_plat {
@@ -213,6 +219,17 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	}
 
 	if (device_is_compatible(dev, "ti,am654-sdhci-5.1")) {
+
+		void *ioaddr = (void *)devfdt_get_addr_index(dev, 1);
+		u32 ctl_cfg_2 = readl(ioaddr + SDHCI_ARASAN_CTL_CFG_2);
+		ctl_cfg_2 &= ~SLOTTYPE_MASK;
+		/* Set slottype based on SD or eMMC */
+		if (fdtdec_get_bool(gd->fdt_blob, dev_of_offset(dev),
+				    "non-removable"))
+			ctl_cfg_2 |= SLOTTYPE_EMBEDDED;
+
+		writel(ctl_cfg_2, ioaddr + SDHCI_ARASAN_CTL_CFG_2);
+
 		/* Get and init phy */
 		ret = generic_phy_get_by_name(dev, "phy_arasan", &plat->phy);
 		if (ret) {
