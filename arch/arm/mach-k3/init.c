@@ -362,7 +362,7 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 		hang();
 	}
 
-	/* Add an extra newline to differentiate the ATF logs from SPL*/
+	/* Add an extra newline to differentiate the ATF logs from SPL */
 	printf("Starting ATF on ARM64 core...\n\n");
 
 	ret = rproc_start(1);
@@ -372,7 +372,7 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 		hang();
 	}
 
-	debug("ATF started. Wait indefiniely\n");
+	debug("ATF started. Waiting indefinitely...\n");
 	while (1)
 		asm volatile("wfe");
 }
