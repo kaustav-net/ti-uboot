@@ -340,6 +340,49 @@ void reset_cpu(ulong ignored)
 #endif
 
 #ifdef CONFIG_K3_SPL_ATF
+
+#define AM6_DEV_MCU_RTI0			134
+#define AM6_DEV_MCU_RTI1			135
+#define AM6_DEV_MCU_ARMSS0_CPU0			159
+#define AM6_DEV_MCU_ARMSS0_CPU1			245
+
+void release_resources_for_core_shutdown(void)
+{
+	struct udevice *dev;
+	struct ti_sci_handle *ti_sci;
+	struct ti_sci_dev_ops *dev_ops;
+	int ret;
+	u32 i;
+
+	const u32 put_device_ids[] = {
+		AM6_DEV_MCU_RTI0,
+		AM6_DEV_MCU_RTI1,
+		AM6_DEV_MCU_ARMSS0_CPU1,
+		AM6_DEV_MCU_ARMSS0_CPU0,	/* Handle CPU0 after CPU1 */
+	};
+
+	/* Get handle to Device Management and Security Controller (SYSFW) */
+	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
+	if (ret) {
+		printf("Failed to get handle to SYSFW (%d)\n", ret);
+		hang();
+	}
+
+	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
+	dev_ops = &ti_sci->ops.dev_ops;
+
+	/* Iterate through list of devices to put (shutdown) */
+	for (i = 0; i < ARRAY_SIZE(put_device_ids); i++) {
+		u32 id = put_device_ids[i];
+
+		ret = dev_ops->put_device(ti_sci, id);
+		if (ret) {
+			printf("Failed to put device %u (%d)\n", id, ret);
+			hang();
+		}
+	}
+}
+
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
 	int ret;
@@ -372,7 +415,10 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 		hang();
 	}
 
-	debug("ATF started. Waiting indefinitely...\n");
+	debug("Releasing resources...\n");
+	release_resources_for_core_shutdown();
+
+	debug("Finalizing core shutdown...\n");
 	while (1)
 		asm volatile("wfe");
 }
