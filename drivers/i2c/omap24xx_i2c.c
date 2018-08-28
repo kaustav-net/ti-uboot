@@ -39,8 +39,10 @@
  */
 
 #include <common.h>
+#include <clk.h>
 #include <dm.h>
 #include <i2c.h>
+#include <power-domain.h>
 
 #include <asm/arch/i2c.h>
 #include <asm/io.h>
@@ -55,11 +57,11 @@ DECLARE_GLOBAL_DATA_PTR;
 #define I2C_WAIT	200
 
 struct omap_i2c {
-	struct udevice *clk;
 	struct i2c *regs;
+	struct clk clk;
+	struct power_domain pwrdmn;
 	unsigned int speed;
 	int waitdelay;
-	int clk_id;
 };
 
 static int omap24_i2c_findpsc(u32 *pscl, u32 *psch, uint speed)
@@ -886,6 +888,31 @@ static int omap_i2c_probe_chip(struct udevice *bus, uint chip_addr,
 static int omap_i2c_probe(struct udevice *bus)
 {
 	struct omap_i2c *priv = dev_get_priv(bus);
+	int ret;
+
+	ret = clk_get_by_index(bus, 0, &priv->clk);
+	if (!ret) {
+		ret = clk_enable(&priv->clk);
+		if (ret) {
+			dev_err(bus, "clk_enable() failed: %d\n", ret);
+			return ret;
+		}
+	} else if (ret != -ENOENT && ret != -ENODEV && ret != -ENOSYS) {
+		dev_err(bus, "omap_i2c: failed to get clock\n");
+		return ret;
+	}
+
+	ret = power_domain_get_by_index(bus, &priv->pwrdmn, 0);
+	if (!ret) {
+		ret = power_domain_on(&priv->pwrdmn);
+		if (ret) {
+			dev_err(bus, "power_domain_on() failed: %d\n", ret);
+			return ret;
+		}
+	} else  if (ret != -ENOENT && ret != -ENODEV && ret != -ENOSYS) {
+		dev_err(bus, "omap_i2c: failed to get pwrdmn: %d\n", ret);
+		return ret;
+	}
 
 	__omap24_i2c_init(priv->regs, priv->speed, 0, &priv->waitdelay);
 
