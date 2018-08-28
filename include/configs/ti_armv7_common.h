@@ -82,7 +82,7 @@
  * Disable DM_* for SPL build and can be re-enabled after adding
  * DM support in SPL
  */
-#ifdef CONFIG_SPL_BUILD
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_ARCH_K3)
 #undef CONFIG_DM_I2C
 #endif
 
@@ -90,10 +90,10 @@
 #define CONFIG_I2C
 #ifndef CONFIG_DM_I2C
 #define CONFIG_SYS_I2C
-#else
+#elif !defined(CONFIG_ARCH_K3)
 /*
- * Enable CONFIG_DM_I2C_COMPAT temporarily until all the i2c client
- * devices are adopted to DM
+ * Enable CONFIG_DM_I2C_COMPAT temporarily for specific platforms until
+ * all the i2c client devices are adopted to DM
  */
 #define CONFIG_DM_I2C_COMPAT
 #endif
