@@ -120,6 +120,13 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&wkup_i2c0_pins_default>;
 	status = "okay";
+
+	tca9554: gpio@38 {
+		compatible = "ti,tca9554", "ti,pcf8575";
+		reg = <0x38>;
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
 };
 
 &wkup_pmx0 {
