@@ -33,6 +33,9 @@
 #define V_OSCK				24000000
 #define V_SCLK				V_OSCK
 
+/* I2C */
+#define CONFIG_SYS_OMAP24_I2C_SPEED	400000
+
 #ifdef CONFIG_K3_SPL_ATF
 #define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"tispl.bin"
 #endif
