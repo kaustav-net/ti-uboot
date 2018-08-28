@@ -72,17 +72,7 @@
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	"findfdt="							\
-		"if test $board_name = am65x; then "			\
-			"setenv name_fdt k3-am654-base-board.dtb; fi;"	\
-		"if test $board_name = am65x_idk; then "         \
-			"setenv name_fdt k3-am654-base-board.dtb; "	\
-			"setenv name_overlays \"k3-am654-pcie-usb2.dtbo k3-am654-idk.dtbo\"; fi;"\
-		"if test $board_name = am65x_evm; then "         \
-			"setenv name_fdt k3-am654-base-board.dtb; "	\
-			"setenv name_overlays \"k3-am654-pcie-usb3.dtbo k3-am654-evm-csi2-ov490.dtbo k3-am654-evm-oldi-lcd1evm.dtbo\"; "\
-		"else if test $name_fdt = undefined; then "		\
-			"echo WARNING: Could not determine device tree to use;"\
-		"fi; fi; "						\
+		"setenv name_fdt k3-am654-base-board.dtb;"		\
 		"setenv fdtfile ${name_fdt};"				\
 		"setenv overlay_files ${name_overlays}\0"		\
 	"loadaddr=0x80080000\0"						\

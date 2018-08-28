@@ -9,5 +9,6 @@
 #define _SYS_PROTO_H_
 
 void sdelay(unsigned long loops);
+int do_board_detect(void);
 
 #endif
