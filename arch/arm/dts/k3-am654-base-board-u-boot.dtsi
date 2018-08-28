@@ -56,6 +56,10 @@
 	mcu_fss0_ospi0_pins_default {
 		u-boot,dm-spl;
 	};
+
+	wkup_i2c0_pins_default: wkup_i2c0_pins_default {
+		u-boot,dm-spl;
+	};
 };
 
 &main_uart0 {
@@ -75,6 +79,10 @@
 };
 
 &main_mmc1_pins_default {
+	u-boot,dm-spl;
+};
+
+&wkup_i2c0 {
 	u-boot,dm-spl;
 };
 
