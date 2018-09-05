@@ -803,8 +803,9 @@ static int am65_cpsw_probe_cpsw(struct udevice *dev)
 	cpsw_common->mdio_base = cpsw_common->ss_base + AM65_CPSW_MDIO_BASE;
 
 	cpsw_common->rflow_id_base = 0;
-	dev_read_u32_default(dev, "ti,rx-flow-id-base",
-			     cpsw_common->rflow_id_base);
+	cpsw_common->rflow_id_base =
+			dev_read_u32_default(dev, "ti,rx-flow-id-base",
+					     cpsw_common->rflow_id_base);
 
 	ports_np = dev_read_subnode(dev, "ports");
 	if (!ofnode_valid(ports_np)) {
