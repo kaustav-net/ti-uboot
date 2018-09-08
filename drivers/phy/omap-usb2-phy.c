@@ -24,6 +24,10 @@
 #define USB2PHY_DISCON_BYP_LATCH	BIT(31)
 #define USB2PHY_ANA_CONFIG1		(0x4c)
 
+#define AM654_USB2_OTG_PD		BIT(8)
+#define AM654_USB2_VBUS_DET_EN		BIT(5)
+#define AM654_USB2_VBUSVALID_DET_EN	BIT(4)
+
 DECLARE_GLOBAL_DATA_PTR;
 
 struct omap_usb2_phy {
@@ -62,6 +66,15 @@ static const struct usb_phy_data dra7x_usb2_phy2_data = {
 	.power_off = OMAP_USB2_PHY_PD,
 };
 
+static const struct usb_phy_data am654_usb2_data = {
+	.label = "am654_usb2",
+	.flags = OMAP_USB2_CALIBRATE_FALSE_DISCONNECT,
+	.mask = AM654_USB2_OTG_PD | AM654_USB2_VBUS_DET_EN |
+		AM654_USB2_VBUSVALID_DET_EN,
+	.power_on = AM654_USB2_VBUS_DET_EN | AM654_USB2_VBUSVALID_DET_EN,
+	.power_off = AM654_USB2_OTG_PD,
+};
+
 static const struct udevice_id omap_usb2_id_table[] = {
 	{
 		.compatible = "ti,omap5-usb2",
@@ -74,6 +87,10 @@ static const struct udevice_id omap_usb2_id_table[] = {
 	{
 		.compatible = "ti,dra7x-usb2-phy2",
 		.data = (ulong)&dra7x_usb2_phy2_data,
+	},
+	{
+		.compatible = "ti,am654-usb2",
+		.data = (ulong)&am654_usb2_data,
 	},
 	{},
 };
