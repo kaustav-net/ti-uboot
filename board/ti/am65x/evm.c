@@ -9,7 +9,9 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <dm.h>
 #include <spl.h>
+#include <usb.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -68,5 +70,24 @@ int board_fit_config_name_match(const char *name)
 #endif
 
 	return -1;
+}
+#endif
+
+#ifdef CONFIG_USB_DWC3
+int board_usb_init(int index, enum usb_init_type init)
+{
+	struct udevice *dev;
+	int ret;
+
+	if (init != USB_INIT_DEVICE)
+		return 0;
+
+	ret = uclass_get_device(UCLASS_USB_DEV_GENERIC, index, &dev);
+	if (!dev || ret) {
+		printf("No USB device found\n");
+		return -ENODEV;
+	}
+
+	return 0;
 }
 #endif
