@@ -8,6 +8,7 @@ dwc3-y					:= core.o
 
 obj-$(CONFIG_USB_DWC3_GADGET)		+= gadget.o ep0.o
 
+obj-$(CONFIG_USB_DWC3_AM654)		+= dwc3-am654-glue.o
 obj-$(CONFIG_USB_DWC3_OMAP)		+= dwc3-omap.o
 obj-$(CONFIG_USB_DWC3_UNIPHIER)		+= dwc3-uniphier.o
 obj-$(CONFIG_USB_DWC3_PHY_OMAP)		+= ti_usb_phy.o

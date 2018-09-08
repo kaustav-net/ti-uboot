@@ -42,6 +42,14 @@ config USB_DWC3_UNIPHIER
 	depends on ARCH_UNIPHIER && USB_XHCI_DWC3
 	help
 	  Support of USB2/3 functionality in Socionext UniPhier platforms.
+
+config USB_DWC3_AM654
+	bool "Support for AM654 SoC DWC3 USB controller"
+	depends on DM_USB
+	depends on ARCH_K3
+	help
+	  Enables support for the on-chip DWC3 controller on TI AM654 SoCs.
+	  Provides the glue logic to probe generic DWC3 host/peripheral driver.
 	  Say 'Y' here if you have one such device.
 
 menu "PHY Subsystem"
