@@ -2065,6 +2065,150 @@ fail:
 	return ret;
 }
 
+/**
+ * ti_sci_cmd_ring_config() - configure RA ring
+ * @handle:	pointer to TI SCI handle
+ * @valid_params: Bitfield defining validity of ring configuration parameters.
+ * @nav_id: Device ID of Navigator Subsystem from which the ring is allocated
+ * @index: Ring index.
+ * @addr_lo: The ring base address lo 32 bits
+ * @addr_hi: The ring base address hi 32 bits
+ * @count: Number of ring elements.
+ * @mode: The mode of the ring
+ * @size: The ring element size.
+ * @order_id: Specifies the ring's bus order ID.
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ *
+ * See @ti_sci_msg_rm_ring_cfg_req for more info.
+ */
+static int ti_sci_cmd_ring_config(const struct ti_sci_handle *handle,
+				  u32 valid_params, u16 nav_id, u16 index,
+				  u32 addr_lo, u32 addr_hi, u32 count,
+				  u8 mode, u8 size, u8 order_id)
+{
+	struct ti_sci_msg_rm_ring_cfg_resp *resp;
+	struct ti_sci_msg_rm_ring_cfg_req req;
+	struct ti_sci_xfer *xfer;
+	struct ti_sci_info *info;
+	int ret = 0;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_RM_RING_CFG,
+				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
+				     (u32 *)&req, sizeof(req), sizeof(*resp));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev, "RM_RA:Message config failed(%d)\n", ret);
+		return ret;
+	}
+	req.valid_params = valid_params;
+	req.nav_id = nav_id;
+	req.index = index;
+	req.addr_lo = addr_lo;
+	req.addr_hi = addr_hi;
+	req.count = count;
+	req.mode = mode;
+	req.size = size;
+	req.order_id = order_id;
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "RM_RA:Mbox config send fail %d\n", ret);
+		goto fail;
+	}
+
+	resp = (struct ti_sci_msg_rm_ring_cfg_resp *)xfer->tx_message.buf;
+
+	ret = ti_sci_is_response_ack(resp) ? 0 : -ENODEV;
+
+fail:
+	dev_dbg(info->dev, "RM_RA:config ring %u ret:%d\n", index, ret);
+	return ret;
+}
+
+/**
+ * ti_sci_cmd_ring_get_config() - get RA ring configuration
+ * @handle:	pointer to TI SCI handle
+ * @nav_id: Device ID of Navigator Subsystem from which the ring is allocated
+ * @index: Ring index.
+ * @addr_lo: returns ring's base address lo 32 bits
+ * @addr_hi: returns ring's base address hi 32 bits
+ * @count: returns number of ring elements.
+ * @mode: returns mode of the ring
+ * @size: returns ring element size.
+ * @order_id: returns ring's bus order ID.
+ *
+ * Return: 0 if all went well, else returns appropriate error value.
+ *
+ * See @ti_sci_msg_rm_ring_get_cfg_req for more info.
+ */
+static int ti_sci_cmd_ring_get_config(const struct ti_sci_handle *handle,
+				      u32 nav_id, u32 index, u8 *mode,
+				      u32 *addr_lo, u32 *addr_hi,
+				      u32 *count, u8 *size, u8 *order_id)
+{
+	struct ti_sci_msg_rm_ring_get_cfg_resp *resp;
+	struct ti_sci_msg_rm_ring_get_cfg_req req;
+	struct ti_sci_xfer *xfer;
+	struct ti_sci_info *info;
+	int ret = 0;
+
+	if (IS_ERR(handle))
+		return PTR_ERR(handle);
+	if (!handle)
+		return -EINVAL;
+
+	info = handle_to_ti_sci_info(handle);
+
+	xfer = ti_sci_setup_one_xfer(info, TI_SCI_MSG_RM_RING_GET_CFG,
+				     TI_SCI_FLAG_REQ_ACK_ON_PROCESSED,
+				     (u32 *)&req, sizeof(req), sizeof(*resp));
+	if (IS_ERR(xfer)) {
+		ret = PTR_ERR(xfer);
+		dev_err(info->dev,
+			"RM_RA:Message get config failed(%d)\n", ret);
+		return ret;
+	}
+	req.nav_id = nav_id;
+	req.index = index;
+
+	ret = ti_sci_do_xfer(info, xfer);
+	if (ret) {
+		dev_err(info->dev, "RM_RA:Mbox get config send fail %d\n", ret);
+		goto fail;
+	}
+
+	resp = (struct ti_sci_msg_rm_ring_get_cfg_resp *)xfer->tx_message.buf;
+
+	if (!ti_sci_is_response_ack(resp)) {
+		ret = -ENODEV;
+	} else {
+		if (mode)
+			*mode = resp->mode;
+		if (addr_lo)
+			*addr_lo = resp->addr_lo;
+		if (addr_hi)
+			*addr_hi = resp->addr_hi;
+		if (count)
+			*count = resp->count;
+		if (size)
+			*size = resp->size;
+		if (order_id)
+			*order_id = resp->order_id;
+	};
+
+fail:
+	dev_dbg(info->dev, "RM_RA:get config ring %u ret:%d\n", index, ret);
+	return ret;
+}
+
 static int ti_sci_cmd_rm_psil_pair(const struct ti_sci_handle *handle,
 				   u32 nav_id, u32 src_thread, u32 dst_thread)
 {
@@ -2541,6 +2685,8 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	rops->free = ti_sci_cmd_ring_free;
 	rops->reset = ti_sci_cmd_ring_reset;
 	rops->reconfig = ti_sci_cmd_ring_reconfig;
+	rops->config = ti_sci_cmd_ring_config;
+	rops->get_config = ti_sci_cmd_ring_get_config;
 
 	psilops->pair = ti_sci_cmd_rm_psil_pair;
 	psilops->unpair = ti_sci_cmd_rm_psil_unpair;
