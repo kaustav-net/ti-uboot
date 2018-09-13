@@ -2145,7 +2145,7 @@ fail:
 	return ret;
 }
 
-static int ti_sci_cmd_rm_udmap_rx_flow_cfg_v2(
+static int ti_sci_cmd_rm_udmap_rx_flow_cfg(
 			const struct ti_sci_handle *handle,
 			const struct ti_sci_msg_rm_udmap_flow_cfg *params)
 {
@@ -2275,7 +2275,7 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 
 	udmap_ops->tx_ch_cfg = ti_sci_cmd_rm_udmap_tx_ch_cfg;
 	udmap_ops->rx_ch_cfg = ti_sci_cmd_rm_udmap_rx_ch_cfg;
-	udmap_ops->rx_flow_cfg_v2 = ti_sci_cmd_rm_udmap_rx_flow_cfg_v2;
+	udmap_ops->rx_flow_cfg = ti_sci_cmd_rm_udmap_rx_flow_cfg;
 }
 
 /**

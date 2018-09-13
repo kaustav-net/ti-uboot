@@ -965,7 +965,7 @@ static int udma_alloc_rchan_sci_req(struct udma_chan *uc)
 	flow_req.rx_fdq3_qnum = fd_ring;
 	flow_req.rx_ps_location = 0;
 
-	ret = ud->tisci_udmap_ops->rx_flow_cfg_v2(ud->tisci, &flow_req);
+	ret = ud->tisci_udmap_ops->rx_flow_cfg(ud->tisci, &flow_req);
 	if (ret)
 		dev_err(ud->dev, "tisci rx %u flow %u cfg failed %d\n",
 			uc->rchan->id, uc->rflow->id, ret);
