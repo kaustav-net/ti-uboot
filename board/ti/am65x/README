@@ -277,3 +277,29 @@ To boot kernel from eMMC, use the following commands:
 => setenv mmcdev 0
 => setenv bootpart 0
 => boot
+
+Debug UART:
+-----------
+On the AM65x family of SoCs much device functionality is dependent on SYSFW
+being up and initialized correctly, including but not limited to peripheral
+modules such as the MAIN_UART0 also used from R5 SPL. In order to allow
+easier early debug functionality a debug UART functionality has been provided
+that when turned on will use the MCU_UART0 during the very early stages of R5
+SPL, namely pre-DM and pre-SYSFW initialization.
+
+In order to turn the debug UART functionality on set the following config
+options:
+
+CONFIG_DEBUG_UART=y
+CONFIG_DEBUG_UART_OMAP=y
+CONFIG_DEBUG_UART_BASE=0x40a00000
+CONFIG_DEBUG_UART_CLOCK=48000000
+CONFIG_DEBUG_UART_SHIFT=2
+CONFIG_DEBUG_UART_BOARD_INIT=y
+CONFIG_DEBUG_UART_ANNOUNCE=y
+
+Note that the module input frequency of 48MHz corresponds to the device state
+right after startup through ROM. Once SYSFW is up and running this frequency
+changes, and the console needs to be re-initialized, which in most cases will
+be done through preloader_console_init() starting up the configured 'stdout'
+UART module as configured via DTS.
