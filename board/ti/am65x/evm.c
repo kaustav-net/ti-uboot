@@ -9,11 +9,32 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <asm/arch/hardware.h>
 #include <dm.h>
 #include <spl.h>
 #include <usb.h>
+#include <debug_uart.h>
+#include <dt-bindings/pinctrl/k3-am6.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#ifdef CONFIG_DEBUG_UART_OMAP
+void board_debug_uart_init(void)
+{
+	/*
+	 * NOTE: For the PADCONFIG registers on K3 to be accessible the
+	 * corresponding CTRL_MMR region must have gotten unlocked first.
+	 */
+
+	/* (P4) MCU_OSPI1_D1.MCU_UART0_RXD */
+	writel(PIN_INPUT | MUX_MODE4,
+	       WKUP_CTRL_MMR0_BASE + CTRLMMR_PADCONFIG(17));
+
+	/* (P5) MCU_OSPI1_D2.MCU_UART0_TXD */
+	writel(PIN_OUTPUT | MUX_MODE4,
+	       WKUP_CTRL_MMR0_BASE + CTRLMMR_PADCONFIG(18));
+}
+#endif
 
 int board_init(void)
 {
