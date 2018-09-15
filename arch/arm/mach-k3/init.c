@@ -10,6 +10,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <spl.h>
+#include <debug_uart.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
 #include <dm/pinctrl.h>
@@ -158,6 +159,20 @@ void board_init_f(ulong dummy)
 
 	/* Make all control module registers accessible */
 	ctrl_mmr_unlock();
+
+#ifdef CONFIG_DEBUG_UART_OMAP
+	/* Initialize debug UART *after* control module regs are unlocked */
+	debug_uart_init();
+
+#ifdef CONFIG_DEBUG_UART_ANNOUNCE
+	/* Provide a tad more info and a LF for cleaner console output */
+#ifdef CONFIG_ARM64
+	puts("ARM64 SPL here\n");
+#elif CONFIG_CPU_V7R
+	puts("R5 SPL here\n");
+#endif
+#endif
+#endif
 
 #ifdef CONFIG_CPU_V7R
 	setup_mpu_regions(k3_mpu_regions, ARRAY_SIZE(k3_mpu_regions));
