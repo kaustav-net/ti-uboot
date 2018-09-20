@@ -28,6 +28,10 @@
 #define ENDLL_MASK		BIT(ENDLL_SHIFT)
 #define DLLRDY_SHIFT		0
 #define DLLRDY_MASK		BIT(DLLRDY_SHIFT)
+#define PDB_SHIFT		0
+#define PDB_MASK		BIT(PDB_SHIFT)
+#define CALDONE_SHIFT		1
+#define CALDONE_MASK		BIT(CALDONE_SHIFT)
 
 #define DRIVER_STRENGTH_50_OHM	0x0
 #define DRIVER_STRENGTH_33_OHM	0x1
@@ -53,11 +57,21 @@ struct am654_mmc_phy {
 static int am654_mmc_phy_init(struct phy *phy)
 {
 	struct am654_mmc_phy *mmc_phy = dev_get_priv(phy->dev);
+	int ret;
+	u32 val;
 
 	/* Reset registers to default values */
 	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL1_REG, 0x10000);
 	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL4_REG, 0x0);
 	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL5_REG, 0x0);
+
+	/* Calibrate IO lines */
+	regmap_update_bits(mmc_phy->reg_base, PHYCTRL_CTRL1_REG,
+			   PDB_MASK, PDB_MASK);
+	ret = regmap_read_poll_timeout(mmc_phy->reg_base, PHYCTRL_STAT1_REG,
+				       val, val & CALDONE_MASK, 20);
+	if (ret)
+		return ret;
 
 	/* Enable pins by setting the IO mux to 0 */
 	regmap_update_bits(mmc_phy->reg_base, PHYCTRL_CTRL1_REG,
@@ -138,7 +152,7 @@ static int am654_mmc_phy_power_off(struct phy *phy)
 			   ENDLL_MASK, 0);
 
 	/* Reset registers to default values */
-	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL1_REG, 0x10000);
+	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL1_REG, 0x10001);
 	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL4_REG, 0x0);
 	regmap_write(mmc_phy->reg_base, PHYCTRL_CTRL5_REG, 0x0);
 
