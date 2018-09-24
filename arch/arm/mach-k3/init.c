@@ -23,6 +23,8 @@
 #include <asm/arch/hardware.h>
 #include <asm/arch/boardcfg_data.h>
 
+DECLARE_GLOBAL_DATA_PTR;
+
 #ifdef CONFIG_SPL_BUILD
 #ifdef CONFIG_CPU_V7R
 struct mpu_region_config k3_mpu_regions[16] = {
@@ -98,6 +100,30 @@ static void store_boot_index_from_rom(void)
 
 	*boot_index = *(u32 *)(CONFIG_BOOT_PARAM_TABLE_INDEX);
 }
+
+#ifdef CONFIG_K3_EARLY_CONS
+int early_console_init(void)
+{
+	struct udevice *dev;
+	int ret;
+
+	gd->baudrate = CONFIG_BAUDRATE;
+
+	ret = uclass_get_device_by_seq(UCLASS_SERIAL, CONFIG_K3_EARLY_CONS_IDX,
+				       &dev);
+	if (ret) {
+		printf("Error getting serial dev for early console! (%d)\n",
+		       ret);
+		return ret;
+	}
+
+	gd->cur_serial_dev = dev;
+	gd->flags |= GD_FLG_SERIAL_READY;
+	gd->have_console = 1;
+
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_K3_LOAD_SYSFW
 static int locate_system_controller_firmware(int *addr, int *len)
@@ -178,8 +204,18 @@ void board_init_f(ulong dummy)
 	setup_mpu_regions(k3_mpu_regions, ARRAY_SIZE(k3_mpu_regions));
 #endif
 
-	/* Init DM early in-order to invoke system controller */
+	/* Init DM early */
 	spl_early_init();
+
+#ifdef CONFIG_K3_EARLY_CONS
+	/*
+	 * Allow establishing an early console as required for example when
+	 * doing a UART-based boot. Note that this console may not "survive"
+	 * through a SYSFW PM-init step and will need a re-init in some way
+	 * due to changing module clock frequencies.
+	 */
+	early_console_init();
+#endif
 
 #ifdef CONFIG_K3_LOAD_SYSFW
 	/*
