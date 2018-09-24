@@ -9,17 +9,22 @@
 #include <errno.h>
 #include <image.h>
 
-int spl_load_image_ext(struct spl_image_info *spl_image,
-		       struct blk_desc *block_dev, int partition,
-		       const char *filename)
+int spl_load_image_ext_buf(struct spl_image_info *spl_image,
+			   struct blk_desc *block_dev, int partition,
+			   const char *filename,
+			   void *buffer)
 {
 	s32 err;
 	struct image_header *header;
 	loff_t filelen, actlen;
 	disk_partition_t part_info = {};
 
-	header = (struct image_header *)(CONFIG_SYS_TEXT_BASE -
-						sizeof(struct image_header));
+	/* Allow overwriting load address */
+	if (buffer)
+		header = buffer;
+	else
+		header = (struct image_header *)(CONFIG_SYS_TEXT_BASE -
+						 sizeof(struct image_header));
 
 	if (part_get_info(block_dev, partition, &part_info)) {
 		printf("spl: no partition table found\n");
@@ -53,6 +58,10 @@ int spl_load_image_ext(struct spl_image_info *spl_image,
 		goto end;
 	}
 
+	/* Allow overwriting load address */
+	if (buffer)
+		spl_image->load_addr = (uintptr_t)buffer;
+
 	err = ext4fs_read((char *)spl_image->load_addr, 0, filelen, &actlen);
 
 end:
@@ -63,6 +72,14 @@ end:
 #endif
 
 	return err < 0;
+}
+
+int spl_load_image_ext(struct spl_image_info *spl_image,
+		       struct blk_desc *block_dev, int partition,
+		       const char *filename)
+{
+	return spl_load_image_ext_buf(spl_image, block_dev, partition,
+				      filename, NULL);
 }
 
 #ifdef CONFIG_SPL_OS_BOOT
