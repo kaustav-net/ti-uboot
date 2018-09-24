@@ -80,6 +80,14 @@
 	status = "okay";
 };
 
+&mcu_uart0 {
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_uart0_pins_default>;
+	clock-frequency = <48000000>;
+	status = "okay";
+};
+
 &wkup_uart0 {
 	u-boot,dm-spl;
 	pinctrl-names = "default";
@@ -147,6 +155,16 @@
 			AM65X_WKUP_IOPAD(0x00a4, PIN_OUTPUT | MUX_MODE0) /* (AB5) WKUP_UART0_TXD */
 			AM65X_WKUP_IOPAD(0x00c8, PIN_INPUT | MUX_MODE1) /* (AC2) WKUP_GPIO0_6.WKUP_UART0_CTSn */
 			AM65X_WKUP_IOPAD(0x00cc, PIN_OUTPUT | MUX_MODE1) /* (AC1) WKUP_GPIO0_7.WKUP_UART0_RTSn */
+		>;
+		u-boot,dm-spl;
+	};
+
+	mcu_uart0_pins_default: mcu_uart0_pins_default {
+		pinctrl-single,pins = <
+			AM65X_WKUP_IOPAD(0x0044, PIN_INPUT | MUX_MODE4) /* (P4) MCU_OSPI1_D1.MCU_UART0_RXD */
+			AM65X_WKUP_IOPAD(0x0048, PIN_OUTPUT | MUX_MODE4) /* (P5) MCU_OSPI1_D2.MCU_UART0_TXD */
+			AM65X_WKUP_IOPAD(0x004C, PIN_INPUT | MUX_MODE4) /* (P1) MCU_OSPI1_D3.MCU_UART0_CTSn */
+			AM65X_WKUP_IOPAD(0x0054, PIN_OUTPUT | MUX_MODE4) /* (N3) MCU_OSPI1_CSn1.MCU_UART0_RTSn */
 		>;
 		u-boot,dm-spl;
 	};
