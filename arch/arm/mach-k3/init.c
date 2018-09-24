@@ -21,7 +21,7 @@
 #include <asm/sections.h>
 #include <asm/armv7_mpu.h>
 #include <asm/arch/hardware.h>
-#include <asm/arch/boardcfg_data.h>
+#include <asm/arch/sysfw-loader.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -124,59 +124,12 @@ int early_console_init(void)
 	return 0;
 }
 #endif
-
-#ifdef CONFIG_K3_LOAD_SYSFW
-static int locate_system_controller_firmware(int *addr, int *len)
-{
-	struct image_header *header;
-	int images, node;
-	const void *fit;
-
-	if (IS_ENABLED(CONFIG_SPL_SEPARATE_BSS))
-		fit = (ulong *)&_image_binary_end;
-	else
-		fit = (ulong *)&__bss_end;
-
-	header = (struct image_header *)fit;
-	if (image_get_magic(header) != FDT_MAGIC) {
-		debug("No FIT image appended to SPL\n");
-		return -EINVAL;
-	}
-
-	/* find the node holding the images information */
-	images = fdt_path_offset(fit, FIT_IMAGES_PATH);
-	if (images < 0) {
-		debug("%s: Cannot find /images node: %d\n", __func__, images);
-		return -ENOENT;
-	}
-
-	/* Find the subnode holding system controller firmware */
-	node = fdt_subnode_offset(fit, images, "sysfw");
-	if (node < 0) {
-		debug("%s: Cannot find fdt node sysfw in FIT: %d\n",
-		      __func__, node);
-		return -EINVAL;
-	}
-
-	fit_image_get_data_offset(fit, node, addr);
-	*addr += (int)fit + ((fdt_totalsize(fit) + 3) & ~3);
-	fit_image_get_data_size(fit, node, len);
-
-	return 0;
-}
-#endif
-
 void board_init_f(ulong dummy)
 {
-#ifdef CONFIG_K3_LOAD_SYSFW
-	int ret, fw_addr, len;
-	struct ti_sci_handle *ti_sci;
-	struct ti_sci_board_ops *board_ops;
-#endif
 #if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM654_DDRSS)
 	struct udevice *dev;
+	int ret;
 #endif
-
 	/*
 	 * Cannot delay this further as there is a chance that
 	 * BOOT_PARAM_TABLE_INDEX can be over written by SPL MALLOC section.
@@ -238,92 +191,13 @@ void board_init_f(ulong dummy)
 		pinctrl_select_state(dev, "default");
 	}
 
-	/* Try to locate firmware image and load it to system controller */
-	if (!locate_system_controller_firmware(&fw_addr, &len)) {
-		debug("Firmware located. Now try to load\n");
-		/*
-		 * It is assumed that remoteproc device 0 is the corresponding
-		 * system-controller that runs SYSFW.
-		 * Make sure DT reflects the same.
-		 */
-		ret = rproc_dev_init(0);
-		if (ret) {
-			debug("rproc failed to be initialized: ret= %d\n",
-			      ret);
-			return;
-		}
-
-		ret = rproc_load(0, fw_addr, len);
-		if (ret) {
-			debug("Firmware failed to start on rproc: ret= %d\n",
-			      ret);
-			return;
-		}
-
-		ret = rproc_start(0);
-		if (ret) {
-			debug("Firmware init failed on rproc: ret= %d\n",
-			      ret);
-			return;
-		}
-	}
-
-	/* Bring up the Device Management and Security Controller (SYSFW) */
-	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
-	if (ret) {
-		debug("Failed to initialize SYSFW (%d)\n", ret);
-		return;
-	}
-
-	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
-	board_ops = &ti_sci->ops.board_ops;
-
-	/* Apply power/clock (PM) specific configuration to SYSFW */
-	ret = board_ops->board_config_pm(ti_sci,
-					 (u64)(u32)&am65_boardcfg_pm_data,
-					 sizeof(am65_boardcfg_pm_data));
-	if (ret) {
-		debug("Failed to set board PM configuration (%d)\n", ret);
-		return;
-	}
-
 	/*
-	 * Now with the SYSFW having the PM configuration applied successfully,
-	 * we can finally bring up our regular U-Boot console.
+	 * Load, start up, and configure system controller firmware. Provide
+	 * the U-Boot console init function to the SYSFW post-PM configuration
+	 * callback hook, effectively switching on (or over) the console
+	 * output.
 	 */
-	preloader_console_init();
-
-	/* Output System Firmware version info */
-	printf("SYSFW ABI: %d.%d (firmware rev 0x%04x '%.*s')\n",
-	       ti_sci->version.abi_major, ti_sci->version.abi_minor,
-	       ti_sci->version.firmware_revision,
-	       sizeof(ti_sci->version.firmware_description),
-	       ti_sci->version.firmware_description);
-
-	/* Apply the remainder of the board configuration to SYSFW */
-	ret = board_ops->board_config(ti_sci,
-				      (u64)(u32)&am65_boardcfg_data,
-				      sizeof(am65_boardcfg_data));
-	if (ret) {
-		debug("Failed to set board configuration (%d)\n", ret);
-		return;
-	}
-
-	ret = board_ops->board_config_rm(ti_sci,
-					 (u64)(u32)&am65_boardcfg_rm_data,
-					 sizeof(am65_boardcfg_rm_data));
-	if (ret) {
-		debug("Failed to set board RM configuration (%d)\n", ret);
-		return;
-	}
-
-	ret = board_ops->board_config_security(ti_sci,
-					 (u64)(u32)&am65_boardcfg_security_data,
-					 sizeof(am65_boardcfg_security_data));
-	if (ret) {
-		debug("Failed to set board security configuration (%d)\n", ret);
-		return;
-	}
+	k3_sysfw_loader(preloader_console_init);
 #else
 	/* Prepare console output */
 	preloader_console_init();

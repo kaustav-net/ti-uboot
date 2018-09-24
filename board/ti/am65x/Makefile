@@ -5,5 +5,4 @@
 # SPDX-License-Identifier:     GPL-2.0+
 #
 
-obj-y	+= boardcfg_data.o
 obj-y	+= evm.o

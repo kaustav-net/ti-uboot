@@ -7,3 +7,4 @@
 
 obj-y += init.o
 obj-$(CONFIG_ARM64) += arm64-mmu.o
+obj-$(CONFIG_K3_LOAD_SYSFW) += sysfw-loader.o

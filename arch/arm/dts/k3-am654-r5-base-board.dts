@@ -56,6 +56,13 @@
 					<&k3_pds 244>;
 			u-boot,dm-spl;
 		};
+
+		clk_200mhz: dummy_clock {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <200000000>;
+			u-boot,dm-spl;
+		};
 	};
 };
 
@@ -196,6 +203,11 @@
 };
 
 &sdhci0 {
+	/delete-property/ power-domains;
+
+	clock-names = "clk_xin", "clk_ahb";
+	clocks = <&clk_200mhz>, <&clk_200mhz>;
+
 	pinctrl-names = "default";
 	xlnx,fails-without-test-cd;
 	bus-width = <8>;
@@ -204,6 +216,11 @@
 };
 
 &sdhci1 {
+	/delete-property/ power-domains;
+
+	clock-names = "clk_xin", "clk_ahb";
+	clocks = <&clk_200mhz>, <&clk_200mhz>;
+
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc1_pins_default>;
 	status = "okay";
@@ -215,6 +232,10 @@
 };
 
 &ospi0 {
+	/delete-property/ power-domains;
+
+	clocks = <&clk_200mhz>;
+
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi0_pins_default>;
