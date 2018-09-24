@@ -118,6 +118,18 @@ config SPL_SEPARATE_BSS
 	  location is used. Normally we put the device tree at the end of BSS
 	  but with this option enabled, it goes at _image_binary_end.
 
+config SPL_SKIP_CLEAR_BSS
+	depends on ARM && !ARM64
+	bool "Skips clearing BSS section during environment setup / relocation"
+	help
+	  On some platform we have sufficient memory available early on to
+	  allow setting up and using a basic BSS prior to relocation. In order
+	  to preserve data written to BSS during early startup use use this
+	  option to skip the clearing of the BSS section. Note that activating
+	  this option implies that you are responsible for clearing the BSS
+	  section yourself, otherwise you will most likely end up with an
+	  invalid post-relocation environment.
+
 config SPL_DISPLAY_PRINT
 	bool "Display a board-specific message in SPL"
 	help
