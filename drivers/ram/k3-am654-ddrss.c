@@ -14,8 +14,9 @@
 #include <asm/io.h>
 #include <power-domain.h>
 #include <dm.h>
-#include <asm/arch/k3-am654-ddrss.h>
 #include <asm/arch/sys_proto.h>
+
+#include "k3-am654-ddrss.h"
 
 #define LDELAY 10000
 
@@ -27,7 +28,7 @@
  * @ddrss_phy_cfg:	DDRSS PHY region base address
  * @ddrss_clk:		DDRSS clock description
  * @ddrss_pwrdmn:	DDRSS power domain description
- * @cfg:		Pointer to the SDRAM configuration
+ * @params:		SDRAM configuration parameters
  */
 struct am654_ddrss_desc {
 	struct udevice *dev;
@@ -37,7 +38,7 @@ struct am654_ddrss_desc {
 	struct clk ddrss_clk;
 	struct power_domain ddrcfg_pwrdmn;
 	struct power_domain ddrdata_pwrdmn;
-	struct am654_ddrss_config *cfg;
+	struct ddrss_params params;
 };
 
 static inline u32 ddrss_readl(void __iomem *addr, unsigned int offset)
@@ -84,62 +85,67 @@ static u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
  */
 static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 {
+	struct ddrss_ddrctl_timing_params *tmg = &ddrss->params.ctl_timing;
+	struct ddrss_ddrctl_reg_params *reg = &ddrss->params.ctl_reg;
+	struct ddrss_ddrctl_ecc_params *ecc = &ddrss->params.ctl_ecc;
+	struct ddrss_ddrctl_crc_params *crc = &ddrss->params.ctl_crc;
+	struct ddrss_ddrctl_map_params *map = &ddrss->params.ctl_map;
 	u32 val;
 
 	debug("%s: DDR controller register configuration started\n", __func__);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_MSTR, 0x41040010);
-	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHCTL0, 0x00210070);
-	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHTMG, 0x00510075);
+	ddrss_ctl_writel(DDRSS_DDRCTL_MSTR, reg->ddrctl_mstr);
+	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHCTL0, reg->ddrctl_rfshctl0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHTMG, reg->ddrctl_rfshtmg);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_ECCCFG0, 0x0);
-	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL1, 0x1A000000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL2, 0x0048051E);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ECCCFG0, ecc->ddrctl_ecccfg0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL1, crc->ddrctl_crcparctl0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL2, crc->ddrctl_crcparctl1);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT0, 0x400100A3);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT1, 0x00420000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT3, 0x00100501);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT4, 0x00000020);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT5, 0x00100000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT6, 0x00000480);
-	ddrss_ctl_writel(DDRSS_DDRCTL_INIT7, 0x00000097);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT0, reg->ddrctl_init0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT1, reg->ddrctl_init1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT3, reg->ddrctl_init3);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT4, reg->ddrctl_init4);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT5, reg->ddrctl_init5);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT6, reg->ddrctl_init6);
+	ddrss_ctl_writel(DDRSS_DDRCTL_INIT7, reg->ddrctl_init7);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG0, 0x0b0a160b);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG1, 0x00020310);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2, 0x0506040a);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG3, 0x0000400C);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG4, 0x05020205);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG5, 0x04040302);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG8, 0x02020C04);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG9, 0x00020208);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG11, 0x1005010E);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG12, 0x00000008);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG13, 0x00000000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG15, 0x00000035);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG17, 0x00000000);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG0, tmg->ddrctl_dramtmg0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG1, tmg->ddrctl_dramtmg1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG2, tmg->ddrctl_dramtmg2);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG3, tmg->ddrctl_dramtmg3);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG4, tmg->ddrctl_dramtmg4);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG5, tmg->ddrctl_dramtmg5);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG8, tmg->ddrctl_dramtmg8);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG9, tmg->ddrctl_dramtmg9);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG11, tmg->ddrctl_dramtmg11);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG12, tmg->ddrctl_dramtmg12);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG13, tmg->ddrctl_dramtmg13);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG15, tmg->ddrctl_dramtmg15);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DRAMTMG17, tmg->ddrctl_dramtmg17);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_ZQCTL0, 0x21000040);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ZQCTL1, 0x00027bc8);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ZQCTL0, reg->ddrctl_zqctl0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ZQCTL1, reg->ddrctl_zqctl1);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG0, 0x04878206);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG1, 0x00060606);
-	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG2, 0x00000504);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG0, reg->ddrctl_dfitmg0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG1, reg->ddrctl_dfitmg1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_DFITMG2, reg->ddrctl_dfitmg2);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP0, 0x001F1F1F);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP1, 0x003f0808);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP2, 0x00000000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP3, 0x00000000);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP4, 0x00001f1f);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP5, 0x08080808);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP6, 0x08080808);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP7, 0x00000f0f);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP8, 0x00000a0a);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP9, 0x0);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP10, 0x0);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP11, 0x001f1f00);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP0, map->ddrctl_addrmap0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP1, map->ddrctl_addrmap1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP2, map->ddrctl_addrmap2);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP3, map->ddrctl_addrmap3);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP4, map->ddrctl_addrmap4);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP5, map->ddrctl_addrmap5);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP6, map->ddrctl_addrmap6);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP7, map->ddrctl_addrmap7);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP8, map->ddrctl_addrmap8);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP9, map->ddrctl_addrmap9);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP10, map->ddrctl_addrmap10);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ADDRMAP11, map->ddrctl_addrmap11);
 
-	ddrss_ctl_writel(DDRSS_DDRCTL_ODTCFG, 0x06000608);
-	ddrss_ctl_writel(DDRSS_DDRCTL_ODTMAP, 0x00000001);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ODTCFG, reg->ddrctl_odtcfg);
+	ddrss_ctl_writel(DDRSS_DDRCTL_ODTMAP, reg->ddrctl_odtmap);
 
 	/* Disable refreshes */
 	val = ddrss_ctl_readl(DDRSS_DDRCTL_RFSHCTL3);
@@ -164,96 +170,100 @@ static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 
 /**
  * am654_ddrss_phy_configuration() - Configure PHY specific registers
- * @dev:		corresponding ddrss device
+ * @ddrss:		corresponding ddrss device
  */
 static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 {
+	struct ddrss_ddrphy_ioctl_params *ioctl = &ddrss->params.phy_ioctl;
+	struct ddrss_ddrphy_timing_params *tmg = &ddrss->params.phy_timing;
+	struct ddrss_ddrphy_ctrl_params *ctrl = &ddrss->params.phy_ctrl;
+	struct ddrss_ddrphy_cfg_params *cfg = &ddrss->params.phy_cfg;
+	struct ddrss_ddrphy_zq_params *zq = &ddrss->params.phy_zq;
+
 	debug("%s: DDR phy register configuration started\n", __func__);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_PGCR1, 0x020046C0);
-	ddrss_phy_writel(DDRSS_DDRPHY_PGCR2, 0x00F09f60);
-	ddrss_phy_writel(DDRSS_DDRPHY_PGCR3, 0x55AA0080);
-	ddrss_phy_writel(DDRSS_DDRPHY_PGCR6, 0x00013001);
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR1, cfg->ddrphy_pgcr1);
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR2, cfg->ddrphy_pgcr2);
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR3, cfg->ddrphy_pgcr3);
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR6, cfg->ddrphy_pgcr6);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_PTR3, 0x00061A80);
-	ddrss_phy_writel(DDRSS_DDRPHY_PTR4, 0x000000E0);
-	ddrss_phy_writel(DDRSS_DDRPHY_PTR5, 0x00027100);
-	ddrss_phy_writel(DDRSS_DDRPHY_PTR6, 0x04000320);
+	ddrss_phy_writel(DDRSS_DDRPHY_PTR3, tmg->ddrphy_ptr3);
+	ddrss_phy_writel(DDRSS_DDRPHY_PTR4, tmg->ddrphy_ptr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_PTR5, tmg->ddrphy_ptr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_PTR6, tmg->ddrphy_ptr6);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_PLLCR0, 0x021c4000);
+	ddrss_phy_writel(DDRSS_DDRPHY_PLLCR0, ctrl->ddrphy_pllcr0);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DXCCR, 0x00000038);
-	ddrss_phy_writel(DDRSS_DDRPHY_DSGCR, 0x02A0C129);
+	ddrss_phy_writel(DDRSS_DDRPHY_DXCCR, cfg->ddrphy_dxccr);
+	ddrss_phy_writel(DDRSS_DDRPHY_DSGCR, cfg->ddrphy_dsgcr);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DCR, 0x0000040C);
+	ddrss_phy_writel(DDRSS_DDRPHY_DCR, cfg->ddrphy_dcr);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR0, 0x04160905);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR1, 0x28140000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR2, 0x00040300);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR3, 0x02800000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR4, 0x00ea0704);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR5, 0x001f0905);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTPR6, 0x00000505);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR0, tmg->ddrphy_dtpr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR1, tmg->ddrphy_dtpr1);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR2, tmg->ddrphy_dtpr2);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR3, tmg->ddrphy_dtpr3);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR4, tmg->ddrphy_dtpr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR5, tmg->ddrphy_dtpr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTPR6, tmg->ddrphy_dtpr6);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQCR, 0x008A2A58);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ0PR0, 0x000077DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ1PR0, 0x000077DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ2PR0, 0x000077DD);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ3PR0, 0x000077DD);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQCR, zq->ddrphy_zqcr);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ0PR0, zq->ddrphy_zq0pr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ1PR0, zq->ddrphy_zq1pr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ2PR0, zq->ddrphy_zq2pr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_ZQ3PR0, zq->ddrphy_zq3pr0);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_MR0, 0x00000010);
-	ddrss_phy_writel(DDRSS_DDRPHY_MR1, 0x00000501);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR0, ctrl->ddrphy_mr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR1, ctrl->ddrphy_mr1);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR2, ctrl->ddrphy_mr2);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR3, ctrl->ddrphy_mr3);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR4, ctrl->ddrphy_mr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR5, ctrl->ddrphy_mr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_MR6, ctrl->ddrphy_mr6);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_MR2, 0x00000000);
-	ddrss_phy_writel(DDRSS_DDRPHY_MR3, 0x00000020);
-	ddrss_phy_writel(DDRSS_DDRPHY_MR4, 0x00000000);
-	ddrss_phy_writel(DDRSS_DDRPHY_MR5, 0x00000480);
-	ddrss_phy_writel(DDRSS_DDRPHY_MR6, 0x0000097);
+	ddrss_phy_writel(DDRSS_DDRPHY_VTCR0, ctrl->ddrphy_vtcr0);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_VTCR0, 0xF3C32017);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0PLLCR0, cfg->ddrphy_dx8sl0pllcr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1PLLCR0, cfg->ddrphy_dx8sl1pllcr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2PLLCR0, cfg->ddrphy_dx8sl2pllcr0);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0PLLCR0, 0x021c4000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1PLLCR0, 0x021c4000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2PLLCR0, 0x021c4000);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTCR0, ctrl->ddrphy_dtcr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DTCR1, ctrl->ddrphy_dtcr1);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DTCR0, 0x8000B1c7);
-	ddrss_phy_writel(DDRSS_DDRPHY_DTCR1, 0x00010236);
+	ddrss_phy_writel(DDRSS_DDRPHY_ACIOCR5, ioctl->ddrphy_aciocr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_IOVCR0, ioctl->ddrphy_iovcr0);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_ACIOCR5, 0x04800000);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR0, cfg->ddrphy_dx4gcr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR1, cfg->ddrphy_dx4gcr1);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR2, cfg->ddrphy_dx4gcr2);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR3, cfg->ddrphy_dx4gcr3);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_IOVCR0, 0x0F0C0C0C);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR4, cfg->ddrphy_dx0gcr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR4, cfg->ddrphy_dx1gcr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR4, cfg->ddrphy_dx2gcr4);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR4, cfg->ddrphy_dx3gcr4);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR0, 0x40703260);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR1, 0x55556000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR2, 0xaaaa0000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX4GCR3, 0xffe18587);
+	ddrss_phy_writel(DDRSS_DDRPHY_PGCR5, cfg->ddrphy_pgcr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR5, cfg->ddrphy_dx0gcr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR5, cfg->ddrphy_dx1gcr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR5, cfg->ddrphy_dx2gcr5);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR5, cfg->ddrphy_dx3gcr5);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR4, 0x0E00c93C);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR4, 0x0E00c93C);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR4, 0x0E00c93C);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR4, 0x0E00c93C);
+	ddrss_phy_writel(DDRSS_DDRPHY_RANKIDR, ctrl->ddrphy_rankidr);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_PGCR5, 0x01010004);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GCR5, 0x00000049);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GCR5, 0x00000049);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR5, 0x00000049);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR5, 0x00000049);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX0GTR0, cfg->ddrphy_dx0gtr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX1GTR0, cfg->ddrphy_dx1gtr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX2GTR0, cfg->ddrphy_dx2gtr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX3GTR0, cfg->ddrphy_dx3gtr0);
+	ddrss_phy_writel(DDRSS_DDRPHY_ODTCR, cfg->ddrphy_odtcr);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_RANKIDR, 0);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0IOCR, cfg->ddrphy_dx8sl0iocr);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1IOCR, cfg->ddrphy_dx8sl1iocr);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2IOCR, cfg->ddrphy_dx8sl2iocr);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_DX0GTR0, 0x00020002);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX1GTR0, 0x00020002);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX2GTR0, 0x00020002);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX3GTR0, 0x00020002);
-	ddrss_phy_writel(DDRSS_DDRPHY_ODTCR, 0x00010000);
-
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0IOCR, 0x04800000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1IOCR, 0x04800000);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2IOCR, 0x04800000);
-
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0DXCTL2, 0x00141830);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1DXCTL2, 0x00141830);
-	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2DXCTL2, 0x00141830);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL0DXCTL2, cfg->ddrphy_dx8sl0dxctl2);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL1DXCTL2, cfg->ddrphy_dx8sl1dxctl2);
+	ddrss_phy_writel(DDRSS_DDRPHY_DX8SL2DXCTL2, cfg->ddrphy_dx8sl2dxctl2);
 
 	debug("%s: DDR phy register configuration completed\n", __func__);
 }
@@ -288,7 +298,7 @@ int write_leveling(struct am654_ddrss_desc *ddrss)
 
 	debug("%s: Write leveling started\n", __func__);
 
-	ret = __phy_builtin_init_routine(ddrss, 0x200, PGSR0_WLDONE_MASK,
+	ret = __phy_builtin_init_routine(ddrss, PIR_WL_MASK, PGSR0_WLDONE_MASK,
 					 PGSR0_WLERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
@@ -309,8 +319,8 @@ int read_dqs_training(struct am654_ddrss_desc *ddrss)
 
 	debug("%s: Read DQS training started\n", __func__);
 
-	ret = __phy_builtin_init_routine(ddrss, 0x400, PGSR0_QSGDONE_MASK,
-					 PGSR0_QSGERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_QSGATE_MASK,
+					 PGSR0_QSGDONE_MASK, PGSR0_QSGERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Read DQS timedout\n", __func__);
@@ -333,8 +343,8 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	debug("%s: Rest of the training started\n", __func__);
 
 	debug("%s: Write Leveling adjustment\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x800, PGSR0_WLADONE_MASK,
-					 PGSR0_WLAERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_WLADJ_MASK,
+					 PGSR0_WLADONE_MASK, PGSR0_WLAERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s:ERROR: Write Leveling adjustment timedout\n",
@@ -346,8 +356,8 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	}
 
 	debug("%s: Read Deskew adjustment\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x1000, PGSR0_RDDONE_MASK,
-					 PGSR0_RDERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_RDDSKW_MASK,
+					 PGSR0_RDDONE_MASK, PGSR0_RDERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Read Deskew timedout\n", __func__);
@@ -357,8 +367,8 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	}
 
 	debug("%s: Write Deskew adjustment\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x2000, PGSR0_WDDONE_MASK,
-					 PGSR0_WDERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_WRDSKW_MASK,
+					 PGSR0_WDDONE_MASK, PGSR0_WDERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Write Deskew timedout\n", __func__);
@@ -368,8 +378,8 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	}
 
 	debug("%s: Read Eye training\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x4000, PGSR0_REDONE_MASK,
-					 PGSR0_REERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_RDEYE_MASK,
+					 PGSR0_REDONE_MASK, PGSR0_REERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Read Eye training timedout\n",
@@ -381,8 +391,8 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	}
 
 	debug("%s: Write Eye training\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x8000, PGSR0_WEDONE_MASK,
-					 PGSR0_WEERR_MASK);
+	ret = __phy_builtin_init_routine(ddrss, PIR_WREYE_MASK,
+					 PGSR0_WEDONE_MASK, PGSR0_WEERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
 			printf("%s: ERROR: Write Eye training timedout\n",
@@ -394,7 +404,7 @@ int rest_training(struct am654_ddrss_desc *ddrss)
 	}
 
 	debug("%s: VREF training\n", __func__);
-	ret = __phy_builtin_init_routine(ddrss, 0x20000, PGSR0_VDONE_MASK,
+	ret = __phy_builtin_init_routine(ddrss, PIR_VREF_MASK, PGSR0_VDONE_MASK,
 					 PGSR0_VERR_MASK);
 	if (ret) {
 		if (ret == -ETIMEDOUT)
@@ -648,7 +658,96 @@ static int am654_ddrss_ofdata_to_priv(struct udevice *dev)
 	}
 	ddrss->ddrss_phy_cfg = (void *)reg;
 
-	return 0;
+	ret = dev_read_u32_array(dev, "ti,ctl-reg",
+				 (u32 *)&ddrss->params.ctl_reg,
+				 sizeof(ddrss->params.ctl_reg) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-reg params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,ctl-crc",
+				 (u32 *)&ddrss->params.ctl_crc,
+				 sizeof(ddrss->params.ctl_crc) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-crc params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,ctl-ecc",
+				 (u32 *)&ddrss->params.ctl_ecc,
+				 sizeof(ddrss->params.ctl_ecc) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-ecc params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,ctl-map",
+				 (u32 *)&ddrss->params.ctl_map,
+				 sizeof(ddrss->params.ctl_map) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-map params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,ctl-pwr",
+				 (u32 *)&ddrss->params.ctl_pwr,
+				 sizeof(ddrss->params.ctl_pwr) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-pwr params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,ctl-timing",
+				 (u32 *)&ddrss->params.ctl_timing,
+				 sizeof(ddrss->params.ctl_timing) /
+				 sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,ctl-timing params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,phy-cfg",
+				 (u32 *)&ddrss->params.phy_cfg,
+				 sizeof(ddrss->params.phy_cfg) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,phy-cfg params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,phy-ctl",
+				 (u32 *)&ddrss->params.phy_ctrl,
+				 sizeof(ddrss->params.phy_ctrl) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,phy-ctl params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,phy-ioctl",
+				 (u32 *)&ddrss->params.phy_ioctl,
+				 sizeof(ddrss->params.phy_ioctl) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,phy-ioctl params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,phy-timing",
+				 (u32 *)&ddrss->params.phy_timing,
+				 sizeof(ddrss->params.phy_timing) /
+				 sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,phy-timing params\n");
+		return ret;
+	}
+
+	ret = dev_read_u32_array(dev, "ti,phy-zq", (u32 *)&ddrss->params.phy_zq,
+				 sizeof(ddrss->params.phy_zq) / sizeof(u32));
+	if (ret) {
+		dev_err(dev, "Cannot read ti,phy-zq params\n");
+		return ret;
+	}
+
+	return ret;
 }
 
 /**

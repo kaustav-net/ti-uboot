@@ -1,15 +1,14 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * AM654: DDRSS Register definitions and structures.
  *
- * (C) Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
+ *	Lokesh Vutla <lokeshvutla@ti.com>
  *
- * SPDX-License-Identifier:     GPL-2.0+
  */
-#ifndef __ASM_ARCH_AM654_DDRSS_H
-#define __ASM_ARCH_AM654_DDRSS_H
 
-#include <config.h>
-#include <linux/bitops.h>
+#ifndef __K3_AM654_DDRSS_H
+#define __K3_AM654_DDRSS_H
 
 /* DDRSS subsystem wrapper logic registers */
 #define DDRSS_SS_ID_REV_REG		0x00000000
@@ -988,257 +987,241 @@
 					PGSR0_DIDONE_MASK)
 #define PGSR0_DATA_TR_INIT_MASK		(PGSR0_DRAM_INIT_MASK)
 
-struct am654_ddrss_config {
-	u32 ss_ctl_reg;			/* Subsystem Control Register */
-	u32 v2h_ctl_reg;		/* VBUSMC2HIF Control Register */
-
-	u32 ddrctl_mstr;		/* Master Register0 */
-	u32 ddrctl_mrctrl0;		/* Mode Register Read/Write Control Register 0 */
-	u32 ddrctl_mrctrl1;		/* Mode Register Read/Write Control Register 1 */
-	u32 ddrctl_mrctrl2;		/* Mode Register Read/Write Control Register 2 */
-	u32 ddrctl_derateen;		/* Temperature Derate Enable Register */
-	u32 ddrctl_derateint;		/* Temperature Derate Interval Register */
-	u32 ddrctl_pwrctl; 		/* Low Power Control Register */
-	u32 ddrctl_pwrtmg;		/* Low Power Timing Register */
-	u32 ddrctl_hwlpctl;		/* Hardware Low Power Control Register */
-	u32 ddrctl_rfshctl0;		/* Refresh Control Register 0 */
-	u32 ddrctl_rfshctl1;		/* Refresh Control Register 1 */
-	u32 ddrctl_rfshctl2;		/* Refresh Control Register 2 */
-	u32 ddrctl_rfshctl4;		/* Refresh Control Register 4 */
-	u32 ddrctl_rfshctl3;		/* Refresh Control Register 3 */
-	u32 ddrctl_ecccfg0;
-	u32 ddrctl_rfshtmg;		/* Refresh Timing Register 1 */
-	u32 ddrctl_rfshctl5;		/* Refresh Control Register 5 */
-	u32 ddrctl_crcparctl1;
-	u32 ddrctl_init0;		/* SDRAM Initialization Register 0 */
-	u32 ddrctl_init1;		/* SDRAM Initialization Register 1 */
-	u32 ddrctl_init2;		/* SDRAM Initialization Register 2 */
-	u32 ddrctl_init3;		/* SDRAM Initialization Register 3 */
-	u32 ddrctl_init4;		/* SDRAM Initialization Register 4 */
-	u32 ddrctl_init5;		/* SDRAM Initialization Register 5 */
-	u32 ddrctl_init6;		/* SDRAM Initialization Register 6 */
-	u32 ddrctl_init7;		/* SDRAM Initialization Register 7 */
-	u32 ddrctl_dimmctl;		/* DIMM Control Register */
-	u32 ddrctl_rankctl;		/* Rank Control Register */
-	u32 ddrctl_dramtmg0;		/* SDRAM Timing Register 0 */
-	u32 ddrctl_dramtmg1;		/* SDRAM Timing Register 1 */
-	u32 ddrctl_dramtmg2;		/* SDRAM Timing Register 2 */
-	u32 ddrctl_dramtmg3;		/* SDRAM Timing Register 3 */
-	u32 ddrctl_dramtmg4;		/* SDRAM Timing Register 4 */
-	u32 ddrctl_dramtmg5;		/* SDRAM Timing Register 5 */
-	u32 ddrctl_dramtmg6;		/* SDRAM Timing Register 6 */
-	u32 ddrctl_dramtmg7;		/* SDRAM Timing Register 7 */
-	u32 ddrctl_dramtmg8;		/* SDRAM Timing Register 8 */
-	u32 ddrctl_dramtmg9;		/* SDRAM Timing Register 9 */
-	u32 ddrctl_dramtmg10;		/* SDRAM Timing Register 10 */
-	u32 ddrctl_dramtmg11;		/* SDRAM Timing Register 11 */
-	u32 ddrctl_dramtmg12;		/* SDRAM Timing Register 12 */
-	u32 ddrctl_dramtmg13;		/* SDRAM Timing Register 13 */
-	u32 ddrctl_dramtmg14;		/* SDRAM Timing Register 14 */
-	u32 ddrctl_dramtmg15;		/* SDRAM Timing Register 15 */
-	u32 ddrctl_dramtmg16;		/* SDRAM Timing Register 16 */
-	u32 ddrctl_mramtmg1;		/* MRAM Timing Register 1 */
-	u32 ddrctl_mramtmg4;		/* MRAM Timing Register 4 */
-	u32 ddrctl_mramtmg9;		/* MRAM Timing Register 9 */
-	u32 ddrctl_zqctl0;		/* ZQ Control Register 0 */
-	u32 ddrctl_zqctl1;		/* ZQ Control Register 1 */
-	u32 ddrctl_zqctl2;		/* ZQ Control Register 2 */
-	u32 ddrctl_dfitmg0;		/* DFI Timing Register 0 */
-	u32 ddrctl_dfitmg1;		/* DFI Timing Register 1 */
-	u32 ddrctl_dfilpcfg0;		/* DFI Low Power Configuration Register 0 */
-	u32 ddrctl_dfilpcfg1;		/* DFI Low Power Configuration Register 1 */
-	u32 ddrctl_dfiupd0;		/* DFI Update Register 0 */
-	u32 ddrctl_dfiupd1;		/* DFI Update Register 1 */
-	u32 ddrctl_dfiupd2;		/* DFI Update Register 2 */
-	u32 ddrctl_dfimisc;		/* DFI Miscellaneous Control Register */
-	u32 ddrctl_dfitmg2;		/* DFI Timing Register 2 */
-	u32 ddrctl_dfitmg3;		/* DFI Timing Register 3 */
-	u32 ddrctl_dbictl;		/* DM, DBI Control Register */
-	u32 ddrctl_addrmap0;		/* Address Map Register 0 */
-	u32 ddrctl_addrmap1;		/* Address Map Register 1 */
-	u32 ddrctl_addrmap2;		/* Address Map Register 2 */
-	u32 ddrctl_addrmap3;		/* Address Map Register 3 */
-	u32 ddrctl_addrmap4;		/* Address Map Register 4 */
-	u32 ddrctl_addrmap5;		/* Address Map Register 5 */
-	u32 ddrctl_addrmap6;		/* Address Map Register 6 */
-	u32 ddrctl_addrmap7;		/* Address Map Register 7 */
-	u32 ddrctl_addrmap8;		/* Address Map Register 8 */
-	u32 ddrctl_addrmap9;		/* Address Map Register 9 */
-	u32 ddrctl_addrmap10;		/* Address Map Register 10 */
-	u32 ddrctl_addrmap11;		/* Address Map Register 11 */
-	u32 ddrctl_odtcfg;		/* ODT Configuration Register */
-	u32 ddrctl_odtmap;		/* ODT/Rank Map Register */
-	u32 ddrctl_sched;		/* Scheduler Control Register */
-	u32 ddrctl_sched1;		/* Scheduler Control Register 1 */
-	u32 ddrctl_dqmap0;		/* DQ Map Register 0 */
-	u32 ddrctl_dqmap1;		/* DQ Map Register 1 */
-	u32 ddrctl_dqmap2;		/* DQ Map Register 2 */
-	u32 ddrctl_dqmap3;		/* DQ Map Register 3 */
-	u32 ddrctl_dqmap4;		/* DQ Map Register 4 */
-	u32 ddrctl_dqmap5;		/* DQ Map Register 5 */
-	u32 ddrctl_addrmap0_alt;		/* Alternative Address Map Register 0 */
-	u32 ddrctl_addrmap1_alt;		/* Alternative Address Map Register 1 */
-	u32 ddrctl_addrmap2_alt;		/* Alternative Address Map Register 2 */
-	u32 ddrctl_addrmap3_alt;		/* Alternative Address Map Register 3 */
-	u32 ddrctl_addrmap4_alt;		/* Alternative Address Map Register 4 */
-	u32 ddrctl_addrmap5_alt;		/* Alternative Address Map Register 5 */
-	u32 ddrctl_addrmap6_alt;		/* Alternative Address Map Register 6 */
-	u32 ddrctl_addrmap7_alt;		/* Alternative Address Map Register 7 */
-	u32 ddrctl_addrmap8_alt;		/* Alternative Address Map Register 8 */
-	u32 ddrctl_addrmap9_alt;		/* Alternative Address Map Register 9 */
-	u32 ddrctl_addrmap10_alt;		/* Alternative Address Map Register 10 */
-	u32 ddrctl_addrmap11_alt;		/* Alternative Address Map Register 11 */
-
-	u32 ddrphy_pir;		/* PHY Initialization Register */
-	u32 ddrphy_pgcr0;		/* PHY General Configuration Register 0 */
-	u32 ddrphy_pgcr1;		/* PHY General Configuration Register 1 */
-	u32 ddrphy_pgcr2;		/* PHY General Configuration Register 2 */
-	u32 ddrphy_pgcr3;		/* PHY General Configuration Register 3 */
-	u32 ddrphy_pgcr4;		/* PHY General Configuration Register 4 */
-	u32 ddrphy_pgcr5;		/* PHY General Configuration Register 5 */
-	u32 ddrphy_pgcr6;		/* PHY General Configuration Register 6 */
-	u32 ddrphy_pgcr7;		/* PHY General Configuration Register 7 */
-	u32 ddrphy_ptr0;		/* PHY Timing Register 0 */
-	u32 ddrphy_ptr1;		/* PHY Timing Register 1 */
-	u32 ddrphy_ptr2;		/* PHY Timing Register 2 */
-	u32 ddrphy_ptr3;		/* PHY Timing Register 3 */
-	u32 ddrphy_ptr4;		/* PHY Timing Register 4 */
-	u32 ddrphy_ptr5;		/* PHY Timing Register 5 */
-	u32 ddrphy_ptr6;		/* PHY Timing Register 6 */
-	u32 ddrphy_pllcr0;		/* PLL Control Register 0 */
-	u32 ddrphy_pllcr1;		/* PLL Control Register 1 */
-	u32 ddrphy_pllcr2;		/* PLL Control Register 2 */
-	u32 ddrphy_pllcr3;		/* PLL Control Register 3 */
-	u32 ddrphy_pllcr4;		/* PLL Control Register 4 */
-	u32 ddrphy_pllcr5;		/* PLL Control Register 5 */
-	u32 ddrphy_dxccr;		/* DATX8 Common Configuration Register */
-	u32 ddrphy_dsgcr;		/* DDR System General Configuration Register */
-	u32 ddrphy_odtcr;		/* ODT Configuration Register */
-	u32 ddrphy_aacr;		/* Anti-aging control Register */
-	u32 ddrphy_dcr;		/* DRAM configuration Register */
-	u32 ddrphy_dtpr0;		/* DRAM Timing Parameters Register 0 */
-	u32 ddrphy_dtpr1;		/* DRAM Timing Parameters Register 1 */
-	u32 ddrphy_dtpr2;		/* DRAM Timing Parameters Register 2 */
-	u32 ddrphy_dtpr3;		/* DRAM Timing Parameters Register 3 */
-	u32 ddrphy_dtpr4;		/* DRAM Timing Parameters Register 4 */
-	u32 ddrphy_dtpr5;		/* DRAM Timing Parameters Register 5 */
-	u32 ddrphy_dtpr6;		/* DRAM Timing Parameters Register 6 */
-	u32 ddrphy_mr0;		/* Mode Register 0 */
-	u32 ddrphy_mr1;		/* Mode Register 1 */
-	u32 ddrphy_mr2;		/* Mode Register 2 */
-	u32 ddrphy_mr3;		/* Mode Register 3 */
-	u32 ddrphy_mr4;		/* Mode Register 4 */
-	u32 ddrphy_mr5;		/* Mode Register 5 */
-	u32 ddrphy_mr6;		/* Mode Register 6 */
-	u32 ddrphy_mr7;		/* Mode Register 7 */
-	u32 ddrphy_mr11;		/* Mode Register 11 */
-	u32 ddrphy_mr13;		/* Mode Register 13 */
-	u32 ddrphy_mr14;		/* Mode Register 14 */
-	u32 ddrphy_mr22;		/* Mode Register 22 */
-	u32 ddrphy_pgcr8;		/* PHY General Configuration Register 8 */
-	u32 ddrphy_rankidr;		/* Rank ID Register */
-	u32 ddrphy_riocr0;		/* Rank I/O Configuration Register 0 */
-	u32 ddrphy_riocr1;		/* Rank I/O Configuration Register 1 */
-	u32 ddrphy_riocr2;		/* Rank I/O Configuration Register 2 */
-	u32 ddrphy_riocr3;		/* Rank I/O Configuration Register 3 */
-	u32 ddrphy_riocr4;		/* Rank I/O Configuration Register 4 */
-	u32 ddrphy_riocr5;		/* Rank I/O Configuration Register 5 */
-	u32 ddrphy_aciocr0;		/* AC I/O Configuration Register 0 */
-	u32 ddrphy_aciocr1;		/* AC I/O Configuration Register 1 */
-	u32 ddrphy_aciocr2;		/* AC I/O Configuration Register 2 */
-	u32 ddrphy_aciocr3;		/* AC I/O Configuration Register 3 */
-	u32 ddrphy_aciocr4;		/* AC I/O Configuration Register 4 */
-	u32 ddrphy_aciocr5;		/* AC I/O Configuration Register 5 */
-	u32 ddrphy_iovcr0;		/* IO VREF Control Register 0 */
-	u32 ddrphy_iovcr1;		/* IO VREF Control Register 1 */
-	u32 ddrphy_zqcr;		/* ZQ Impedance Control Register */
-	u32 ddrphy_zq0pr0;		/* ZQ n Impedance Control Program Register 0 */
-	u32 ddrphy_zq0pr1;		/* ZQ n Impedance Control Program Register 1 */
-	u32 ddrphy_zq0dr0;		/* ZQ n Impedance Control Data Register 0 */
-	u32 ddrphy_zq0dr1;		/* ZQ n Impedance Control Data Register 1 */
-	u32 ddrphy_zq0or0;		/* ZQ n Impedance Control Override Data Register 0 */
-	u32 ddrphy_zq0or1;		/* ZQ n Impedance Control Override Data Register 1 */
-	u32 ddrphy_zq1pr0;		/* ZQ n Impedance Control Program Register 0 */
-	u32 ddrphy_zq1pr1;		/* ZQ n Impedance Control Program Register 1 */
-	u32 ddrphy_zq1dr0;		/* ZQ n Impedance Control Data Register 0 */
-	u32 ddrphy_zq1dr1;		/* ZQ n Impedance Control Data Register 1 */
-	u32 ddrphy_zq1or0;		/* ZQ n Impedance Control Override Data Register 0 */
-	u32 ddrphy_zq1or1;		/* ZQ n Impedance Control Override Data Register 1 */
-	u32 ddrphy_zq2pr0;		/* ZQ n Impedance Control Program Register 0 */
-	u32 ddrphy_zq2pr1;		/* ZQ n Impedance Control Program Register 1 */
-	u32 ddrphy_zq2dr0;		/* ZQ n Impedance Control Data Register 0 */
-	u32 ddrphy_zq2dr1;		/* ZQ n Impedance Control Data Register 1 */
-	u32 ddrphy_zq2or0;		/* ZQ n Impedance Control Override Data Register 0 */
-	u32 ddrphy_zq2or1;		/* ZQ n Impedance Control Override Data Register 1 */
-	u32 ddrphy_zq3pr0;		/* ZQ n Impedance Control Program Register 0 */
-	u32 ddrphy_zq3pr1;		/* ZQ n Impedance Control Program Register 1 */
-	u32 ddrphy_zq3dr0;		/* ZQ n Impedance Control Data Register 0 */
-	u32 ddrphy_zq3dr1;		/* ZQ n Impedance Control Data Register 1 */
-	u32 ddrphy_zq3or0;		/* ZQ n Impedance Control Override Data Register 0 */
-	u32 ddrphy_zq3or1;		/* ZQ n Impedance Control Override Data Register 1 */
-	u32 ddrphy_dx0gtr0;		/* DATX8 n General Timing Register */
-	u32 ddrphy_dx0gcr0;		/* DATX8 n General Configuration Register 0 */
-	u32 ddrphy_dx0gcr1;		/* DATX8 n General Configuration Register 1 */
-	u32 ddrphy_dx0gcr2;		/* DATX8 n General Configuration Register 2 */
-	u32 ddrphy_dx0gcr3;		/* DATX8 n General Configuration Register 3 */
-	u32 ddrphy_dx0gcr4;		/* DATX8 n General Configuration Register 4 */
-	u32 ddrphy_dx0gcr5;		/* DATX8 n General Configuration Register 5 */
-	u32 ddrphy_dx0gcr6;		/* DATX8 n General Configuration Register 6 */
-	u32 ddrphy_dx0gcr7;		/* DATX8 n General Configuration Register 7 */
-	u32 ddrphy_dx0gcr8;		/* DATX8 n General Configuration Register 8 */
-	u32 ddrphy_dx0gcr9;		/* DATX8 n General Configuration Register 9 */
-	u32 ddrphy_dx1gtr0;		/* DATX8 n General Timing Register */
-	u32 ddrphy_dx1gcr0;		/* DATX8 n General Configuration Register 0 */
-	u32 ddrphy_dx1gcr1;		/* DATX8 n General Configuration Register 1 */
-	u32 ddrphy_dx1gcr2;		/* DATX8 n General Configuration Register 2 */
-	u32 ddrphy_dx1gcr3;		/* DATX8 n General Configuration Register 3 */
-	u32 ddrphy_dx1gcr4;		/* DATX8 n General Configuration Register 4 */
-	u32 ddrphy_dx1gcr5;		/* DATX8 n General Configuration Register 5 */
-	u32 ddrphy_dx1gcr6;		/* DATX8 n General Configuration Register 6 */
-	u32 ddrphy_dx1gcr7;		/* DATX8 n General Configuration Register 7 */
-	u32 ddrphy_dx1gcr8;		/* DATX8 n General Configuration Register 8 */
-	u32 ddrphy_dx1gcr9;		/* DATX8 n General Configuration Register 9 */
-	u32 ddrphy_dx2gtr0;		/* DATX8 n General Timing Register */
-	u32 ddrphy_dx2gcr0;		/* DATX8 n General Configuration Register 0 */
-	u32 ddrphy_dx2gcr1;		/* DATX8 n General Configuration Register 1 */
-	u32 ddrphy_dx2gcr2;		/* DATX8 n General Configuration Register 2 */
-	u32 ddrphy_dx2gcr3;		/* DATX8 n General Configuration Register 3 */
-	u32 ddrphy_dx2gcr4;		/* DATX8 n General Configuration Register 4 */
-	u32 ddrphy_dx2gcr5;		/* DATX8 n General Configuration Register 5 */
-	u32 ddrphy_dx2gcr6;		/* DATX8 n General Configuration Register 6 */
-	u32 ddrphy_dx2gcr7;		/* DATX8 n General Configuration Register 7 */
-	u32 ddrphy_dx2gcr8;		/* DATX8 n General Configuration Register 8 */
-	u32 ddrphy_dx2gcr9;		/* DATX8 n General Configuration Register 9 */
-	u32 ddrphy_dx3gtr0;		/* DATX8 n General Timing Register */
-	u32 ddrphy_dx3gcr0;		/* DATX8 n General Configuration Register 0 */
-	u32 ddrphy_dx3gcr1;		/* DATX8 n General Configuration Register 1 */
-	u32 ddrphy_dx3gcr2;		/* DATX8 n General Configuration Register 2 */
-	u32 ddrphy_dx3gcr3;		/* DATX8 n General Configuration Register 3 */
-	u32 ddrphy_dx3gcr4;		/* DATX8 n General Configuration Register 4 */
-	u32 ddrphy_dx3gcr5;		/* DATX8 n General Configuration Register 5 */
-	u32 ddrphy_dx3gcr6;		/* DATX8 n General Configuration Register 6 */
-	u32 ddrphy_dx3gcr7;		/* DATX8 n General Configuration Register 7 */
-	u32 ddrphy_dx3gcr8;		/* DATX8 n General Configuration Register 8 */
-	u32 ddrphy_dx3gcr9;		/* DATX8 n General Configuration Register 9 */
-	u32 ddrphy_dx4gtr0;		/* DATX8 n General Timing Register */
-	u32 ddrphy_dx4gcr0;		/* DATX8 n General Configuration Register 0 */
-	u32 ddrphy_dx4gcr1;		/* DATX8 n General Configuration Register 1 */
-	u32 ddrphy_dx4gcr2;		/* DATX8 n General Configuration Register 2 */
-	u32 ddrphy_dx4gcr3;		/* DATX8 n General Configuration Register 3 */
-	u32 ddrphy_dx4gcr4;		/* DATX8 n General Configuration Register 4 */
-	u32 ddrphy_dx4gcr5;		/* DATX8 n General Configuration Register 5 */
-	u32 ddrphy_dx4gcr6;		/* DATX8 n General Configuration Register 6 */
-	u32 ddrphy_dx4gcr7;		/* DATX8 n General Configuration Register 7 */
-	u32 ddrphy_dx4gcr8;		/* DATX8 n General Configuration Register 8 */
-	u32 ddrphy_dx4gcr9;		/* DATX8 n General Configuration Register 9 */
-
-	/* Find the right place */
-	u32 ddrphy_dx8sl0iocr;
-	u32 ddrphy_dx8sl1iocr;
-	u32 ddrphy_dx8sl2iocr;
-	u32 ddrphy_dx8sl3iocr;
-	u32 ddrphy_dtcr1;
+struct ddrss_ddrctl_reg_params {
+	u32 ddrctl_dfimisc;
+	u32 ddrctl_dfitmg0;
+	u32 ddrctl_dfitmg1;
+	u32 ddrctl_dfitmg2;
+	u32 ddrctl_init0;
+	u32 ddrctl_init1;
+	u32 ddrctl_init2;
+	u32 ddrctl_init3;
+	u32 ddrctl_init4;
+	u32 ddrctl_init5;
+	u32 ddrctl_init6;
+	u32 ddrctl_init7;
+	u32 ddrctl_mstr;
+	u32 ddrctl_odtcfg;
+	u32 ddrctl_odtmap;
+	u32 ddrctl_rankctl;
+	u32 ddrctl_rfshctl0;
+	u32 ddrctl_rfshctl3;
+	u32 ddrctl_rfshtmg;
+	u32 ddrctl_stat;
+	u32 ddrctl_swctl;
+	u32 ddrctl_swstat;
+	u32 ddrctl_zqctl0;
+	u32 ddrctl_zqctl1;
 };
 
-struct am654_ddrss_config *board_am654_get_ddrss_cfg(void);
-#endif /* __ASM_ARCH_AM654_DDRSS_H */
+struct ddrss_ddrctl_crc_params {
+	u32 ddrctl_crcparctl0;
+	u32 ddrctl_crcparctl1;
+};
+
+struct ddrss_ddrctl_ecc_params {
+	u32 ddrctl_ecccfg0;
+};
+
+struct ddrss_ddrctl_map_params {
+	u32 ddrctl_addrmap0;
+	u32 ddrctl_addrmap1;
+	u32 ddrctl_addrmap2;
+	u32 ddrctl_addrmap3;
+	u32 ddrctl_addrmap4;
+	u32 ddrctl_addrmap5;
+	u32 ddrctl_addrmap6;
+	u32 ddrctl_addrmap7;
+	u32 ddrctl_addrmap8;
+	u32 ddrctl_addrmap9;
+	u32 ddrctl_addrmap10;
+	u32 ddrctl_addrmap11;
+	u32 ddrctl_dqmap0;
+	u32 ddrctl_dqmap1;
+	u32 ddrctl_dqmap4;
+	u32 ddrctl_dqmap5;
+};
+
+struct ddrss_ddrctl_pwr_params {
+	u32 ddrctl_pwrctl;
+};
+
+struct ddrss_ddrctl_timing_params {
+	u32 ddrctl_dramtmg0;
+	u32 ddrctl_dramtmg1;
+	u32 ddrctl_dramtmg2;
+	u32 ddrctl_dramtmg3;
+	u32 ddrctl_dramtmg4;
+	u32 ddrctl_dramtmg5;
+	u32 ddrctl_dramtmg6;
+	u32 ddrctl_dramtmg7;
+	u32 ddrctl_dramtmg8;
+	u32 ddrctl_dramtmg9;
+	u32 ddrctl_dramtmg11;
+	u32 ddrctl_dramtmg12;
+	u32 ddrctl_dramtmg13;
+	u32 ddrctl_dramtmg14;
+	u32 ddrctl_dramtmg15;
+	u32 ddrctl_dramtmg17;
+};
+
+struct ddrss_ddrphy_cfg_params {
+	u32 ddrphy_dcr;
+	u32 ddrphy_dsgcr;
+	u32 ddrphy_dx0gcr0;
+	u32 ddrphy_dx0gcr1;
+	u32 ddrphy_dx0gcr2;
+	u32 ddrphy_dx0gcr3;
+	u32 ddrphy_dx0gcr4;
+	u32 ddrphy_dx0gcr5;
+	u32 ddrphy_dx0gsr0;
+	u32 ddrphy_dx0gsr1;
+	u32 ddrphy_dx0gsr2;
+	u32 ddrphy_dx0gsr3;
+	u32 ddrphy_dx0gsr4;
+	u32 ddrphy_dx0gsr5;
+	u32 ddrphy_dx0gsr6;
+	u32 ddrphy_dx0gtr0;
+	u32 ddrphy_dx1gcr0;
+	u32 ddrphy_dx1gcr1;
+	u32 ddrphy_dx1gcr2;
+	u32 ddrphy_dx1gcr3;
+	u32 ddrphy_dx1gcr4;
+	u32 ddrphy_dx1gcr5;
+	u32 ddrphy_dx1gsr0;
+	u32 ddrphy_dx1gsr1;
+	u32 ddrphy_dx1gsr2;
+	u32 ddrphy_dx1gsr3;
+	u32 ddrphy_dx1gsr4;
+	u32 ddrphy_dx1gsr5;
+	u32 ddrphy_dx1gsr6;
+	u32 ddrphy_dx1gtr0;
+	u32 ddrphy_dx2gcr0;
+	u32 ddrphy_dx2gcr1;
+	u32 ddrphy_dx2gcr2;
+	u32 ddrphy_dx2gcr3;
+	u32 ddrphy_dx2gcr4;
+	u32 ddrphy_dx2gcr5;
+	u32 ddrphy_dx2gsr0;
+	u32 ddrphy_dx2gsr1;
+	u32 ddrphy_dx2gsr2;
+	u32 ddrphy_dx2gsr3;
+	u32 ddrphy_dx2gsr4;
+	u32 ddrphy_dx2gsr5;
+	u32 ddrphy_dx2gsr6;
+	u32 ddrphy_dx2gtr0;
+	u32 ddrphy_dx3gcr0;
+	u32 ddrphy_dx3gcr1;
+	u32 ddrphy_dx3gcr2;
+	u32 ddrphy_dx3gcr3;
+	u32 ddrphy_dx3gcr4;
+	u32 ddrphy_dx3gcr5;
+	u32 ddrphy_dx3gsr0;
+	u32 ddrphy_dx3gsr1;
+	u32 ddrphy_dx3gsr2;
+	u32 ddrphy_dx3gsr3;
+	u32 ddrphy_dx3gsr4;
+	u32 ddrphy_dx3gsr5;
+	u32 ddrphy_dx3gsr6;
+	u32 ddrphy_dx3gtr0;
+	u32 ddrphy_dx4gcr0;
+	u32 ddrphy_dx4gcr1;
+	u32 ddrphy_dx4gcr2;
+	u32 ddrphy_dx4gcr3;
+	u32 ddrphy_dx4gcr4;
+	u32 ddrphy_dx4gcr5;
+	u32 ddrphy_dx4gsr0;
+	u32 ddrphy_dx4gsr1;
+	u32 ddrphy_dx4gsr2;
+	u32 ddrphy_dx4gsr3;
+	u32 ddrphy_dx4gsr4;
+	u32 ddrphy_dx4gsr5;
+	u32 ddrphy_dx4gsr6;
+	u32 ddrphy_dx4gtr0;
+	u32 ddrphy_dx8sl0dqsctl;
+	u32 ddrphy_dx8sl0dxctl2;
+	u32 ddrphy_dx8sl0iocr;
+	u32 ddrphy_dx8sl0pllcr0;
+	u32 ddrphy_dx8sl1dqsctl;
+	u32 ddrphy_dx8sl1dxctl2;
+	u32 ddrphy_dx8sl1iocr;
+	u32 ddrphy_dx8sl1pllcr0;
+	u32 ddrphy_dx8sl2dqsctl;
+	u32 ddrphy_dx8sl2dxctl2;
+	u32 ddrphy_dx8sl2iocr;
+	u32 ddrphy_dx8sl2pllcr0;
+	u32 ddrphy_dxccr;
+	u32 ddrphy_odtcr;
+	u32 ddrphy_pgcr0;
+	u32 ddrphy_pgcr1;
+	u32 ddrphy_pgcr2;
+	u32 ddrphy_pgcr3;
+	u32 ddrphy_pgcr5;
+	u32 ddrphy_pgcr6;
+	u32 ddrphy_pgsr0;
+};
+
+struct ddrss_ddrphy_ctrl_params {
+	u32 ddrphy_dtcr0;
+	u32 ddrphy_dtcr1;
+	u32 ddrphy_mr0;
+	u32 ddrphy_mr1;
+	u32 ddrphy_mr2;
+	u32 ddrphy_mr3;
+	u32 ddrphy_mr4;
+	u32 ddrphy_mr5;
+	u32 ddrphy_mr6;
+	u32 ddrphy_mr11;
+	u32 ddrphy_mr12;
+	u32 ddrphy_mr13;
+	u32 ddrphy_mr14;
+	u32 ddrphy_mr22;
+	u32 ddrphy_pir;
+	u32 ddrphy_pllcr0;
+	u32 ddrphy_rankidr;
+	u32 ddrphy_vtcr0;
+};
+
+struct ddrss_ddrphy_ioctl_params {
+	u32 ddrphy_aciocr5;
+	u32 ddrphy_iovcr0;
+};
+
+struct ddrss_ddrphy_timing_params {
+	u32 ddrphy_dtpr0;
+	u32 ddrphy_dtpr1;
+	u32 ddrphy_dtpr2;
+	u32 ddrphy_dtpr3;
+	u32 ddrphy_dtpr4;
+	u32 ddrphy_dtpr5;
+	u32 ddrphy_dtpr6;
+	u32 ddrphy_ptr2;
+	u32 ddrphy_ptr3;
+	u32 ddrphy_ptr4;
+	u32 ddrphy_ptr5;
+	u32 ddrphy_ptr6;
+};
+
+struct ddrss_ddrphy_zq_params {
+	u32 ddrphy_zq0pr0;
+	u32 ddrphy_zq1pr0;
+	u32 ddrphy_zq2pr0;
+	u32 ddrphy_zq3pr0;
+	u32 ddrphy_zqcr;
+};
+
+struct ddrss_params {
+	struct ddrss_ddrctl_reg_params ctl_reg;
+	struct ddrss_ddrctl_crc_params ctl_crc;
+	struct ddrss_ddrctl_ecc_params ctl_ecc;
+	struct ddrss_ddrctl_map_params ctl_map;
+	struct ddrss_ddrctl_pwr_params ctl_pwr;
+	struct ddrss_ddrctl_timing_params ctl_timing;
+	struct ddrss_ddrphy_cfg_params phy_cfg;
+	struct ddrss_ddrphy_ctrl_params phy_ctrl;
+	struct ddrss_ddrphy_ioctl_params phy_ioctl;
+	struct ddrss_ddrphy_timing_params phy_timing;
+	struct ddrss_ddrphy_zq_params phy_zq;
+};
+
+#endif /* __K3_AM654_DDRSS_H */
