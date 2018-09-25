@@ -10,5 +10,7 @@
 
 void sdelay(unsigned long loops);
 int do_board_detect(void);
+u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
+		  u32 bound);
 
 #endif

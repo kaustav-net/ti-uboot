@@ -53,29 +53,6 @@ static inline void ddrss_writel(void __iomem *addr, unsigned int offset,
 	writel(data, addr + offset);
 }
 
-/**
- * wait_on_value() - Wait for a value to reflect in a register
- * @read_bit_mask:	Mask within the read register
- * @match_value:	value to match from the mask bits
- * @read_addr:		Register address from which value is read
- * @bound:		no. of times the value is read from the register
- *
- */
-static u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
-			 u32 bound)
-{
-	u32 i = 0, val;
-
-	do {
-		++i;
-		val = readl((u32)read_addr) & read_bit_mask;
-		if (val == match_value)
-			return -ETIMEDOUT;
-		if (i == bound)
-			return 0;
-	} while (1);
-}
-
 #define ddrss_ctl_writel(off, val) ddrss_writel(ddrss->ddrss_ctl_cfg, off, val)
 #define ddrss_ctl_readl(off) ddrss_readl(ddrss->ddrss_ctl_cfg, off)
 
