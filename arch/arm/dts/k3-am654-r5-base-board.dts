@@ -6,6 +6,8 @@
 /dts-v1/;
 
 #include "k3-am6.dtsi"
+#include "k3-am654-base-board-ddr4-1333MHz.dtsi"
+#include "k3-am654-ddr.dtsi"
 
 / {
 	compatible =  "ti,am654-evm", "ti,am654";
@@ -42,18 +44,6 @@
 			proc-controls = <&k3_proc_ctrl 32 10>;
 			assigned-clocks = <&k3_clks 202 0>;
 			assigned-clock-rates = <800000000>;
-			u-boot,dm-spl;
-		};
-
-		memorycontroller: memorycontroller@0298e000 {
-			compatible = "ti,am654-ddrss";
-			reg = <0x0 0x0298e000 0x0 0x200>,
-			      <0x0 0x02980000 0x0 0x4000>,
-			      <0x0 0x02988000 0x0 0x2000>;
-			reg-names = "ss", "ctl", "phy";
-			clocks = <&k3_clks 20 0>;
-			power-domains = <&k3_pds 20>,
-					<&k3_pds 244>;
 			u-boot,dm-spl;
 		};
 
