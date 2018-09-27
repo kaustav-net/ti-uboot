@@ -212,7 +212,7 @@ void board_init_f(ulong dummy)
 	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
 	if (ret) {
 		printf("DRAM init failed: %d\n", ret);
-		return;
+		hang();
 	}
 #endif
 }
