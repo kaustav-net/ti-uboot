@@ -125,6 +125,7 @@ int early_console_init(void)
 	return 0;
 }
 #endif
+
 void board_init_f(ulong dummy)
 {
 #if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM654_DDRSS)
