@@ -44,7 +44,6 @@
 
 #ifdef CONFIG_DIRECT_NOR_BOOT
 #define CONFIG_ARCH_CPU_INIT
-#define CONFIG_DA8XX_GPIO
 #define CONFIG_SYS_TEXT_BASE		0x60000000
 #define CONFIG_SYS_DV_NOR_BOOT_CFG	(0x11)
 #define CONFIG_DA850_LOWLEVEL
@@ -254,6 +253,7 @@
 #define CONFIG_MTD_PARTITIONS		/* required for UBI partition support */
 #endif
 
+#define CONFIG_DA8XX_GPIO
 /*
  * U-Boot general configuration
  */
