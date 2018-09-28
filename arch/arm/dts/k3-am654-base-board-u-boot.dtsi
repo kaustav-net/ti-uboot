@@ -139,3 +139,7 @@
 &usb1 {
 	dr_mode = "peripheral";
 };
+
+&wkup_gpio0 {
+	u-boot,dm-spl;
+};

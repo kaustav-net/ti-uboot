@@ -466,7 +466,7 @@
 			clock-names = "gpio";
 		};
 
-		wkup_gpio0: wkup_gpio0:@42110000 {
+		wkup_gpio0: wkup_gpio0@42110000 {
 			compatible = "ti,k2g-gpio", "ti,keystone-gpio";
 			reg = <0x0 0x42110000 0x0 0x100>;
 			gpio-controller;
