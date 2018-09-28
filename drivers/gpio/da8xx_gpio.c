@@ -12,10 +12,13 @@
 #include <fdtdec.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
+
+#include "da8xx_gpio.h"
+
+#ifndef CONFIG_DM_GPIO
 #include <asm/arch/hardware.h>
 #include <asm/arch/davinci_misc.h>
 
-#ifndef CONFIG_DM_GPIO
 static struct gpio_registry {
 	int is_registered;
 	char name[GPIO_NAME_SIZE];
