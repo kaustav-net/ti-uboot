@@ -53,6 +53,16 @@
 			clock-frequency = <200000000>;
 			u-boot,dm-spl;
 		};
+
+		vtt_supply: vtt_supply {
+			compatible = "regulator-gpio";
+			regulator-name = "vtt";
+			regulator-min-microvolt = <0>;
+			regulator-max-microvolt = <3300000>;
+			gpios = <&wkup_gpio0 28 GPIO_ACTIVE_HIGH>;
+			states = <0 0x0 3300000 0x1>;
+			u-boot,dm-spl;
+		};
 	};
 };
 
@@ -256,6 +266,10 @@
 &mmc_phy1 {
 	status = "okay";
 	ti,drv-strength-ohm = <50>;
+};
+
+&memorycontroller {
+	vtt-supply = <&vtt_supply>;
 };
 
 #include "k3-am654-base-board-u-boot.dtsi"
