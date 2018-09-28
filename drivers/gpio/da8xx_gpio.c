@@ -510,6 +510,7 @@ static int davinci_gpio_probe(struct udevice *dev)
 
 static const struct udevice_id davinci_gpio_ids[] = {
 	{ .compatible = "ti,dm6441-gpio" },
+	{ .compatible = "ti,k2g-gpio" },
 	{ }
 };
 
