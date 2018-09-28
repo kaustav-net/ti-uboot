@@ -253,7 +253,6 @@
 #define CONFIG_MTD_PARTITIONS		/* required for UBI partition support */
 #endif
 
-#define CONFIG_DA8XX_GPIO
 /*
  * U-Boot general configuration
  */
