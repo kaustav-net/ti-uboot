@@ -571,11 +571,6 @@ static int am654_ddrss_power_on(struct am654_ddrss_desc *ddrss)
 	}
 
 	/* VTT enable */
-	writel(0x68ef3491, 0x4301D008);
-	writel(0xD172BC5A, 0x4301D00C);
-
-	writel(0x20007, 0x4301c040);
-
 #if CONFIG_IS_ENABLED(DM_REGULATOR)
 	device_get_supply_regulator(ddrss->dev, "vtt-supply",
 				    &ddrss->vtt_supply);
