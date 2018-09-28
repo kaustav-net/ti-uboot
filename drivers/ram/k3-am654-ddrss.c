@@ -18,6 +18,8 @@
 
 #include "k3-am654-ddrss.h"
 
+#include <power/regulator.h>
+
 #define LDELAY 10000
 
 /**
@@ -27,6 +29,7 @@
  * @ddrss_ctl_cfg:	DDRSS controller region base address
  * @ddrss_phy_cfg:	DDRSS PHY region base address
  * @ddrss_clk:		DDRSS clock description
+ * @vtt_supply:		VTT Supply regulator
  * @ddrss_pwrdmn:	DDRSS power domain description
  * @params:		SDRAM configuration parameters
  */
@@ -36,6 +39,7 @@ struct am654_ddrss_desc {
 	void __iomem *ddrss_ctl_cfg;
 	void __iomem *ddrss_phy_cfg;
 	struct clk ddrss_clk;
+	struct udevice *vtt_supply;
 	struct power_domain ddrcfg_pwrdmn;
 	struct power_domain ddrdata_pwrdmn;
 	struct ddrss_params params;
@@ -572,12 +576,14 @@ static int am654_ddrss_power_on(struct am654_ddrss_desc *ddrss)
 
 	writel(0x20007, 0x4301c040);
 
-	ret = readl(0x42110010);
-	ret &= ~0x10000000;
-	writel(ret, 0x42110010);
-	writel(0x10000000, 0x42110014);
-
+#if CONFIG_IS_ENABLED(DM_REGULATOR)
+	device_get_supply_regulator(ddrss->dev, "vtt-supply",
+				    &ddrss->vtt_supply);
+	ret = regulator_set_value(ddrss->vtt_supply, 3300000);
+	if (ret)
+		return ret;
 	debug("VTT regulator enabled\n");
+#endif
 
 	return 0;
 }
