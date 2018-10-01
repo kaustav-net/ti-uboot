@@ -232,10 +232,12 @@ static u32 __get_backup_bootmedia(u32 devstat)
 	u32 bkup_boot = (devstat & CTRLMMR_MAIN_DEVSTAT_BKUP_BOOTMODE_MASK) >>
 			CTRLMMR_MAIN_DEVSTAT_BKUP_BOOTMODE_SHIFT;
 
+	u32 bootmode = BOOT_DEVICE_RAM;
+
 	switch (bkup_boot) {
 #define __BKUP_BOOT_DEVICE(n)			\
 	case BACKUP_BOOT_DEVICE_##n:		\
-		return BOOT_DEVICE_##n;
+		bootmode =  BOOT_DEVICE_##n;
 	__BKUP_BOOT_DEVICE(USB);
 	__BKUP_BOOT_DEVICE(UART);
 	__BKUP_BOOT_DEVICE(ETHERNET);
@@ -245,15 +247,35 @@ static u32 __get_backup_bootmedia(u32 devstat)
 	__BKUP_BOOT_DEVICE(I2C);
 	};
 
-	return BOOT_DEVICE_RAM;
+	if (bootmode == BOOT_DEVICE_MMC2) {
+		u32 port = (devstat & CTRLMMR_MAIN_DEVSTAT_BKUP_MMC_PORT_MASK) >>
+				CTRLMMR_MAIN_DEVSTAT_BKUP_MMC_PORT_SHIFT;
+		if (port == 0x0)
+			bootmode = BOOT_DEVICE_MMC1;
+	}
+
+	return bootmode;
 }
 
 static u32 __get_primary_bootmedia(u32 devstat)
 {
-	u32 bootmode = devstat & CTRLMMR_MAIN_DEVSTAT_BOOTMODE_MASK;
+	u32 bootmode = (devstat & CTRLMMR_MAIN_DEVSTAT_BOOTMODE_MASK) >>
+			CTRLMMR_MAIN_DEVSTAT_BOOTMODE_SHIFT;
 
 	if (bootmode == BOOT_DEVICE_OSPI || bootmode ==	BOOT_DEVICE_QSPI)
 		bootmode = BOOT_DEVICE_SPI;
+
+	if (bootmode == BOOT_DEVICE_MMC2) {
+		u32 port = (devstat & CTRLMMR_MAIN_DEVSTAT_MMC_PORT_MASK) >>
+			    CTRLMMR_MAIN_DEVSTAT_MMC_PORT_SHIFT;
+		if (port == 0x0)
+			bootmode = BOOT_DEVICE_MMC1;
+	} else if (bootmode == BOOT_DEVICE_MMC1) {
+		u32 port = (devstat & CTRLMMR_MAIN_DEVSTAT_EMMC_PORT_MASK) >>
+			    CTRLMMR_MAIN_DEVSTAT_EMMC_PORT_SHIFT;
+		if (port == 0x1)
+			bootmode = BOOT_DEVICE_MMC2;
+	}
 
 	return bootmode;
 }
