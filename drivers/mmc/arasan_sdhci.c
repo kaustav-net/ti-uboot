@@ -256,20 +256,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 			    "xlnx,fails-without-test-cd"))
 		host->quirks |= SDHCI_QUIRK_FORCE_CD_TEST;
 
-	switch (fdtdec_get_int(gd->fdt_blob, dev_of_offset(dev),
-		"bus-width", 4)) {
-	case 8:
-		host->host_caps |= MMC_MODE_8BIT;
-		break;
-	case 4:
-		host->host_caps |= MMC_MODE_4BIT;
-		break;
-	case 1:
-		break;
-	default:
-		printf("Invalid \"bus-width\" value\n");
-		return -EINVAL;
-	}
+	mmc_of_parse(dev, &plat->cfg);
 
 	host->max_clk = clock;
 	host->mmc->dev = dev;
