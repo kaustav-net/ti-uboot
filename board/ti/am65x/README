@@ -196,7 +196,7 @@ ROM supports booting from OSPI from offset 0x0.
 Flashing images to OSPI:
 
 Below commands can be used to download tiboot3.bin, tispl.bin, u-boot.img,
-sysfw.itb, and config.sys over tftp and then flash it to OSPI at respective
+and sysfw.itb over tftp and then flash those to OSPI at their respective
 addresses.
 
 => sf probe
