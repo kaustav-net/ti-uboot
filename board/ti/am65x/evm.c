@@ -11,6 +11,7 @@
 #include <dm.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/hardware.h>
+#include <asm/arch/utils.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
@@ -360,6 +361,7 @@ int board_late_init(void)
 
 	setup_board_eeprom_env();
 	setup_serial();
+	k3_set_fastboot_vars();
 
 	/*
 	 * The first MAC address for ethernet a.k.a. ethernet0 comes from
