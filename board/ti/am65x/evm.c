@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <environment.h>
 #include <dm.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/hardware.h>
@@ -376,3 +377,13 @@ int board_late_init(void)
 
 	return 0;
 }
+
+#if defined(CONFIG_USB_FUNCTION_FASTBOOT) && !defined(CONFIG_ENV_IS_NOWHERE)
+int fb_set_reboot_flag(void)
+{
+	printf("Setting reboot to fastboot flag ...\n");
+	env_set("dofastboot", "1");
+	env_save();
+	return 0;
+}
+#endif
