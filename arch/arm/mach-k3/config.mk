@@ -39,7 +39,7 @@ cmd_gencert = cat $(srctree)/tools/k3/x509template.txt | sed $(SED_OPTS) > u-boo
 ifeq ($(CONFIG_K3_KEY), "")
 KEY=u-boot-spl-eckey.pem
 else
-KEY=$(CONFIG_K3_KEY)
+KEY=$(patsubst "%",%,$(CONFIG_K3_KEY))
 endif
 
 u-boot-spl-eckey.pem: FORCE
@@ -48,7 +48,7 @@ u-boot-spl-eckey.pem: FORCE
 # tiboot3.bin is mandated by ROM and ROM only supports R5 boot.
 # So restrict tiboot3.bin creation for CPU_V7R.
 ifdef CONFIG_CPU_V7R
-u-boot-spl-cert.bin: u-boot-spl-eckey.pem $(obj)/u-boot-spl.bin image_check FORCE
+u-boot-spl-cert.bin: $(KEY) $(obj)/u-boot-spl.bin image_check FORCE
 	$(call if_changed,gencert)
 
 image_check: $(obj)/u-boot-spl.bin FORCE
