@@ -78,7 +78,7 @@
 	"name=tiboot3,start=4M,size=1M,uuid=${uuid_gpt_tiboot3};" \
 	"name=boot,start=13M,size=40M,uuid=${uuid_gpt_boot};" \
 	"name=vendor,size=512M,uuid=${uuid_gpt_vendor};" \
-	"name=system,size=1024M,uuid=${uuid_gpt_system};" \
+	"name=system,size=2048M,uuid=${uuid_gpt_system};" \
 	"name=userdata,size=-,uuid=${uuid_gpt_userdata}\0"
 
 /* U-Boot general configuration */
