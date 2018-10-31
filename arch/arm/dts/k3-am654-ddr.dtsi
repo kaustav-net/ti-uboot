@@ -13,6 +13,8 @@
 		clocks = <&k3_clks 20 0>;
 		power-domains = <&k3_pds 20>,
 				<&k3_pds 244>;
+		assigned-clocks = <&k3_clks 20 1>;
+		assigned-clock-rates = <DDR_PLL_FREQUENCY>;
 		u-boot,dm-spl;
 
 		ti,ctl-reg = <

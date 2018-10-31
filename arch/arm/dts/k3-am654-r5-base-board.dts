@@ -6,7 +6,7 @@
 /dts-v1/;
 
 #include "k3-am6.dtsi"
-#include "k3-am654-base-board-ddr4-1333MHz.dtsi"
+#include "k3-am654-base-board-ddr4-1600MHz.dtsi"
 #include "k3-am654-ddr.dtsi"
 
 / {
