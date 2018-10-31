@@ -994,7 +994,6 @@ struct ddrss_ddrctl_reg_params {
 	u32 ddrctl_dfitmg2;
 	u32 ddrctl_init0;
 	u32 ddrctl_init1;
-	u32 ddrctl_init2;
 	u32 ddrctl_init3;
 	u32 ddrctl_init4;
 	u32 ddrctl_init5;
@@ -1005,11 +1004,7 @@ struct ddrss_ddrctl_reg_params {
 	u32 ddrctl_odtmap;
 	u32 ddrctl_rankctl;
 	u32 ddrctl_rfshctl0;
-	u32 ddrctl_rfshctl3;
 	u32 ddrctl_rfshtmg;
-	u32 ddrctl_stat;
-	u32 ddrctl_swctl;
-	u32 ddrctl_swstat;
 	u32 ddrctl_zqctl0;
 	u32 ddrctl_zqctl1;
 };
@@ -1017,6 +1012,7 @@ struct ddrss_ddrctl_reg_params {
 struct ddrss_ddrctl_crc_params {
 	u32 ddrctl_crcparctl0;
 	u32 ddrctl_crcparctl1;
+	u32 ddrctl_crcparctl2;
 };
 
 struct ddrss_ddrctl_ecc_params {
@@ -1074,13 +1070,6 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_dx0gcr3;
 	u32 ddrphy_dx0gcr4;
 	u32 ddrphy_dx0gcr5;
-	u32 ddrphy_dx0gsr0;
-	u32 ddrphy_dx0gsr1;
-	u32 ddrphy_dx0gsr2;
-	u32 ddrphy_dx0gsr3;
-	u32 ddrphy_dx0gsr4;
-	u32 ddrphy_dx0gsr5;
-	u32 ddrphy_dx0gsr6;
 	u32 ddrphy_dx0gtr0;
 	u32 ddrphy_dx1gcr0;
 	u32 ddrphy_dx1gcr1;
@@ -1088,13 +1077,6 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_dx1gcr3;
 	u32 ddrphy_dx1gcr4;
 	u32 ddrphy_dx1gcr5;
-	u32 ddrphy_dx1gsr0;
-	u32 ddrphy_dx1gsr1;
-	u32 ddrphy_dx1gsr2;
-	u32 ddrphy_dx1gsr3;
-	u32 ddrphy_dx1gsr4;
-	u32 ddrphy_dx1gsr5;
-	u32 ddrphy_dx1gsr6;
 	u32 ddrphy_dx1gtr0;
 	u32 ddrphy_dx2gcr0;
 	u32 ddrphy_dx2gcr1;
@@ -1102,13 +1084,6 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_dx2gcr3;
 	u32 ddrphy_dx2gcr4;
 	u32 ddrphy_dx2gcr5;
-	u32 ddrphy_dx2gsr0;
-	u32 ddrphy_dx2gsr1;
-	u32 ddrphy_dx2gsr2;
-	u32 ddrphy_dx2gsr3;
-	u32 ddrphy_dx2gsr4;
-	u32 ddrphy_dx2gsr5;
-	u32 ddrphy_dx2gsr6;
 	u32 ddrphy_dx2gtr0;
 	u32 ddrphy_dx3gcr0;
 	u32 ddrphy_dx3gcr1;
@@ -1116,13 +1091,6 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_dx3gcr3;
 	u32 ddrphy_dx3gcr4;
 	u32 ddrphy_dx3gcr5;
-	u32 ddrphy_dx3gsr0;
-	u32 ddrphy_dx3gsr1;
-	u32 ddrphy_dx3gsr2;
-	u32 ddrphy_dx3gsr3;
-	u32 ddrphy_dx3gsr4;
-	u32 ddrphy_dx3gsr5;
-	u32 ddrphy_dx3gsr6;
 	u32 ddrphy_dx3gtr0;
 	u32 ddrphy_dx4gcr0;
 	u32 ddrphy_dx4gcr1;
@@ -1130,23 +1098,13 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_dx4gcr3;
 	u32 ddrphy_dx4gcr4;
 	u32 ddrphy_dx4gcr5;
-	u32 ddrphy_dx4gsr0;
-	u32 ddrphy_dx4gsr1;
-	u32 ddrphy_dx4gsr2;
-	u32 ddrphy_dx4gsr3;
-	u32 ddrphy_dx4gsr4;
-	u32 ddrphy_dx4gsr5;
-	u32 ddrphy_dx4gsr6;
 	u32 ddrphy_dx4gtr0;
-	u32 ddrphy_dx8sl0dqsctl;
 	u32 ddrphy_dx8sl0dxctl2;
 	u32 ddrphy_dx8sl0iocr;
 	u32 ddrphy_dx8sl0pllcr0;
-	u32 ddrphy_dx8sl1dqsctl;
 	u32 ddrphy_dx8sl1dxctl2;
 	u32 ddrphy_dx8sl1iocr;
 	u32 ddrphy_dx8sl1pllcr0;
-	u32 ddrphy_dx8sl2dqsctl;
 	u32 ddrphy_dx8sl2dxctl2;
 	u32 ddrphy_dx8sl2iocr;
 	u32 ddrphy_dx8sl2pllcr0;
@@ -1158,7 +1116,6 @@ struct ddrss_ddrphy_cfg_params {
 	u32 ddrphy_pgcr3;
 	u32 ddrphy_pgcr5;
 	u32 ddrphy_pgcr6;
-	u32 ddrphy_pgsr0;
 };
 
 struct ddrss_ddrphy_ctrl_params {
@@ -1176,9 +1133,7 @@ struct ddrss_ddrphy_ctrl_params {
 	u32 ddrphy_mr13;
 	u32 ddrphy_mr14;
 	u32 ddrphy_mr22;
-	u32 ddrphy_pir;
 	u32 ddrphy_pllcr0;
-	u32 ddrphy_rankidr;
 	u32 ddrphy_vtcr0;
 };
 
@@ -1205,8 +1160,6 @@ struct ddrss_ddrphy_timing_params {
 struct ddrss_ddrphy_zq_params {
 	u32 ddrphy_zq0pr0;
 	u32 ddrphy_zq1pr0;
-	u32 ddrphy_zq2pr0;
-	u32 ddrphy_zq3pr0;
 	u32 ddrphy_zqcr;
 };
 

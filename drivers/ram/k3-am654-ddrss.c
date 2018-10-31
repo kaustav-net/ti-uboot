@@ -22,6 +22,9 @@
 
 #define LDELAY 10000
 
+/* DDRSS PHY configuration register fixed values */
+#define DDRSS_DDRPHY_RANKIDR_RANK0	0
+
 /**
  * struct am654_ddrss_desc - Description of ddrss integration.
  * @dev:		DDRSS device pointer
@@ -80,8 +83,9 @@ static void am654_ddrss_ctrl_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_ctl_writel(DDRSS_DDRCTL_RFSHTMG, reg->ddrctl_rfshtmg);
 
 	ddrss_ctl_writel(DDRSS_DDRCTL_ECCCFG0, ecc->ddrctl_ecccfg0);
-	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL1, crc->ddrctl_crcparctl0);
-	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL2, crc->ddrctl_crcparctl1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL0, crc->ddrctl_crcparctl0);
+	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL1, crc->ddrctl_crcparctl1);
+	ddrss_ctl_writel(DDRSS_DDRCTL_CRCPARCTL2, crc->ddrctl_crcparctl2);
 
 	ddrss_ctl_writel(DDRSS_DDRCTL_INIT0, reg->ddrctl_init0);
 	ddrss_ctl_writel(DDRSS_DDRCTL_INIT1, reg->ddrctl_init1);
@@ -191,8 +195,6 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_phy_writel(DDRSS_DDRPHY_ZQCR, zq->ddrphy_zqcr);
 	ddrss_phy_writel(DDRSS_DDRPHY_ZQ0PR0, zq->ddrphy_zq0pr0);
 	ddrss_phy_writel(DDRSS_DDRPHY_ZQ1PR0, zq->ddrphy_zq1pr0);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ2PR0, zq->ddrphy_zq2pr0);
-	ddrss_phy_writel(DDRSS_DDRPHY_ZQ3PR0, zq->ddrphy_zq3pr0);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_MR0, ctrl->ddrphy_mr0);
 	ddrss_phy_writel(DDRSS_DDRPHY_MR1, ctrl->ddrphy_mr1);
@@ -230,7 +232,7 @@ static void am654_ddrss_phy_configuration(struct am654_ddrss_desc *ddrss)
 	ddrss_phy_writel(DDRSS_DDRPHY_DX2GCR5, cfg->ddrphy_dx2gcr5);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX3GCR5, cfg->ddrphy_dx3gcr5);
 
-	ddrss_phy_writel(DDRSS_DDRPHY_RANKIDR, ctrl->ddrphy_rankidr);
+	ddrss_phy_writel(DDRSS_DDRPHY_RANKIDR, DDRSS_DDRPHY_RANKIDR_RANK0);
 
 	ddrss_phy_writel(DDRSS_DDRPHY_DX0GTR0, cfg->ddrphy_dx0gtr0);
 	ddrss_phy_writel(DDRSS_DDRPHY_DX1GTR0, cfg->ddrphy_dx1gtr0);
