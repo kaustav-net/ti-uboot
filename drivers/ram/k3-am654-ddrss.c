@@ -63,6 +63,46 @@ static inline void ddrss_writel(void __iomem *addr, unsigned int offset,
 #define ddrss_ctl_writel(off, val) ddrss_writel(ddrss->ddrss_ctl_cfg, off, val)
 #define ddrss_ctl_readl(off) ddrss_readl(ddrss->ddrss_ctl_cfg, off)
 
+static inline u32 am654_ddrss_get_type(struct am654_ddrss_desc *ddrss)
+{
+	return ddrss_ctl_readl(DDRSS_DDRCTL_MSTR) & MSTR_DDR_TYPE_MASK;
+}
+
+/**
+ * am654_ddrss_dram_wait_for_init_complete() - Wait for init to complete
+ *
+ * After detecting the DDR type this function will pause until the
+ * initialization is complete. Each DDR type has mask of multiple bits.
+ * The size of the field depends on the DDR Type. If the initialization
+ * does not complete and error will be returned and will cause the boot to halt.
+ *
+ */
+static int am654_ddrss_dram_wait_for_init_complt(struct am654_ddrss_desc *ddrss)
+{
+	u32 val, mask;
+
+	val = am654_ddrss_get_type(ddrss);
+
+	switch (val) {
+	case DDR_TYPE_LPDDR4:
+	case DDR_TYPE_DDR4:
+		mask = DDR4_STAT_MODE_MASK;
+		break;
+	case DDR_TYPE_DDR3:
+		mask = DDR3_STAT_MODE_MASK;
+		break;
+	default:
+		printf("Unsupported DDR type 0x%x\n", val);
+		return -EINVAL;
+	}
+
+	if (!wait_on_value(mask, DDR_MODE_NORMAL,
+			   ddrss->ddrss_ctl_cfg + DDRSS_DDRCTL_STAT, LDELAY))
+		return -ETIMEDOUT;
+
+	return 0;
+}
+
 /**
  * am654_ddrss_ctrl_configuration() - Configure Controller specific registers
  * @dev:		corresponding ddrss device
@@ -514,6 +554,13 @@ static int am654_ddrss_init(struct am654_ddrss_desc *ddrss)
 					 PGSR0_DRAM_INIT_MASK, 0);
 	if (ret) {
 		dev_err(ddrss->dev, "DRAM initialization failed %d\n", ret);
+		return ret;
+	}
+
+	ret = am654_ddrss_dram_wait_for_init_complt(ddrss);
+	if (ret) {
+		printf("%s: ERROR: DRAM Wait for init complete timedout\n",
+		       __func__);
 		return ret;
 	}
 
