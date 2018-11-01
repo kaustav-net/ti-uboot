@@ -120,7 +120,7 @@
 /* Command for booting the Android from eMMC */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_EMMC_ANDROID			\
 	"check_dofastboot="						\
-		"if test ${dofastboot} -eq 1; then "			\
+		"if test \"${dofastboot}\" -eq 1; then "		\
 			"echo Boot fastboot requested, "		\
 				"resetting dofastboot ...;"		\
 			"setenv dofastboot 0; env save; "		\
