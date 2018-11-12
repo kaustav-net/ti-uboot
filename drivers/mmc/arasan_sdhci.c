@@ -259,12 +259,12 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	mmc_of_parse(dev, &plat->cfg);
 
 	host->max_clk = clock;
+	host->mmc = &plat->mmc;
 	host->mmc->dev = dev;
 
 	host->ops = &arasan_ops;
 	ret = sdhci_setup_cfg(&plat->cfg, host, plat->f_max,
 			      CONFIG_ARASAN_SDHCI_MIN_FREQ);
-	host->mmc = &plat->mmc;
 	if (ret)
 		return ret;
 	host->mmc->priv = host;
