@@ -120,6 +120,24 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		hang();
 	}
 
+	/* Extract board configuration from FIT */
+	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_BOARD,
+				   &cfg_fragment_addr, &cfg_fragment_size);
+	if (ret < 0) {
+		printf("Error accessing %s node in FIT (%d)\n", SYSFW_CFG_BOARD,
+		       ret);
+		hang();
+	}
+
+	/* Apply board configuration to SYSFW */
+	ret = board_ops->board_config(ti_sci,
+				      (u64)(u32)cfg_fragment_addr,
+				      (u32)cfg_fragment_size);
+	if (ret) {
+		pr_err("Failed to set board configuration (%d)\n", ret);
+		hang();
+	}
+
 	/* Extract power/clock (PM) specific configuration from FIT */
 	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_PM,
 				   &cfg_fragment_addr, &cfg_fragment_size);
@@ -145,24 +163,6 @@ static void k3_sysfw_configure_using_fit(void *fit,
 	 */
 	if (config_pm_done_callback)
 		config_pm_done_callback();
-
-	/* Extract power/clock (PM) specific configuration from FIT */
-	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_BOARD,
-				   &cfg_fragment_addr, &cfg_fragment_size);
-	if (ret < 0) {
-		printf("Error accessing %s node in FIT (%d)\n", SYSFW_CFG_BOARD,
-		       ret);
-		hang();
-	}
-
-	/* Apply board configuration to SYSFW */
-	ret = board_ops->board_config(ti_sci,
-				      (u64)(u32)cfg_fragment_addr,
-				      (u32)cfg_fragment_size);
-	if (ret) {
-		pr_err("Failed to set board configuration (%d)\n", ret);
-		hang();
-	}
 
 	/* Extract resource management (RM) specific configuration from FIT */
 	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_RM,
