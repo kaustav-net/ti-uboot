@@ -73,6 +73,13 @@ void board_init_f(ulong dummy)
 
 #ifdef CONFIG_CPU_V7R
 	setup_k3_mpu_regions();
+
+	/*
+	 * When running SPL on R5 we are using SRAM for BSS to have global
+	 * data etc. working prior to relocation. Since this means we need
+	 * to self-manage BSS, clear that section now.
+	 */
+	memset(__bss_start, 0, __bss_end - __bss_start);
 #endif
 
 	/* Init DM early in-order to invoke system controller */
