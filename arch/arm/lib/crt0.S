@@ -124,6 +124,8 @@ here:
 	movne	sp, r0
 	movne	r9, r0
 # endif
+
+#if !CONFIG_IS_ENABLED(SKIP_CLEAR_BSS)
 	ldr	r0, =__bss_start	/* this is auto-relocated! */
 
 #ifdef CONFIG_USE_ARCH_MEMSET
@@ -140,6 +142,7 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 	strlo	r2, [r0]		/* clear 32-bit BSS word */
 	addlo	r0, r0, #4		/* move to next */
 	blo	clbss_l
+#endif
 #endif
 
 #if ! defined(CONFIG_SPL_BUILD)
