@@ -62,39 +62,43 @@ static ulong spl_spi_fit_read(struct spl_load_info *load, ulong sector,
 	else
 		return 0;
 }
-/*
- * The main entry for SPI booting. It's necessary that SDRAM is already
- * configured and available since this code loads the main U-Boot image
- * from SPI into SDRAM and starts it from there.
- */
-static int spl_spi_load_image(struct spl_image_info *spl_image,
-			      struct spl_boot_device *bootdev)
+
+int spl_spi_load(struct spl_image_info *spl_image,
+		 struct spl_boot_device *bootdev,
+		 unsigned int offs_override,
+		 void *buffer)
 {
 	int err = 0;
 	unsigned payload_offs = CONFIG_SYS_SPI_U_BOOT_OFFS;
-	struct spi_flash *flash;
+	static struct spi_flash *flash;
 	struct image_header *header;
 
-	/*
-	 * Load U-Boot image from SPI flash into RAM
-	 */
-
-	flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
-				CONFIG_SF_DEFAULT_CS,
-				CONFIG_SF_DEFAULT_SPEED,
-				CONFIG_SF_DEFAULT_MODE);
+	/* Perform peripheral init only once */
 	if (!flash) {
-		puts("SPI probe failed.\n");
-		return -ENODEV;
+		flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
+					CONFIG_SF_DEFAULT_CS,
+					CONFIG_SF_DEFAULT_SPEED,
+					CONFIG_SF_DEFAULT_MODE);
+		if (!flash) {
+			puts("SPI probe failed.\n");
+			return -ENODEV;
+		}
 	}
 
-	header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
+	/* Allow overwriting load address */
+	if (buffer)
+		header = buffer;
+	else
+		header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	payload_offs = fdtdec_get_config_int(gd->fdt_blob,
 					     "u-boot,spl-payload-offset",
 					     payload_offs);
 #endif
+
+	if (offs_override)
+		payload_offs = offs_override;
 
 #ifdef CONFIG_SPL_OS_BOOT
 	if (spl_start_uboot() || spi_load_image_os(spl_image, flash, header))
@@ -128,13 +132,26 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 			load.filename = NULL;
 			load.bl_len = 1;
 			load.read = spl_spi_fit_read;
-			err = spl_load_simple_fit(spl_image, &load,
-						  payload_offs,
-						  header);
+
+			/* Force load address if dedicated buffer is provided */
+			if (buffer)
+				return spl_load_simple_fit_ex(spl_image, &load,
+							      payload_offs,
+							      header,
+							      buffer);
+			else
+				return spl_load_simple_fit(spl_image, &load,
+							   payload_offs,
+							   header);
 		} else {
 			err = spl_parse_image_header(spl_image, header);
 			if (err)
 				return err;
+
+			/* Allow overwriting load address */
+			if (buffer)
+				spl_image->load_addr = (uintptr_t)buffer;
+
 			err = spi_flash_read(flash, payload_offs,
 					     spl_image->size,
 					     (void *)spl_image->load_addr);
@@ -143,5 +160,17 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 
 	return err;
 }
+
+/*
+ * The main entry for SPI booting. It's necessary that SDRAM is already
+ * configured and available since this code loads the main U-Boot image
+ * from SPI into SDRAM and starts it from there.
+ */
+static int spl_spi_load_image(struct spl_image_info *spl_image,
+			      struct spl_boot_device *bootdev)
+{
+	return spl_spi_load(spl_image, bootdev, 0, NULL);
+}
+
 /* Use priorty 1 so that boards can override this */
 SPL_LOAD_IMAGE_METHOD("SPI", 1, BOOT_DEVICE_SPI, spl_spi_load_image);

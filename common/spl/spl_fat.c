@@ -52,9 +52,10 @@ static ulong spl_fit_read(struct spl_load_info *load, ulong file_offset,
 	return actread;
 }
 
-int spl_load_image_fat(struct spl_image_info *spl_image,
-		       struct blk_desc *block_dev, int partition,
-		       const char *filename)
+int spl_load_image_fat_buf(struct spl_image_info *spl_image,
+			   struct blk_desc *block_dev, int partition,
+			   const char *filename,
+			   void *buffer)
 {
 	int err;
 	struct image_header *header;
@@ -63,7 +64,11 @@ int spl_load_image_fat(struct spl_image_info *spl_image,
 	if (err)
 		goto end;
 
-	header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
+	/* Allow overwriting load address */
+	if (buffer)
+		header = buffer;
+	else
+		header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
 
 	err = file_fat_read(filename, header, sizeof(struct image_header));
 	if (err <= 0)
@@ -90,11 +95,20 @@ int spl_load_image_fat(struct spl_image_info *spl_image,
 		load.filename = (void *)filename;
 		load.priv = NULL;
 
-		return spl_load_simple_fit(spl_image, &load, 0, header);
+		/* Force load address if dedicated buffer is provided */
+		if (buffer)
+			return spl_load_simple_fit_ex(spl_image, &load, 0,
+						      header, buffer);
+		else
+			return spl_load_simple_fit(spl_image, &load, 0, header);
 	} else {
 		err = spl_parse_image_header(spl_image, header);
 		if (err)
 			goto end;
+
+		/* Allow overwriting load address */
+		if (buffer)
+			spl_image->load_addr = (uintptr_t)buffer;
 
 		err = file_fat_read(filename,
 				    (u8 *)(uintptr_t)spl_image->load_addr, 0);
@@ -108,6 +122,14 @@ end:
 #endif
 
 	return (err <= 0);
+}
+
+int spl_load_image_fat(struct spl_image_info *spl_image,
+		       struct blk_desc *block_dev, int partition,
+		       const char *filename)
+{
+	return spl_load_image_fat_buf(spl_image, block_dev, partition,
+				      filename, NULL);
 }
 
 #ifdef CONFIG_SPL_OS_BOOT

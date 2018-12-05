@@ -104,18 +104,37 @@ struct spl_load_info {
 binman_sym_extern(ulong, u_boot_any, image_pos);
 
 /**
+ * spl_load_simple_fit_ex() - Loads a fit image from a device.
+ * @spl_image:	Image description to set up
+ * @info:	Structure containing the information required to load data.
+ * @sector:	Sector number where FIT image is located in the device
+ * @fit:	Pointer to the copied FIT header.
+ * @load_only_addr: If set the FDT fill be loaded into the buffer pointed to
+ *		by this parameter, otherwise it will get loaded to an address
+ *		derived from CONFIG_SYS_TEXT_BASE. Furthermore, in this case
+ *		the image will not get parsed for contents like U-Boot proper.
+ *
+ * Reads the FIT image @sector in the device. Loads u-boot image to
+ * specified load address and copies the dtb to end of u-boot image.
+ * Returns 0 on success.
+ */
+int spl_load_simple_fit_ex(struct spl_image_info *spl_image,
+			   struct spl_load_info *info, ulong sector,
+			   void *fit, void *load_only_addr);
+
+/**
  * spl_load_simple_fit() - Loads a fit image from a device.
  * @spl_image:	Image description to set up
  * @info:	Structure containing the information required to load data.
  * @sector:	Sector number where FIT image is located in the device
- * @fdt:	Pointer to the copied FIT header.
+ * @fit:	Pointer to the copied FIT header.
  *
  * Reads the FIT image @sector in the device. Loads u-boot image to
  * specified load address and copies the dtb to end of u-boot image.
  * Returns 0 on success.
  */
 int spl_load_simple_fit(struct spl_image_info *spl_image,
-			struct spl_load_info *info, ulong sector, void *fdt);
+			struct spl_load_info *info, ulong sector, void *fit);
 
 #define SPL_COPY_PAYLOAD_ONLY	1
 #define SPL_FIT_FOUND		2
@@ -257,6 +276,9 @@ struct spl_image_loader {
 int spl_load_image_fat(struct spl_image_info *spl_image,
 		       struct blk_desc *block_dev, int partition,
 		       const char *filename);
+int spl_load_image_fat_buf(struct spl_image_info *spl_image,
+			   struct blk_desc *block_dev, int partition,
+			   const char *filename, void *buffer);
 int spl_load_image_fat_os(struct spl_image_info *spl_image,
 			  struct blk_desc *block_dev, int partition);
 
@@ -266,6 +288,9 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image);
 int spl_load_image_ext(struct spl_image_info *spl_image,
 		       struct blk_desc *block_dev, int partition,
 		       const char *filename);
+int spl_load_image_ext_buf(struct spl_image_info *spl_image,
+			   struct blk_desc *block_dev, int partition,
+			   const char *filename,  void *buffer);
 int spl_load_image_ext_os(struct spl_image_info *spl_image,
 			  struct blk_desc *block_dev, int partition);
 
@@ -324,6 +349,53 @@ int spl_dfu_cmd(int usbctrl, char *dfu_alt_info, char *interface, char *devstr);
 
 int spl_mmc_load_image(struct spl_image_info *spl_image,
 		       struct spl_boot_device *bootdev);
+
+/**
+ * spl_mmc_load() - Load an image file from MMC/SD media
+ *
+ * @param spl_image	Image data filled in by loading process
+ * @param bootdev	Describes which device to load from
+ * @param filename	Name of file to load (in FS mode)
+ * @param raw_part	Partition to load from (in RAW mode)
+ * @param raw_sect	Sector to load from (in RAW mode)
+ * @param buffer	Address to load image file to
+ *
+ * @return 0 on success, otherwise error code
+ */
+int spl_mmc_load(struct spl_image_info *spl_image,
+		 struct spl_boot_device *bootdev,
+		 const char *filename,
+		 int raw_part,
+		 unsigned long raw_sect,
+		 void *buffer);
+
+/**
+ * spl_mmc_load() - Load an image file via Y-Modem
+ *
+ * @param spl_image	Image data filled in by loading process
+ * @param bootdev	Describes which device to load from
+ * @param buffer	Address to load image file to
+ *
+ * @return 0 on success, otherwise error code
+ */
+int spl_ymodem_load(struct spl_image_info *spl_image,
+		    struct spl_boot_device *bootdev,
+		    void *buffer);
+
+/**
+ * spl_mmc_load() - Load an image file from SPI flash
+ *
+ * @param spl_image	Image data filled in by loading process
+ * @param bootdev	Describes which device to load from
+ * @param offs_override	Start offset to read from
+ * @param buffer	Address to load image file to
+ *
+ * @return 0 on success, otherwise error code
+ */
+int spl_spi_load(struct spl_image_info *spl_image,
+		 struct spl_boot_device *bootdev,
+		 unsigned int offs_override,
+		 void *buffer);
 
 /**
  * spl_invoke_atf - boot using an ARM trusted firmware image

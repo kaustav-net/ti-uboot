@@ -66,8 +66,9 @@ static ulong ymodem_read_fit(struct spl_load_info *load, ulong offset,
 	return size;
 }
 
-static int spl_ymodem_load_image(struct spl_image_info *spl_image,
-				 struct spl_boot_device *bootdev)
+int spl_ymodem_load(struct spl_image_info *spl_image,
+		    struct spl_boot_device *bootdev,
+		    void *buffer)
 {
 	int size = 0;
 	int err;
@@ -101,7 +102,14 @@ static int spl_ymodem_load_image(struct spl_image_info *spl_image,
 		info.buf = buf;
 		info.image_read = BUF_SIZE;
 		load.read = ymodem_read_fit;
-		ret = spl_load_simple_fit(spl_image, &load, 0, (void *)buf);
+
+		/* Force load address if dedicated buffer is provided */
+		if (buffer)
+			ret = spl_load_simple_fit_ex(spl_image, &load, 0,
+						     (void *)buf, buffer);
+		else
+			ret = spl_load_simple_fit(spl_image, &load, 0,
+						  (void *)buf);
 		size = info.image_read;
 
 		while ((res = xyzModem_stream_read(buf, BUF_SIZE, &err)) > 0)
@@ -111,6 +119,11 @@ static int spl_ymodem_load_image(struct spl_image_info *spl_image,
 					     (struct image_header *)buf);
 		if (ret)
 			return ret;
+
+		/* Allow overwriting load address */
+		if (buffer)
+			spl_image->load_addr = (uintptr_t)buffer;
+
 		addr = spl_image->load_addr;
 		memcpy((void *)addr, buf, res);
 		size += res;
@@ -130,4 +143,11 @@ end_stream:
 	printf("Loaded %d bytes\n", size);
 	return 0;
 }
+
+static int spl_ymodem_load_image(struct spl_image_info *spl_image,
+				 struct spl_boot_device *bootdev)
+{
+	return spl_ymodem_load(spl_image, bootdev, NULL);
+}
+
 SPL_LOAD_IMAGE_METHOD("UART", 0, BOOT_DEVICE_UART, spl_ymodem_load_image);

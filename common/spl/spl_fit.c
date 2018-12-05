@@ -340,8 +340,9 @@ static int spl_fit_image_get_os(const void *fit, int noffset, uint8_t *os)
 #endif
 }
 
-int spl_load_simple_fit(struct spl_image_info *spl_image,
-			struct spl_load_info *info, ulong sector, void *fit)
+int spl_load_simple_fit_ex(struct spl_image_info *spl_image,
+			   struct spl_load_info *info, ulong sector,
+			   void *fit, void *load_only_addr)
 {
 	int sectors;
 	ulong size;
@@ -379,8 +380,19 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	 * For FIT with data embedded, data is loaded as part of FIT image.
 	 * For FIT with external data, data is not loaded in this step.
 	 */
-	hsize = (size + info->bl_len + align_len) & ~align_len;
-	fit = spl_get_load_buffer(-hsize, hsize);
+
+	/*
+	 * If load_only_addr is set this means we are operating in "loader
+	 * mode", in which we a) force a specific destination address, and b)
+	 * skip the standard post-loading image processing steps.
+	 */
+	if (load_only_addr) {
+		fit = load_only_addr;
+	} else {
+		hsize = (size + info->bl_len + align_len) & ~align_len;
+		fit = spl_get_load_buffer(-hsize, hsize);
+	}
+
 	sectors = get_aligned_image_size(info, size, 0);
 	count = info->read(info, sector, sectors, fit);
 	debug("fit read sector %lx, sectors=%d, dst=%p, count=%lu, size=0x%lx\n",
@@ -388,6 +400,13 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 
 	if (count == 0)
 		return -EIO;
+
+	/*
+	 * Perform early successful exit if we are in "loader mode", meaning
+	 * extracting the (U-Boot) image is not desired.
+	 */
+	if (load_only_addr)
+		return 0;
 
 	/* find the node holding the images information */
 	images = fdt_path_offset(fit, FIT_IMAGES_PATH);
@@ -528,4 +547,10 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 #endif
 
 	return 0;
+}
+
+int spl_load_simple_fit(struct spl_image_info *spl_image,
+			struct spl_load_info *info, ulong sector, void *fit)
+{
+	return spl_load_simple_fit_ex(spl_image, info, sector, fit, NULL);
 }
