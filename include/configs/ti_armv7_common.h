@@ -138,7 +138,13 @@
 #define CONFIG_SPL_BSS_START_ADDR	0x80a00000
 #define CONFIG_SPL_BSS_MAX_SIZE		0x80000		/* 512 KB */
 #endif
-#ifndef CONFIG_SYS_SPL_MALLOC_START
+/*
+ * Only define defaults for setting up a full malloc environment if not already
+ * configured and not running on the R5 CPU of K3 family devices since for those
+ * devices we typically only use the simple version of malloc.
+ */
+#if !defined(CONFIG_SYS_SPL_MALLOC_START) && \
+	!(defined(CONFIG_ARCH_K3) && defined(CONFIG_CPU_V7R))
 #define CONFIG_SYS_SPL_MALLOC_START	(CONFIG_SPL_BSS_START_ADDR + \
 					 CONFIG_SPL_BSS_MAX_SIZE)
 #define CONFIG_SYS_SPL_MALLOC_SIZE	SZ_8M
