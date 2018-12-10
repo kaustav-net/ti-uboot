@@ -97,6 +97,12 @@
 		u-boot,dm-spl;
 	};
 
+	clk_200mhz: dummy_clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <200000000>;
+		u-boot,dm-spl;
+	};
 };
 
 &dmsc {
@@ -155,4 +161,16 @@
 	vtt-supply = <&vtt_supply>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&wkup_vtt_pins_default>;
+};
+
+&sdhci0 {
+	clock-names = "clk_xin";
+	clocks = <&clk_200mhz>;
+	/delete-property/ power-domains;
+};
+
+&sdhci1 {
+	clock-names = "clk_xin";
+	clocks = <&clk_200mhz>;
+	/delete-property/ power-domains;
 };
