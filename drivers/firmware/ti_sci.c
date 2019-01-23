@@ -2012,7 +2012,7 @@ static int ti_sci_probe(struct udevice *dev)
 /* Description for AM654 */
 static const struct ti_sci_desc ti_sci_sysfw_am654_desc = {
 	.host_id = 4,
-	.max_rx_timeout_us = 1000000,
+	.max_rx_timeout_us = 3000000,
 	.max_msg_size = 60,
 };
 
