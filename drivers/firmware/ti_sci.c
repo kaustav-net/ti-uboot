@@ -598,8 +598,14 @@ static int ti_sci_get_device_state(const struct ti_sci_handle *handle,
  */
 static int ti_sci_cmd_get_device(const struct ti_sci_handle *handle, u32 id)
 {
-	return ti_sci_set_device_state(handle, id,
-				       MSG_FLAG_DEVICE_EXCLUSIVE,
+	return ti_sci_set_device_state(handle, id, 0,
+				       MSG_DEVICE_SW_STATE_ON);
+}
+
+static int ti_sci_cmd_get_device_exclusive(const struct ti_sci_handle *handle,
+					   u32 id)
+{
+	return ti_sci_set_device_state(handle, id, MSG_FLAG_DEVICE_EXCLUSIVE,
 				       MSG_DEVICE_SW_STATE_ON);
 }
 
@@ -617,7 +623,14 @@ static int ti_sci_cmd_get_device(const struct ti_sci_handle *handle, u32 id)
 static int ti_sci_cmd_idle_device(const struct ti_sci_handle *handle, u32 id)
 {
 	return ti_sci_set_device_state(handle, id,
-				       MSG_FLAG_DEVICE_EXCLUSIVE,
+				       0,
+				       MSG_DEVICE_SW_STATE_RETENTION);
+}
+
+static int ti_sci_cmd_idle_device_exclusive(const struct ti_sci_handle *handle,
+					    u32 id)
+{
+	return ti_sci_set_device_state(handle, id, MSG_FLAG_DEVICE_EXCLUSIVE,
 				       MSG_DEVICE_SW_STATE_RETENTION);
 }
 
@@ -634,8 +647,8 @@ static int ti_sci_cmd_idle_device(const struct ti_sci_handle *handle, u32 id)
  */
 static int ti_sci_cmd_put_device(const struct ti_sci_handle *handle, u32 id)
 {
-	return ti_sci_set_device_state(handle, id,
-				       0, MSG_DEVICE_SW_STATE_AUTO_OFF);
+	return ti_sci_set_device_state(handle, id, 0,
+				       MSG_DEVICE_SW_STATE_AUTO_OFF);
 }
 
 /**
@@ -2814,7 +2827,9 @@ static void ti_sci_setup_ops(struct ti_sci_info *info)
 	bops->board_config_pm = ti_sci_cmd_set_board_config_pm;
 
 	dops->get_device = ti_sci_cmd_get_device;
+	dops->get_device_exclusive = ti_sci_cmd_get_device_exclusive;
 	dops->idle_device = ti_sci_cmd_idle_device;
+	dops->idle_device_exclusive = ti_sci_cmd_idle_device_exclusive;
 	dops->put_device = ti_sci_cmd_put_device;
 	dops->is_valid = ti_sci_cmd_dev_is_valid;
 	dops->get_context_loss_count = ti_sci_cmd_dev_get_clcnt;
