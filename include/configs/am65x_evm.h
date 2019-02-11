@@ -55,6 +55,8 @@
 
 #define CONFIG_SPL_MAX_SIZE		CONFIG_SYS_K3_MAX_DOWNLODABLE_IMAGE_SIZE
 
+#define CONFIG_SYS_BOOTM_LEN		SZ_64M
+
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	"findfdt="							\
