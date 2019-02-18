@@ -197,4 +197,5 @@
 	clock-names = "clk_xin";
 	clocks = <&clk_200mhz>;
 	/delete-property/ power-domains;
+	ti,driver-strength-ohm = <50>;
 };
