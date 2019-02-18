@@ -91,6 +91,8 @@
 	EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC
 
+#define CONFIG_SUPPORT_EMMC_BOOT
+
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
 

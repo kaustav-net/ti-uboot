@@ -103,7 +103,7 @@ config K3_SYSFW_IMAGE_SPI_OFFS
 config K3_SYSFW_IMAGE_MMCSD_RAW_MODE_SECT
 	hex "MMC sector to load SYSFW firmware and configuration blob from"
 	depends on K3_LOAD_SYSFW && SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR
-	default 0x3d00
+	default 0x3600
 	help
 	  Address on the MMC to load the combined System Firmware and
 	  configuration image tree blob from, when the MMC is being used
