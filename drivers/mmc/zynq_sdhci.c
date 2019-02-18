@@ -49,11 +49,6 @@ static const u8 mode2timing[] = {
 	[MMC_HS_200] = MMC_HS200_BUS_SPEED,
 };
 
-#define SDHCI_HOST_CTRL2	0x3E
-#define SDHCI_CTRL2_MODE_MASK	0x7
-#define SDHCI_18V_SIGNAL	0x8
-#define SDHCI_CTRL_EXEC_TUNING	0x0040
-#define SDHCI_CTRL_TUNED_CLK	0x80
 #define SDHCI_TUNING_LOOP_COUNT	40
 
 static void arasan_zynqmp_dll_reset(struct sdhci_host *host, u8 deviceid)
@@ -191,30 +186,8 @@ static void arasan_sdhci_set_control_reg(struct sdhci_host *host)
 	}
 
 	if (mmc->selected_mode > SD_HS &&
-	    mmc->selected_mode <= UHS_DDR50) {
-		reg = sdhci_readw(host, SDHCI_HOST_CTRL2);
-		reg &= ~SDHCI_CTRL2_MODE_MASK;
-		switch (mmc->selected_mode) {
-		case UHS_SDR12:
-			reg |= UHS_SDR12_BUS_SPEED;
-			break;
-		case UHS_SDR25:
-			reg |= UHS_SDR25_BUS_SPEED;
-			break;
-		case UHS_SDR50:
-			reg |= UHS_SDR50_BUS_SPEED;
-			break;
-		case UHS_SDR104:
-			reg |= UHS_SDR104_BUS_SPEED;
-			break;
-		case UHS_DDR50:
-			reg |= UHS_DDR50_BUS_SPEED;
-			break;
-		default:
-			break;
-		}
-		sdhci_writew(host, reg, SDHCI_HOST_CTRL2);
-	}
+	    mmc->selected_mode <= UHS_DDR50)
+		sdhci_set_uhs_timing(host);
 }
 #endif
 
