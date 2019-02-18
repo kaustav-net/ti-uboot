@@ -57,6 +57,10 @@
 
 #define CONFIG_SYS_BOOTM_LEN		SZ_64M
 
+#define PARTS_DEFAULT \
+	/* Linux partitions */ \
+	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
+
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	"findfdt="							\
@@ -71,7 +75,7 @@
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
 	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000\0" \
-	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"
+	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"		\
 
 /* U-Boot MMC-specific configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC				\
@@ -83,7 +87,8 @@
 	"init_mmc=run args_all args_mmc\0"				\
 	"get_fdt_mmc=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${name_fdt}\0" \
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
-		"${bootdir}/${name_kern}\0"
+		"${bootdir}/${name_kern}\0"				\
+	"partitions=" PARTS_DEFAULT
 
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
