@@ -67,7 +67,6 @@
 struct am654_sdhci_plat {
 	struct mmc_config cfg;
 	struct mmc mmc;
-	unsigned int f_max;
 	struct regmap *base;
 	bool non_removable;
 	u32 otap_del_sel;
@@ -199,6 +198,7 @@ static int am654_sdhci_probe(struct udevice *dev)
 	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
 	struct sdhci_host *host = dev_get_priv(dev);
+	struct mmc_config *cfg = &plat->cfg;
 	struct power_domain sdhci_pwrdmn;
 	struct clk clk;
 	unsigned long clock;
@@ -229,8 +229,7 @@ static int am654_sdhci_probe(struct udevice *dev)
 	}
 
 	host->max_clk = clock;
-
-	ret = sdhci_setup_cfg(&plat->cfg, host, plat->f_max,
+	ret = sdhci_setup_cfg(cfg, host, cfg->f_max,
 			      AM654_SDHCI_MIN_FREQ);
 	if (ret)
 		return ret;
