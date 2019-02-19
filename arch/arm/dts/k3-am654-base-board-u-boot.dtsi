@@ -364,3 +364,7 @@
 		reg-names = "gmii-sel";
 	};
 };
+
+&usb1 {
+	dr_mode = "peripheral";
+};
