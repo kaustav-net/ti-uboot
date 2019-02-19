@@ -125,7 +125,7 @@ u32 cpsw_mdio_get_alive(struct mii_dev *bus)
 	return val & GENMASK(15, 0);
 }
 
-struct mii_dev *cpsw_mdio_init(const char *name, u32 mdio_base,
+struct mii_dev *cpsw_mdio_init(const char *name, phys_addr_t mdio_base,
 			       u32 bus_freq, int fck_freq)
 {
 	struct cpsw_mdio *cpsw_mdio;
