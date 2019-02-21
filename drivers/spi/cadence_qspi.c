@@ -15,8 +15,8 @@
 
 #define CQSPI_STIG_READ			0
 #define CQSPI_STIG_WRITE		1
-#define CQSPI_INDIRECT_READ		2
-#define CQSPI_INDIRECT_WRITE		3
+#define CQSPI_READ			2
+#define CQSPI_WRITE			3
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -176,6 +176,7 @@ static int cadence_spi_probe(struct udevice *bus)
 
 static int cadence_spi_set_mode(struct udevice *bus, uint mode)
 {
+	struct cadence_spi_platdata *plat = bus->platdata;
 	struct cadence_spi_priv *priv = dev_get_priv(bus);
 
 	/* Disable QSPI */
@@ -183,6 +184,10 @@ static int cadence_spi_set_mode(struct udevice *bus, uint mode)
 
 	/* Set SPI mode */
 	cadence_qspi_apb_set_clk_mode(priv->regbase, mode);
+
+	/* Enable Direct Access Controller */
+	if (plat->use_dac_mode)
+		cadence_qspi_apb_dac_mode_enable(priv->regbase);
 
 	/* Enable QSPI */
 	cadence_qspi_apb_controller_enable(priv->regbase);
@@ -210,13 +215,13 @@ static int cadence_spi_mem_exec_op(struct spi_slave *spi,
 			if (!op->addr.nbytes)
 				mode = CQSPI_STIG_READ;
 			else
-				mode = CQSPI_INDIRECT_READ;
+				mode = CQSPI_READ;
 		} else {
 			/* write */
 			if (!op->addr.nbytes)
 				mode = CQSPI_STIG_WRITE;
 			else
-				mode = CQSPI_INDIRECT_WRITE;
+				mode = CQSPI_WRITE;
 		}
 
 		switch (mode) {
@@ -228,19 +233,19 @@ static int cadence_spi_mem_exec_op(struct spi_slave *spi,
 		case CQSPI_STIG_WRITE:
 			err = cadence_qspi_apb_command_write(base, op);
 		break;
-		case CQSPI_INDIRECT_READ:
-			err = cadence_qspi_apb_indirect_read_setup(plat, op);
+		case CQSPI_READ:
+			err = cadence_qspi_apb_read_setup(plat, op);
 			if (!err) {
-				err = cadence_qspi_apb_indirect_read_execute
-				(plat, op->data.nbytes, op->data.buf.in);
+				err = cadence_qspi_apb_read_execute
+				(plat, op);
 			}
 		break;
-		case CQSPI_INDIRECT_WRITE:
-			err = cadence_qspi_apb_indirect_write_setup
+		case CQSPI_WRITE:
+			err = cadence_qspi_apb_write_setup
 				(plat, op);
 			if (!err) {
-				err = cadence_qspi_apb_indirect_write_execute
-				(plat, op->data.nbytes, op->data.buf.out);
+				err = cadence_qspi_apb_write_execute
+				(plat, op);
 			}
 		break;
 		default:
@@ -256,10 +261,17 @@ static int cadence_spi_ofdata_to_platdata(struct udevice *bus)
 	struct cadence_spi_platdata *plat = bus->platdata;
 	const void *blob = gd->fdt_blob;
 	int node = dev_of_offset(bus);
+	fdt_addr_t mmap_addr, mmap_size;
 	int subnode;
 
 	plat->regbase = (void *)devfdt_get_addr_index(bus, 0);
 	plat->ahbbase = (void *)devfdt_get_addr_index(bus, 1);
+	mmap_addr = devfdt_get_addr_size_index(bus, 1, &mmap_size);
+	plat->ahbbase = map_physmem(mmap_addr, mmap_size, MAP_NOCACHE);
+	plat->ahbsize = mmap_size;
+	if (plat->ahbsize >= SZ_8M)
+		plat->use_dac_mode = true;
+
 	plat->is_decoded_cs = fdtdec_get_bool(blob, node, "cdns,is-decoded-cs");
 	plat->fifo_depth = fdtdec_get_uint(blob, node, "cdns,fifo-depth", 128);
 	plat->fifo_width = fdtdec_get_uint(blob, node, "cdns,fifo-width", 4);
