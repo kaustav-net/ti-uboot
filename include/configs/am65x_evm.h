@@ -24,6 +24,7 @@
 #define CONFIG_SPL_TEXT_BASE		0x80080000
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SPL_TEXT_BASE +	\
 					 CONFIG_SYS_K3_NON_SECURE_MSRAM_SIZE)
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x300000
 #else
 #define CONFIG_SPL_TEXT_BASE		0x41c00000
 /*
@@ -44,6 +45,7 @@
 					 CONFIG_SPL_BSS_MAX_SIZE)
 /* Set the stack right below the SPL BSS section */
 #define CONFIG_SYS_INIT_SP_ADDR         CONFIG_SPL_BSS_START_ADDR
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x100000
 #endif
 
 #ifdef CONFIG_SYS_K3_SPL_ATF
@@ -121,6 +123,10 @@
 #define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
 #define CONFIG_SYS_REDUNDAND_ENVIRONMENT
 #endif
+
+/* Non Kconfig SF configs */
+#define CONFIG_SF_DEFAULT_SPEED		0
+#define CONFIG_SF_DEFAULT_MODE		0
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
