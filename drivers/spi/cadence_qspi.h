@@ -7,6 +7,8 @@
 #ifndef __CADENCE_QSPI_H__
 #define __CADENCE_QSPI_H__
 
+#include <clk.h>
+
 #define CQSPI_IS_ADDR(cmd_len)		(cmd_len > 1 ? 1 : 0)
 
 #define CQSPI_NO_DECODER_MAX_CS		4
@@ -23,6 +25,8 @@ struct cadence_spi_platdata {
 	u32		trigger_address;
 	size_t		ahbsize;
 	bool		use_dac_mode;
+
+	struct clk	clk;
 
 	/* Flash parameters */
 	u32		page_size;
@@ -43,6 +47,7 @@ struct cadence_spi_priv {
 	int		qspi_is_init;
 	unsigned int	qspi_calibrated_hz;
 	unsigned int	qspi_calibrated_cs;
+	unsigned long	ref_clk_hz;
 	unsigned int	previous_hz;
 };
 
