@@ -120,7 +120,8 @@
 #define DFUARGS \
 	"dfu_bufsiz=0x20000\0" \
 	DFU_ALT_INFO_MMC \
-	DFU_ALT_INFO_EMMC
+	DFU_ALT_INFO_EMMC \
+	DFU_ALT_INFO_OSPI
 
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
