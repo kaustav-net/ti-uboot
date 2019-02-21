@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <asm-generic/io.h>
 #include <clk.h>
 #include <dm.h>
 #include <fdtdec.h>
