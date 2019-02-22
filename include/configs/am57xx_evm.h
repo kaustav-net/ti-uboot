@@ -40,6 +40,7 @@
 	DFU_ALT_INFO_MMC \
 	DFU_ALT_INFO_EMMC \
 	DFU_ALT_INFO_RAM \
+	DFU_ALT_INFO_QSPI \
 
 #include <configs/ti_omap5_common.h>
 
