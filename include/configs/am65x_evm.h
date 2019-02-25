@@ -24,7 +24,7 @@
 #define CONFIG_SPL_TEXT_BASE		0x80080000
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SPL_TEXT_BASE +	\
 					 CONFIG_SYS_K3_NON_SECURE_MSRAM_SIZE)
-#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x300000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x280000
 #else
 #define CONFIG_SPL_TEXT_BASE		0x41c00000
 /*
@@ -45,7 +45,7 @@
 					 CONFIG_SPL_BSS_MAX_SIZE)
 /* Set the stack right below the SPL BSS section */
 #define CONFIG_SYS_INIT_SP_ADDR         CONFIG_SPL_BSS_START_ADDR
-#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x100000
+#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x80000
 #endif
 
 #ifdef CONFIG_SYS_K3_SPL_ATF
@@ -76,7 +76,8 @@
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
 	"stdin=serial,usbkbd\0"						\
-	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000\0" \
+	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000 "  \
+		"${mtdparts}\0"						\
 	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"		\
 
 /* U-Boot MMC-specific configuration */
@@ -100,6 +101,22 @@
 		"${bootdir}/${name_kern}\0"				\
 	"partitions=" PARTS_DEFAULT
 
+#ifdef CONFIG_TARGET_AM654_A53_EVM
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
+	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
+	"mtdparts=" CONFIG_MTDPARTS_DEFAULT "\0"
+#else
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD
+#endif
+
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI				\
+	"init_ubi=run args_all args_ubi; sf probe; "			\
+		"ubi part ospi.rootfs; ubifsmount ubi:rootfs;\0"	\
+	"get_kern_ubi=ubifsload ${loadaddr} ${bootdir}/${name_kern}\0"	\
+	"get_fdt_ubi=ubifsload ${fdtaddr} ${bootdir}/${name_fdt}\0"	\
+	"args_ubi=setenv bootargs ${console} ${optargs} rootfstype=ubifs "\
+	"root=ubi0:rootfs rw ubi.mtd=ospi.rootfs\0"
+
 #define DFUARGS \
 	"dfu_bufsiz=0x20000\0" \
 	DFU_ALT_INFO_MMC \
@@ -110,6 +127,8 @@
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC				\
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI				\
 	DFUARGS
 
 #define CONFIG_SUPPORT_EMMC_BOOT
@@ -127,6 +146,13 @@
 /* Non Kconfig SF configs */
 #define CONFIG_SF_DEFAULT_SPEED		0
 #define CONFIG_SF_DEFAULT_MODE		0
+#ifdef CONFIG_ENV_IS_IN_SPI_FLASH
+#define CONFIG_ENV_OFFSET		0x680000
+#define CONFIG_ENV_SECT_SIZE		0x20000
+#define CONFIG_ENV_OFFSET_REDUND        (CONFIG_ENV_OFFSET + \
+					 CONFIG_ENV_SECT_SIZE)
+#define CONFIG_SYS_REDUNDAND_ENVIRONMENT
+#endif
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
