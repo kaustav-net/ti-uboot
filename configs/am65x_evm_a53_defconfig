@@ -15,7 +15,7 @@ CONFIG_DISTRO_DEFAULTS=y
 CONFIG_NR_DRAM_BANKS=2
 # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
 CONFIG_SPL_LOAD_FIT=y
-CONFIG_BOOTCOMMAND="run findfdt; run envboot; run init_${boot}; run get_kern_${boot}; run get_fdt_${boot}; run run_kern"
+CONFIG_BOOTCOMMAND="run findfdt; run envboot; run init_${boot}; run get_kern_${boot}; run get_fdt_${boot}; run get_overlay_${boot}; run run_kern"
 CONFIG_CONSOLE_MUX=y
 # CONFIG_DISPLAY_CPUINFO is not set
 CONFIG_SPL_SYS_MALLOC_SIMPLE=y
@@ -111,3 +111,4 @@ CONFIG_USB_GADGET_PRODUCT_NUM=0x6162
 CONFIG_USB_GADGET_DOWNLOAD=y
 CONFIG_FAT_WRITE=y
 CONFIG_HEXDUMP=y
+CONFIG_OF_LIBFDT_OVERLAY=y
