@@ -11,6 +11,7 @@
 #include <spl.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/sysfw-loader.h>
+#include <asm/arch/sys_proto.h>
 #include "common.h"
 #include <dm.h>
 #include <dm/uclass-internal.h>
@@ -123,6 +124,9 @@ void board_init_f(ulong dummy)
 	/* Prepare console output */
 	preloader_console_init();
 #endif
+
+	/* Perform EEPROM-based board detection */
+	do_board_detect();
 
 #ifdef CONFIG_K3_AM654_DDRSS
 	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
