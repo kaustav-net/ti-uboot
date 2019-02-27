@@ -315,3 +315,20 @@ ospi.rootfs just like in SD card case. U-Boot looks for UBI volume named
 To boot kernel from OSPI, at the U-Boot prompt:
 => setenv boot ubi
 => boot
+
+UART:
+-----
+ROM supports booting from MCU_UART0 via X-Modem protocol. The entire UART-based
+boot process up to U-Boot (proper) prompt goes through different stages and uses
+different UART peripherals as follows:
+
+  WHO     | Loading WHAT  |  HW Module  |  Protocol
+----------+---------------+-------------+------------
+Boot ROM  |  tiboot3.bin  |  MCU_UART0  |  X-Modem(*)
+R5 SPL    |  sysfw.itb    |  MCU_UART0  |  Y-Modem(*)
+R5 SPL    |  tispl.bin    |  MAIN_UART0 |  Y-Modem
+A53 SPL   |  u-boot.img   |  MAIN_UART0 |  Y-Modem
+
+(*) Note that in addition to X/Y-Modem related protocol timeouts the DMSC
+    watchdog timeout of 3min (typ.) needs to be observed until System Firmware
+    is fully loaded (from sysfw.itb) and started.
