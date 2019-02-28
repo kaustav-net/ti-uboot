@@ -144,7 +144,9 @@ struct mii_dev *cpsw_mdio_init(const char *name, phys_addr_t mdio_base,
 		return NULL;
 	}
 
-	cpsw_mdio->regs = (struct cpsw_mdio_regs *)mdio_base;
+	cpsw_mdio->regs = map_physmem(mdio_base,
+				      sizeof(struct cpsw_mdio_regs),
+				      MAP_NOCACHE);
 
 	if (!bus_freq || !fck_freq)
 		cpsw_mdio->div = CPSW_MDIO_DIV_DEF;
