@@ -62,6 +62,7 @@
 
 #define PARTS_DEFAULT \
 	/* Linux partitions */ \
+	"uuid_disk=${uuid_gpt_disk};" \
 	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
 
 /* U-Boot general configuration */
