@@ -118,6 +118,26 @@ invalid_eeprom:
 	set_board_info_env_am6(name);
 }
 
+static void setup_serial(void)
+{
+	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
+	unsigned long board_serial;
+	char *endp;
+	char serial_string[17] = { 0 };
+
+	if (env_get("serial#"))
+		return;
+
+	board_serial = simple_strtoul(ep->serial, &endp, 16);
+	if (*endp != '\0') {
+		pr_err("Error: Can't set serial# to %s\n", ep->serial);
+		return;
+	}
+
+	snprintf(serial_string, sizeof(serial_string), "%016lx", board_serial);
+	env_set("serial#", serial_string);
+}
+
 static int init_daughtercard_det_gpio(char *gpio_name, struct gpio_desc *desc)
 {
 	int ret;
@@ -293,6 +313,7 @@ int board_late_init(void)
 	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
 
 	setup_board_eeprom_env();
+	setup_serial();
 
 	/*
 	 * The first MAC address for ethernet a.k.a. ethernet0 comes from
