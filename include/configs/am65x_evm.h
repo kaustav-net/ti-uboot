@@ -111,6 +111,36 @@
 		"${bootdir}/${name_kern}\0"				\
 	"partitions=" PARTS_DEFAULT
 
+/* Command for booting the Android from eMMC */
+#define EXTRA_ENV_AM65X_BOARD_SETTINGS_EMMC_ANDROID			\
+	"check_android="						\
+		"setenv mmcdev 0; "					\
+		"env delete boot_start; "				\
+		"part start mmc ${mmcdev} boot boot_start; "		\
+		"if test \"$boot_start\" = \"\"; then "			\
+			"env set is_android 0; "			\
+		"else "							\
+			"env set is_android 1; "			\
+		"fi; "							\
+		"env delete boot_start\0"				\
+	"emmc_android_boot="						\
+		"echo Trying to boot Android from eMMC ...; "		\
+		"setenv fit_loadaddr 0x87000000; "			\
+		"setenv loadaddr ${fit_loadaddr}; "			\
+		"setenv eval_bootargs setenv bootargs $bootargs; "	\
+		"run eval_bootargs; "					\
+		"setenv mmcdev 0; "					\
+		"mmc dev $mmcdev; "					\
+		"mmc rescan; "						\
+		"part start mmc ${mmcdev} boot boot_start; "		\
+		"part size mmc ${mmcdev} boot boot_size; "		\
+		"mmc read ${fit_loadaddr} ${boot_start} ${boot_size}; "	\
+		"for overlay in $overlay_files;"			\
+		"do;"							\
+		"setenv overlaystring ${overlaystring}'#'${overlay};"	\
+		"done;"							\
+		"bootm ${fit_loadaddr}#${fdtfile}${overlaystring}\0"
+
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
 	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
@@ -138,6 +168,7 @@
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS					\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MMC				\
+	EXTRA_ENV_AM65X_BOARD_SETTINGS_EMMC_ANDROID			\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI				\
 	DFUARGS
