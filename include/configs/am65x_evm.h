@@ -63,7 +63,16 @@
 #define PARTS_DEFAULT \
 	/* Linux partitions */ \
 	"uuid_disk=${uuid_gpt_disk};" \
-	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
+	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0" \
+	/* Android partitions */ \
+	"partitions_android=" \
+	"uuid_disk=${uuid_gpt_disk};" \
+	"name=bootloader,start=5M,size=8M,uuid=${uuid_gpt_bootloader};" \
+	"name=tiboot3,start=4M,size=1M,uuid=${uuid_gpt_tiboot3};" \
+	"name=boot,start=13M,size=40M,uuid=${uuid_gpt_boot};" \
+	"name=vendor,size=512M,uuid=${uuid_gpt_vendor};" \
+	"name=system,size=2048M,uuid=${uuid_gpt_system};" \
+	"name=userdata,size=-,uuid=${uuid_gpt_userdata}\0"
 
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS					\
