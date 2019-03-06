@@ -11,6 +11,7 @@
 #include "common.h"
 #include <dm.h>
 #include <remoteproc.h>
+#include <asm/arch/sys_proto.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -63,7 +64,10 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 	if (ret)
 		panic("%s: ATF failed to start on rproc (%d)\n", __func__, ret);
 
-	debug("ATF started. Waiting indefinitely...\n");
+	debug("Releasing resources...\n");
+	release_resources_for_core_shutdown();
+
+	debug("Finalizing core shutdown...\n");
 	while (1)
 		asm volatile("wfe");
 }
