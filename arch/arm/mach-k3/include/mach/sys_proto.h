@@ -14,4 +14,6 @@ int do_board_detect(void);
 void release_resources_for_core_shutdown(void);
 struct ti_sci_handle *get_ti_sci_handle(void);
 
+int fdt_fixup_msmc_ram(void *blob, char *parent_path, char *node_name);
+
 #endif
