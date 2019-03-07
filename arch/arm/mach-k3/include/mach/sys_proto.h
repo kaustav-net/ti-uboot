@@ -12,5 +12,6 @@ u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
 		  u32 bound);
 int do_board_detect(void);
 void release_resources_for_core_shutdown(void);
+struct ti_sci_handle *get_ti_sci_handle(void);
 
 #endif

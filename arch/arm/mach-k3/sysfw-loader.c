@@ -22,6 +22,7 @@
 #include <asm/sections.h>
 #include <asm/armv7_mpu.h>
 #include <asm/arch/hardware.h>
+#include <asm/arch/sys_proto.h>
 
 /* Name of the FIT image nodes for SYSFW and its config data */
 #define SYSFW_FIRMWARE			"sysfw.bin"
@@ -48,7 +49,6 @@ static void k3_sysfw_load_using_fit(void *fit, struct ti_sci_handle **ti_sci)
 	int images;
 	const void *sysfw_addr;
 	size_t sysfw_size;
-	struct udevice *dev;
 	int ret;
 
 	/* Find the node holding the images information */
@@ -91,15 +91,8 @@ static void k3_sysfw_load_using_fit(void *fit, struct ti_sci_handle **ti_sci)
 		hang();
 	}
 
-	/* Bring up the Device Management and Security Controller (SYSFW) */
-	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
-	if (ret) {
-		pr_err("Failed to initialize SYSFW (%d)\n", ret);
-		hang();
-	}
-
 	/* Establish handle for easier access */
-	*ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
+	*ti_sci = get_ti_sci_handle();
 }
 
 static void k3_sysfw_configure_using_fit(void *fit,

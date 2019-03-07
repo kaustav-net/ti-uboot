@@ -236,7 +236,6 @@ u32 spl_boot_device(void)
 
 void release_resources_for_core_shutdown(void)
 {
-	struct udevice *dev;
 	struct ti_sci_handle *ti_sci;
 	struct ti_sci_dev_ops *dev_ops;
 	struct ti_sci_proc_ops *proc_ops;
@@ -248,12 +247,7 @@ void release_resources_for_core_shutdown(void)
 		AM6_DEV_MCU_RTI1,
 	};
 
-	/* Get handle to Device Management and Security Controller (SYSFW) */
-	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
-	if (ret)
-		panic("Failed to get handle to SYSFW (%d)\n", ret);
-
-	ti_sci = (struct ti_sci_handle *)(ti_sci_get_handle_from_sysfw(dev));
+	ti_sci = get_ti_sci_handle();
 	dev_ops = &ti_sci->ops.dev_ops;
 	proc_ops = &ti_sci->ops.proc_ops;
 

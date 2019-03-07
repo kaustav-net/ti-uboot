@@ -12,8 +12,21 @@
 #include <dm.h>
 #include <remoteproc.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/soc/ti/ti_sci_protocol.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+struct ti_sci_handle *get_ti_sci_handle(void)
+{
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_get_device_by_name(UCLASS_FIRMWARE, "dmsc", &dev);
+	if (ret)
+		panic("Failed to get SYSFW (%d)\n", ret);
+
+	return (struct ti_sci_handle *)ti_sci_get_handle_from_sysfw(dev);
+}
 
 #ifdef CONFIG_K3_EARLY_CONS
 int early_console_init(void)
