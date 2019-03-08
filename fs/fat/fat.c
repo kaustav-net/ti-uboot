@@ -470,12 +470,7 @@ static __u8 mkcksum(const char name[8], const char ext[3])
 static int
 read_bootsectandvi(boot_sector *bs, volume_info *volinfo, int *fatsize)
 {
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static __u8 *block;
-	static unsigned long blk_sz;
-#else
 	__u8 *block;
-#endif
 	volume_info *vistart;
 	int ret = 0;
 
@@ -484,15 +479,7 @@ read_bootsectandvi(boot_sector *bs, volume_info *volinfo, int *fatsize)
 		return -1;
 	}
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!block || cur_dev->blksz > blk_sz) {
-		block = malloc_cache_aligned(cur_dev->blksz);
-		if (block)
-			blk_sz = cur_dev->blksz;
-	}
-#else
 	block = malloc_cache_aligned(cur_dev->blksz);
-#endif
 	if (block == NULL) {
 		debug("Error: allocating block\n");
 		return -1;
@@ -552,10 +539,6 @@ static int get_fs_info(fsdata *mydata)
 {
 	boot_sector bs;
 	volume_info volinfo;
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static __u8 *fatbuf;
-	static unsigned long fatbuf_sz;
-#endif
 	int ret;
 
 	ret = read_bootsectandvi(&bs, &volinfo, &mydata->fatsize);
@@ -618,17 +601,7 @@ static int get_fs_info(fsdata *mydata)
 
 	mydata->fatbufnum = -1;
 	mydata->fat_dirty = 0;
-
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!fatbuf || FATBUFSIZE > fatbuf_sz) {
-		fatbuf = malloc_cache_aligned(FATBUFSIZE);
-		mydata->fatbuf = fatbuf;
-		if (fatbuf)
-			fatbuf_sz = FATBUFSIZE;
-	}
-#else
 	mydata->fatbuf = malloc_cache_aligned(FATBUFSIZE);
-#endif
 	if (mydata->fatbuf == NULL) {
 		debug("Error: allocating memory\n");
 		return -1;
@@ -1095,24 +1068,13 @@ int file_fat_detectfs(void)
 
 int fat_exists(const char *filename)
 {
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static fsdata fsdata;
-	static fat_itr *itr;
-#else
 	fsdata fsdata;
 	fat_itr *itr;
-#endif
 	int ret;
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!itr)
-		itr = malloc_cache_aligned(sizeof(fat_itr));
-#else
 	itr = malloc_cache_aligned(sizeof(fat_itr));
-#endif
 	if (!itr)
 		return 0;
-
 	ret = fat_itr_root(itr, &fsdata);
 	if (ret)
 		goto out;
@@ -1126,24 +1088,13 @@ out:
 
 int fat_size(const char *filename, loff_t *size)
 {
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static fsdata fsdata;
-	static fat_itr *itr;
-#else
 	fsdata fsdata;
 	fat_itr *itr;
-#endif
 	int ret;
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!itr)
-		itr = malloc_cache_aligned(sizeof(fat_itr));
-#else
 	itr = malloc_cache_aligned(sizeof(fat_itr));
-#endif
 	if (!itr)
 		return -ENOMEM;
-
 	ret = fat_itr_root(itr, &fsdata);
 	if (ret)
 		goto out_free_itr;
@@ -1174,24 +1125,13 @@ out_free_itr:
 int file_fat_read_at(const char *filename, loff_t pos, void *buffer,
 		     loff_t maxsize, loff_t *actread)
 {
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static fsdata fsdata;
-	static fat_itr *itr;
-#else
 	fsdata fsdata;
 	fat_itr *itr;
-#endif
 	int ret;
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!itr)
-		itr = malloc_cache_aligned(sizeof(fat_itr));
-#else
 	itr = malloc_cache_aligned(sizeof(fat_itr));
-#endif
 	if (!itr)
 		return -ENOMEM;
-
 	ret = fat_itr_root(itr, &fsdata);
 	if (ret)
 		goto out_free_itr;
@@ -1243,19 +1183,10 @@ typedef struct {
 
 int fat_opendir(const char *filename, struct fs_dir_stream **dirsp)
 {
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	static fat_dir * dir;
-#else
 	fat_dir *dir;
-#endif
 	int ret;
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
-	if (!dir)
-		dir = malloc_cache_aligned(sizeof(*dir));
-#else
 	dir = malloc_cache_aligned(sizeof(*dir));
-#endif
 	if (!dir)
 		return -ENOMEM;
 	memset(dir, 0, sizeof(*dir));
