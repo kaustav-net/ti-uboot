@@ -597,8 +597,7 @@ static int ti_sci_get_device_state(const struct ti_sci_handle *handle,
  */
 static int ti_sci_cmd_get_device(const struct ti_sci_handle *handle, u32 id)
 {
-	return ti_sci_set_device_state(handle, id,
-				       MSG_FLAG_DEVICE_EXCLUSIVE,
+	return ti_sci_set_device_state(handle, id, 0,
 				       MSG_DEVICE_SW_STATE_ON);
 }
 
@@ -615,8 +614,7 @@ static int ti_sci_cmd_get_device(const struct ti_sci_handle *handle, u32 id)
  */
 static int ti_sci_cmd_idle_device(const struct ti_sci_handle *handle, u32 id)
 {
-	return ti_sci_set_device_state(handle, id,
-				       MSG_FLAG_DEVICE_EXCLUSIVE,
+	return ti_sci_set_device_state(handle, id, 0,
 				       MSG_DEVICE_SW_STATE_RETENTION);
 }
 
