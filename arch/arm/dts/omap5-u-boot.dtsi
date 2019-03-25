@@ -112,7 +112,6 @@
 
 &usb1 {
 	u-boot,dm-spl;
-	dr_mode = "peripheral";
 };
 
 &usb2_phy1 {
