@@ -138,7 +138,7 @@
 		"env delete boot_start\0"				\
 	"emmc_android_boot="						\
 		"echo Trying to boot Android from eMMC ...; "		\
-		"setenv fit_loadaddr 0x87000000; "			\
+		"setenv fit_loadaddr 0x90000000; "			\
 		"setenv loadaddr ${fit_loadaddr}; "			\
 		"setenv eval_bootargs setenv bootargs $bootargs; "	\
 		"run eval_bootargs; "					\
