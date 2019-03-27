@@ -318,14 +318,14 @@ static int am654_sdhci_probe(struct udevice *dev)
 	}
 
 	host->max_clk = clock;
+	host->mmc = &plat->mmc;
+	host->mmc->dev = dev;
 	ret = sdhci_setup_cfg(cfg, host, cfg->f_max,
 			      AM654_SDHCI_MIN_FREQ);
 	if (ret)
 		return ret;
-	host->mmc = &plat->mmc;
 	host->ops = &am654_sdhci_ops;
 	host->mmc->priv = host;
-	host->mmc->dev = dev;
 	upriv->mmc = host->mmc;
 
 	regmap_init_mem_index(dev_ofnode(dev), &plat->base, 1);
