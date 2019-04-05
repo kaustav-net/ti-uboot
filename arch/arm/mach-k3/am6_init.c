@@ -9,12 +9,14 @@
 #include <common.h>
 #include <asm/io.h>
 #include <spl.h>
+#include <mmc.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/sysfw-loader.h>
 #include <asm/arch/sys_proto.h>
 #include "common.h"
 #include <dm.h>
 #include <dm/uclass-internal.h>
+#include <dm/device-internal.h>
 #include <dm/pinctrl.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
 
@@ -64,6 +66,31 @@ u32 bootindex __attribute__((section(".data")));
 static void store_boot_index_from_rom(void)
 {
 	bootindex = *(u32 *)(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX);
+}
+
+static void reinit_mmc_device(int dev)
+{
+	struct mmc *mmc = find_mmc_device(dev);
+
+	if (!mmc)
+		return;
+
+	/* remove the udevice so that it can be re-probed */
+	device_remove(mmc->dev, DM_REMOVE_NORMAL);
+	/* probe the udevice */
+	device_probe(mmc->dev);
+	/* force a reinit of the MMC/SDCard */
+	mmc->has_init = 0;
+	mmc_init(mmc);
+}
+
+void k3_init_post_pm_cb(void)
+{
+	preloader_console_init();
+	if (spl_boot_device() == BOOT_DEVICE_MMC1)
+		reinit_mmc_device(0);
+	else if (spl_boot_device() == BOOT_DEVICE_MMC2)
+		reinit_mmc_device(1);
 }
 
 void board_init_f(ulong dummy)
@@ -125,7 +152,7 @@ void board_init_f(ulong dummy)
 	 * callback hook, effectively switching on (or over) the console
 	 * output.
 	 */
-	k3_sysfw_loader(preloader_console_init);
+	k3_sysfw_loader(k3_init_post_pm_cb);
 #else
 	/* Prepare console output */
 	preloader_console_init();
