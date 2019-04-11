@@ -5,6 +5,8 @@
 
 #include <common.h>
 #include <dm.h>
+#include <dm/device-internal.h>
+#include <dm/uclass-internal.h>
 #include <errno.h>
 #include <misc.h>
 
@@ -63,6 +65,29 @@ int misc_set_enabled(struct udevice *dev, bool val)
 		return -ENOSYS;
 
 	return ops->set_enabled(dev, val);
+}
+
+int misc_init_by_ofnode(ofnode node)
+{
+	struct udevice *dev = NULL;
+	int ret;
+	long temp1, temp2;
+
+	temp1 = ofnode_to_offset(node);
+
+	for (ret = uclass_find_first_device(UCLASS_MISC, &dev); dev;
+	     ret = uclass_find_next_device(&dev)) {
+		temp2 = ofnode_to_offset(dev_ofnode(dev));
+		if (temp1 == temp2) {
+			ret = device_probe(dev);
+			if (ret)
+				debug("%s: Failed to initialize - %d\n",
+				      dev->name, ret);
+			return ret;
+		}
+	}
+
+	return -ENODEV;
 }
 
 UCLASS_DRIVER(misc) = {
