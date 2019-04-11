@@ -11,3 +11,4 @@ obj-$(CONFIG_K3_SYSTEM_CONTROLLER) += k3_system_controller.o
 obj-$(CONFIG_REMOTEPROC_K3) += k3_rproc.o
 obj-$(CONFIG_REMOTEPROC_SANDBOX) += sandbox_testproc.o
 obj-$(CONFIG_REMOTEPROC_TI_POWER) += ti_power_proc.o
+obj-$(CONFIG_REMOTEPROC_TI_PRU) += pru_rproc.o
