@@ -21,6 +21,8 @@
 #define PRUSS_CFG_IEPCLK	0x30
 #define ICSSG_CFG_CORE_SYNC	0x3c
 
+#define ICSSG_TASK_MGR_OFFSET	0x2a000
+
 /* PRUSS_IEPCLK register bits */
 #define PRUSS_IEPCLK_IEP_OCP_CLK_EN		BIT(0)
 
@@ -36,6 +38,19 @@ enum pruss_mem {
 	PRUSS_MEM_SHRD_RAM2,
 	PRUSS_MEM_MAX,
 };
+
+int pruss_request_tm_region(struct udevice *dev, phys_addr_t *loc)
+{
+	struct pruss *priv;
+
+	priv = dev_get_priv(dev);
+	if (!priv || !priv->pruss_dram0)
+		return -EINVAL;
+
+	*loc = priv->pruss_dram0 + ICSSG_TASK_MGR_OFFSET;
+
+	return 0;
+}
 
 int pruss_request_shrmem_region(struct udevice *dev, phys_addr_t *loc)
 {

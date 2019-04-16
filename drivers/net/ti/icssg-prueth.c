@@ -84,6 +84,7 @@ struct prueth {
 	struct regmap		*miig_rt;
 	fdt_addr_t		mdio_base;
 	phys_addr_t		pruss_shrdram2;
+	phys_addr_t		tmaddr;
 	struct mii_dev		*bus;
 	u32			port_id;
 	u32			sram_pa;
@@ -277,6 +278,9 @@ static void prueth_stop(struct udevice *dev)
 
 	dma_disable(&priv->dma_rx);
 	dma_free(&priv->dma_rx);
+
+	/* Workaround for shutdown command */
+	writel(0x0, priv->tmaddr + priv->slice * 0x200);
 }
 
 static const struct eth_ops prueth_ops = {
@@ -388,6 +392,10 @@ static int prueth_probe(struct udevice *dev)
 		dev_err(dev, "error getting the pruss dev\n");
 
 	ret = pruss_request_shrmem_region(*prussdev, &prueth->pruss_shrdram2);
+	if (ret)
+		return ret;
+
+	ret = pruss_request_tm_region(*prussdev, &prueth->tmaddr);
 	if (ret)
 		return ret;
 
