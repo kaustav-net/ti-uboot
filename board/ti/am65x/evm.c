@@ -158,14 +158,54 @@ static int init_daughtercard_det_gpio(char *gpio_name, struct gpio_desc *desc)
 	return dm_gpio_set_dir_flags(desc, GPIOD_IS_IN);
 }
 
+/* Declaration of daughtercards to probe */
+static const struct {
+	u8 slot_index;		/* Slot the card is installed */
+	char *card_name;	/* EEPROM-programmed card name */
+	char *dtbo_name;	/* Device tree overlay to apply */
+	u8 eth_offset;		/* ethXaddr MAC address index offset */
+} ext_cards[] = {
+	{
+		AM65X_EVM_APP_BRD_DET,
+		"AM6-GPAPPEVM",
+		"k3-am654-gp.dtbo",
+		0,
+	},
+	{
+		AM65X_EVM_APP_BRD_DET,
+		"AM6-IDKAPPEVM",
+		"k3-am654-idk.dtbo",
+		3,
+	},
+	{
+		AM65X_EVM_SERDES_BRD_DET,
+		"SER-PCIE2LEVM",
+		"k3-am654-pcie-usb2.dtbo",
+		0,
+	},
+	{
+		AM65X_EVM_SERDES_BRD_DET,
+		"SER-PCIEUSBEVM",
+		"k3-am654-pcie-usb3.dtbo",
+		0,
+	},
+	{
+		AM65X_EVM_LCD_BRD_DET,
+		"OLDI-LCD1EVM",
+		"k3-am654-evm-oldi-lcd1evm.dtbo",
+		0,
+	},
+};
+
+static bool daughter_card_detect_flags[ARRAY_SIZE(ext_cards)];
+
 static int probe_daughtercards(void)
 {
 	struct ti_am6_eeprom ep;
 	struct gpio_desc board_det_gpios[AM65X_EVM_BRD_DET_COUNT];
 	char mac_addr[DAUGHTER_CARD_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
 	u8 mac_addr_cnt;
-	char name_overlays[1024] = { 0 };
-	int i, j;
+	int i;
 	int ret;
 
 	/*
@@ -182,44 +222,8 @@ static int probe_daughtercards(void)
 		{ "gpio@38_3", 0x53, },	/* AM65X_EVM_HDMI_GPMC_BRD_DET */
 	};
 
-	/* Declaration of daughtercards to probe */
-	const struct {
-		u8 slot_index;		/* Slot the card is installed */
-		char *card_name;	/* EEPROM-programmed card name */
-		char *dtbo_name;	/* Device tree overlay to apply */
-		u8 eth_offset;		/* ethXaddr MAC address index offset */
-	} cards[] = {
-		{
-			AM65X_EVM_APP_BRD_DET,
-			"AM6-GPAPPEVM",
-			"k3-am654-gp.dtbo",
-			0,
-		},
-		{
-			AM65X_EVM_APP_BRD_DET,
-			"AM6-IDKAPPEVM",
-			"k3-am654-idk.dtbo",
-			3,
-		},
-		{
-			AM65X_EVM_SERDES_BRD_DET,
-			"SER-PCIE2LEVM",
-			"k3-am654-pcie-usb2.dtbo",
-			0,
-		},
-		{
-			AM65X_EVM_SERDES_BRD_DET,
-			"SER-PCIEUSBEVM",
-			"k3-am654-pcie-usb3.dtbo",
-			0,
-		},
-		{
-			AM65X_EVM_LCD_BRD_DET,
-			"OLDI-LCD1EVM",
-			"k3-am654-evm-oldi-lcd1evm.dtbo",
-			0,
-		},
-	};
+	for (i = 0; i < ARRAY_SIZE(daughter_card_detect_flags); i++)
+		daughter_card_detect_flags[i] = false;
 
 	/*
 	 * Initialize GPIO used for daughtercard slot presence detection and
@@ -232,9 +236,9 @@ static int probe_daughtercards(void)
 			return ret;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(cards); i++) {
+	for (i = 0; i < ARRAY_SIZE(ext_cards); i++) {
 		/* Obtain card-specific slot index and associated I2C address */
-		u8 slot_index = cards[i].slot_index;
+		u8 slot_index = ext_cards[i].slot_index;
 		u8 i2c_addr = slot_map[slot_index].i2c_addr;
 
 		/*
@@ -265,15 +269,18 @@ static int probe_daughtercards(void)
 		}
 
 		/* Only process the parsed data if we found a match */
-		if (strncmp(ep.name, cards[i].card_name, sizeof(ep.name)))
+		if (strncmp(ep.name, ext_cards[i].card_name, sizeof(ep.name)))
 			continue;
 
-		printf("detected %s\n", cards[i].card_name);
+		printf("detected %s\n", ext_cards[i].card_name);
+		daughter_card_detect_flags[i] = true;
 
+#ifndef CONFIG_SPL_BUILD
+		int j;
 		/*
 		 * Populate any MAC addresses from daughtercard into the U-Boot
 		 * environment, starting with a card-specific offset so we can
-		 * have multiple cards contribute to the MAC pool in a well-
+		 * have multiple ext_cards contribute to the MAC pool in a well-
 		 * defined manner.
 		 */
 		for (j = 0; j < mac_addr_cnt; j++) {
@@ -281,12 +288,20 @@ static int probe_daughtercards(void)
 				continue;
 
 			eth_env_set_enetaddr_by_index("eth",
-						      cards[i].eth_offset + j,
+						      ext_cards[i].eth_offset + j,
 						      (uchar *)mac_addr[j]);
 		}
+#endif
+	}
+#ifndef CONFIG_SPL_BUILD
+	char name_overlays[1024] = { 0 };
+
+	for (i = 0; i < ARRAY_SIZE(ext_cards); i++) {
+		if (!daughter_card_detect_flags[i])
+			continue;
 
 		/* Skip if no overlays are to be added */
-		if (!strlen(cards[i].dtbo_name))
+		if (!strlen(ext_cards[i].dtbo_name))
 			continue;
 
 		/*
@@ -294,18 +309,20 @@ static int probe_daughtercards(void)
 		 * if we can fit the new overlay, a trailing space to be used
 		 * as a separator, plus the terminating zero.
 		 */
-		if (strlen(name_overlays) + strlen(cards[i].dtbo_name) + 2 >
+		if (strlen(name_overlays) + strlen(ext_cards[i].dtbo_name) + 2 >
 		    sizeof(name_overlays))
 			return -ENOMEM;
 
 		/* Append to our list of overlays */
-		strcat(name_overlays, cards[i].dtbo_name);
+		strcat(name_overlays, ext_cards[i].dtbo_name);
 		strcat(name_overlays, " ");
+
 	}
 
 	/* Apply device tree overlay(s) to the U-Boot environment, if any */
 	if (strlen(name_overlays))
 		return env_set("name_overlays", name_overlays);
+#endif
 
 	return 0;
 }
@@ -354,3 +371,8 @@ int ft_board_setup(void *blob, bd_t *bd)
 	return ret;
 }
 #endif
+
+void spl_board_init(void)
+{
+	probe_daughtercards();
+}
