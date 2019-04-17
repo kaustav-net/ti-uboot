@@ -199,6 +199,24 @@ static const struct {
 
 static bool daughter_card_detect_flags[ARRAY_SIZE(ext_cards)];
 
+const char *board_fit_get_additionnal_images(int index, const char *type)
+{
+	int i, j;
+
+	if (strcmp(type, FIT_FDT_PROP))
+		return NULL;
+
+	j = 0;
+	for (i = 0; i < ARRAY_SIZE(ext_cards); i++) {
+		if (daughter_card_detect_flags[i]) {
+			if (j == index)
+				return ext_cards[i].dtbo_name;
+			j++;
+		}
+	}
+	return NULL;
+}
+
 static int probe_daughtercards(void)
 {
 	struct ti_am6_eeprom ep;
