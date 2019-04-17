@@ -414,6 +414,19 @@ int clk_disable_bulk(struct clk_bulk *bulk)
 	return 0;
 }
 
+bool clk_is_match(const struct clk *p, const struct clk *q)
+{
+	/* trivial case: identical struct clk's or both NULL */
+	if (p == q)
+		return true;
+
+	/* same device, id and data */
+	if (p->dev == q->dev && p->id == q->id && p->data == q->data)
+		return true;
+
+	return false;
+}
+
 UCLASS_DRIVER(clk) = {
 	.id		= UCLASS_CLK,
 	.name		= "clk",
