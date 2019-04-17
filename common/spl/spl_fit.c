@@ -25,6 +25,12 @@ __weak ulong board_spl_fit_size_align(ulong size)
 	return size;
 }
 
+__weak const char *board_fit_get_additionnal_images(int index,
+						    const char *type)
+{
+	return NULL;
+}
+
 /**
  * spl_fit_get_image_name(): By using the matching configuration subnode,
  * retrieve the name of an image, specified by a property name and an index
@@ -45,6 +51,7 @@ static int spl_fit_get_image_name(const void *fit, int images,
 	__maybe_unused int node;
 	int conf_node;
 	int len, i;
+	bool found = true;
 
 	conf_node = fit_find_config_node(fit);
 	if (conf_node < 0) {
@@ -70,12 +77,27 @@ static int spl_fit_get_image_name(const void *fit, int images,
 	for (i = 0; i < index; i++) {
 		str = strchr(str, '\0') + 1;
 		if (!str || (str - name >= len)) {
-			debug("no string for index %d\n", index);
-			return -E2BIG;
+			found = false;
+			break;
 		}
 	}
 
-	*outname = (char *)str;
+	if (!found) {
+		/*
+		 * no string in the property for this index. Check if the board
+		 * level code can supply one.
+		 */
+		str = board_fit_get_additionnal_images(index - i - 1, type);
+		if (str)
+			found = true;
+	}
+
+	if (!found) {
+		debug("no string for index %d\n", index);
+		return -E2BIG;
+	}
+
+	*outname = str;
 	return 0;
 }
 
