@@ -9,6 +9,7 @@
 #include <fpga.h>
 #include <image.h>
 #include <linux/libfdt.h>
+#include <malloc.h>
 #include <spl.h>
 
 #ifndef CONFIG_SYS_BOOTM_LEN
@@ -302,6 +303,16 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 	spl_image->fdt_addr = (void *)image_info.load_addr;
 #if !CONFIG_IS_ENABLED(FIT_IMAGE_TINY)
 #if defined(CONFIG_OF_LIBFDT_OVERLAY)
+	void *tmpbuffer;
+	/*
+	 * allocate 64kB of memory. This will be used to store the DT overlay
+	 * before it is applied. It may not be used depending on how the
+	 * overlay is stored.
+	 */
+	tmpbuffer = malloc(64 * 1024);
+	if (!tmpbuffer)
+		debug("%s: unable to allocate space for overlays\n", __func__);
+
 	for (; ; index++) {
 		node = spl_fit_get_image_node(fit, images, FIT_FDT_PROP, index);
 		if (node < 0) {
@@ -309,6 +320,7 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 			return 0;
 		}
 
+		image_info.load_addr = (ulong) tmpbuffer;
 		ret = spl_load_fit_image(info, sector, fit, base_offset, node,
 					 &image_info);
 		if (ret < 0)
@@ -327,6 +339,8 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 		debug("%s: DT overlay %s applied\n", __func__,
 		      fit_get_name(fit, node, NULL));
 	}
+	if (tmpbuffer)
+		free(tmpbuffer);
 #endif
 	/* Try to make space, so we can inject details on the loadables */
 	ret = fdt_shrink_to_minimum(spl_image->fdt_addr, 8192);
