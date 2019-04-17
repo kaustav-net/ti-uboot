@@ -1148,12 +1148,15 @@ ifndef CONFIG_SYS_UBOOT_START
 CONFIG_SYS_UBOOT_START := 0
 endif
 
+
 # Boards with more complex image requirments can provide an .its source file
 # or a generator script
-ifneq ($(CONFIG_SPL_FIT_SOURCE),"")
-U_BOOT_ITS = $(subst ",,$(CONFIG_SPL_FIT_SOURCE))
+SPL_FIT_SOURCE := $(subst ",,$(CONFIG_SPL_FIT_SOURCE))
+SPL_FIT_GENERATOR := $(subst ",,$(CONFIG_SPL_FIT_GENERATOR))
+ifneq ($(SPL_FIT_SOURCE),)
+U_BOOT_ITS = $(SPL_FIT_SOURCE)
 else
-ifneq ($(CONFIG_SPL_FIT_GENERATOR),"")
+ifneq ($(SPL_FIT_GENERATOR),)
 U_BOOT_ITS := u-boot.its
 ifeq ($(CONFIG_SPL_FIT_GENERATOR),"arch/arm/mach-imx/mkimage_fit_atf.sh")
 U_BOOT_ITS_DEPS += u-boot-nodtb.bin
@@ -1162,7 +1165,7 @@ ifeq ($(CONFIG_SPL_FIT_GENERATOR),"arch/arm/mach-rockchip/make_fit_atf.py")
 U_BOOT_ITS_DEPS += u-boot
 endif
 $(U_BOOT_ITS): $(U_BOOT_ITS_DEPS) FORCE
-	$(srctree)/$(CONFIG_SPL_FIT_GENERATOR) \
+	$(srctree)/$(SPL_FIT_GENERATOR) \
 	$(patsubst %,arch/$(ARCH)/dts/%.dtb,$(subst ",,$(CONFIG_OF_LIST))) > $@
 endif
 endif
