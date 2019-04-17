@@ -46,6 +46,8 @@ cat << __HEADER_EOF
 		};
 __HEADER_EOF
 
+shift
+
 cnt=1
 for dtname in $*
 do

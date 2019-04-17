@@ -4,7 +4,7 @@
 # script to generate FIT image source for i.MX8MQ boards with
 # ARM Trusted Firmware and multiple device trees (given on the command line)
 #
-# usage: $0 <dt_name> [<dt_name> [<dt_name] ...]
+# usage: $0 <board> <dt_name> [<dt_name> [<dt_name] ...]
 
 [ -z "$BL31" ] && BL31="bl31.bin"
 [ -z "$TEE_LOAD_ADDR" ] && TEE_LOAD_ADDR="0xfe000000"
@@ -38,6 +38,7 @@ else
 	ls -lct u-boot-nodtb.bin | awk '{print $5}' >&2
 fi
 
+shift
 for dtname in $*
 do
 	echo "$dtname size: " >&2

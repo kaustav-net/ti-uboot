@@ -4,7 +4,7 @@ A script to generate FIT image source for rockchip boards
 with ARM Trusted Firmware
 and multiple device trees (given on the command line)
 
-usage: $0 <dt_name> [<dt_name> [<dt_name] ...]
+usage: $0 <board> <dt_name> [<dt_name> [<dt_name] ...]
 """
 
 import os
@@ -209,7 +209,8 @@ def main():
             print(__doc__)
             sys.exit(2)
 
-    dtbs = args
+    board = args[0]
+    dtbs = args[1:]
     #get_bl31_segments_info("u-boot")
     #get_bl31_segments_info("bl31.elf")
 
