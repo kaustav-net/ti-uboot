@@ -301,11 +301,6 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 	/* Make the load-address of the FDT available for the SPL framework */
 	spl_image->fdt_addr = (void *)image_info.load_addr;
 #if !CONFIG_IS_ENABLED(FIT_IMAGE_TINY)
-	/* Try to make space, so we can inject details on the loadables */
-	ret = fdt_shrink_to_minimum(spl_image->fdt_addr, 8192);
-	if (ret < 0)
-		return ret;
-#endif
 #if defined(CONFIG_OF_LIBFDT_OVERLAY)
 	for (; ; index++) {
 		node = spl_fit_get_image_node(fit, images, FIT_FDT_PROP, index);
@@ -319,6 +314,11 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 		if (ret < 0)
 			return ret;
 
+		/* Make room in FDT for changes coming from the overlay */
+		ret = fdt_increase_size(spl_image->fdt_addr, image_info.size);
+		if (ret < 0)
+			return ret;
+
 		ret = fdt_overlay_apply_verbose(spl_image->fdt_addr,
 						(void *)image_info.load_addr);
 		if (ret)
@@ -328,6 +328,12 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 		      fit_get_name(fit, node, NULL));
 	}
 #endif
+	/* Try to make space, so we can inject details on the loadables */
+	ret = fdt_shrink_to_minimum(spl_image->fdt_addr, 8192);
+	if (ret < 0)
+		return ret;
+#endif
+
 	return ret;
 }
 
