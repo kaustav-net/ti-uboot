@@ -14,7 +14,7 @@
 	images {
 		uboot {
 			description = "U-Boot (64-bit)";
-			data = /incbin/("../../../u-boot-nodtb.bin");
+			data = /incbin/("u-boot-nodtb.bin");
 			type = "standalone";
 			os = "U-Boot";
 			arch = "arm64";
@@ -23,7 +23,7 @@
 		};
 		atf {
 			description = "ARM Trusted Firmware";
-			data = /incbin/("../../../bl31-rk3399.bin");
+			data = /incbin/("bl31-rk3399.bin");
 			type = "firmware";
 			arch = "arm64";
 			os = "arm-trusted-firmware";
@@ -33,14 +33,14 @@
 		};
 		pmu {
 		        description = "Cortex-M0 firmware";
-			data = /incbin/("../../../rk3399m0.bin");
+			data = /incbin/("rk3399m0.bin");
 			type = "pmu-firmware";
 			compression = "none";
 			load = <0x180000>;
                 };
 		fdt {
 			description = "RK3399-Q7 (Puma) flat device-tree";
-			data = /incbin/("../../../u-boot.dtb");
+			data = /incbin/("u-boot.dtb");
 			type = "flat_dt";
 			compression = "none";
 		};
