@@ -125,14 +125,20 @@ def generate_its(board, dtbs):
 
 def usage():
     print(
-        "{} <BOARD> <BOARDDIR> <dt_name> [<dt_name> [<dt_name] ...] ".format(
+        "{} <BOARD> <dt_name> [<dt_name> [<dt_name] ...] ".format(
             sys.argv[0]))
     sys.exit(-1)
 
+def show_deps_and_exit():
+	print("u-boot-nodtb.bin")
+	sys.exit(0)
 
 def main():
     if len(sys.argv) < 2:
         usage()
+
+    if sys.argv[1] == "--deps":
+        show_deps_and_exit()
 
     board = sys.argv[1]
     dtbs = sys.argv[2:]
