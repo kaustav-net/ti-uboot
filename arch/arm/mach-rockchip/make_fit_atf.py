@@ -192,10 +192,18 @@ def get_bl31_segments_info(bl31_file_name):
             paddr = seg[ELF_SEG_P_PADDR]
             print('paddr: %08x' % paddr)
 
+def show_deps_and_exit():
+	print("u-boot")
+	print("bl31.elf")
+	sys.exit(0)
+
 def main():
     uboot_elf="./u-boot"
     bl31_elf="./bl31.elf"
     FIT_ITS=sys.stdout
+
+    if sys.argv[1] == "--deps":
+	    show_deps_and_exit()
 
     opts, args = getopt.getopt(sys.argv[1:], "o:u:b:h")
     for opt, val in opts:

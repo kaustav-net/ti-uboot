@@ -1162,13 +1162,8 @@ U_BOOT_ITS = $(src)/$(SPL_FIT_SOURCE)
 else
 ifneq ($(SPL_FIT_GENERATOR),)
 U_BOOT_ITS := u-boot.its
-ifeq ($(CONFIG_SPL_FIT_GENERATOR),"arch/arm/mach-imx/mkimage_fit_atf.sh")
-U_BOOT_ITS_DEPS += u-boot-nodtb.bin
-endif
-ifeq ($(CONFIG_SPL_FIT_GENERATOR),"arch/arm/mach-rockchip/make_fit_atf.py")
-U_BOOT_ITS_DEPS += u-boot
-endif
-$(U_BOOT_ITS): $(U_BOOT_ITS_DEPS) FORCE
+U_BOOT_ITS_DEPS += $(shell $(srctree)/$(SPL_FIT_GENERATOR) --deps $(BOARD))
+$(U_BOOT_ITS): u-boot-nodtb.bin $(U_BOOT_ITS_DEPS) FORCE
 	$(srctree)/$(SPL_FIT_GENERATOR) $(BOARD) \
 	$(patsubst %,arch/$(ARCH)/dts/%.dtb,$(subst ",,$(CONFIG_OF_LIST))) > $@
 endif
