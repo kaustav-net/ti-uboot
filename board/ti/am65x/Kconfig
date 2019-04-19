@@ -13,6 +13,7 @@ config TARGET_AM654_A53_EVM
 	select SOC_K3_AM6
 	select BOARD_LATE_INIT
 	imply TI_I2C_BOARD_DETECT
+	select SYS_DISABLE_DCACHE_OPS
 
 config TARGET_AM654_R5_EVM
 	bool "TI K3 based AM654 EVM running on R5"
