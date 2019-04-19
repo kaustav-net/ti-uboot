@@ -74,7 +74,12 @@ def get_overlays(board):
     for l in p.stdout.readlines():
         m = r.match(l)
         if m:
-            overlays.append(m.group(1).strip())
+            fname = m.group(1).strip()
+            if os.path.isfile("arch/arm/dts/" + fname):
+                overlays.append(fname)
+            else:
+                sys.stderr.write("cannot find %s. removing from its!\n" % fname)
+
     return overlays
 
 
@@ -131,6 +136,7 @@ def usage():
 
 def show_deps_and_exit():
 	print("u-boot-nodtb.bin")
+	print("dtbs")
 	sys.exit(0)
 
 def main():
