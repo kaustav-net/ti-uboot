@@ -11,6 +11,7 @@
 *.cfgout
 *.dtb
 *.dtb.S
+*.dtbo
 *.elf
 *.exe
 *.gcda
