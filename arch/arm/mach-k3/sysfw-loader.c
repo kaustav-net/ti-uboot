@@ -16,6 +16,7 @@
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include <image.h>
 #include <malloc.h>
+#include <spi_flash.h>
 
 #include <asm/io.h>
 #include <asm/spl.h>
@@ -194,13 +195,32 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		config_pm_done_callback();
 }
 
+#if CONFIG_IS_ENABLED(SPI_LOAD)
+static void *get_sysfw_spi_addr(void)
+{
+	struct udevice *dev;
+	fdt_addr_t addr;
+	int ret;
+
+	ret = uclass_get_device_by_seq(UCLASS_SPI, CONFIG_SF_DEFAULT_BUS, &dev);
+	if (ret)
+		return NULL;
+
+	addr = dev_read_addr_index(dev, 1);
+	if (addr == FDT_ADDR_T_NONE)
+		return NULL;
+
+	return (void *)(addr + CONFIG_K3_SYSFW_IMAGE_SPI_OFFS);
+}
+#endif
+
 void k3_sysfw_loader(void (*config_pm_done_callback)(void))
 {
 	void *addr;
 	struct spl_image_info spl_image = { 0 };
 	struct spl_boot_device bootdev = { 0 };
 	struct ti_sci_handle *ti_sci;
-	int ret;
+	int ret = 0;
 
 	addr = memalign(ARCH_DMA_MINALIGN, CONFIG_K3_SYSFW_IMAGE_SIZE_MAX);
 	if (!addr) {
@@ -239,10 +259,11 @@ void k3_sysfw_loader(void (*config_pm_done_callback)(void))
 				   addr);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(SPI_FLASH_SUPPORT)
+#if CONFIG_IS_ENABLED(SPI_LOAD)
 	case BOOT_DEVICE_SPI:
-		ret = spl_spi_load(&spl_image, &bootdev,
-				   CONFIG_K3_SYSFW_IMAGE_SPI_OFFS, addr);
+		addr = get_sysfw_spi_addr();
+		if (!addr)
+			ret = -ENODEV;
 		break;
 #endif
 #if CONFIG_IS_ENABLED(YMODEM_SUPPORT)
