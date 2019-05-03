@@ -202,7 +202,8 @@ static void *get_sysfw_spi_addr(void)
 	fdt_addr_t addr;
 	int ret;
 
-	ret = uclass_get_device_by_seq(UCLASS_SPI, CONFIG_SF_DEFAULT_BUS, &dev);
+	ret = uclass_find_device_by_seq(UCLASS_SPI, CONFIG_SF_DEFAULT_BUS,
+					true, &dev);
 	if (ret)
 		return NULL;
 
