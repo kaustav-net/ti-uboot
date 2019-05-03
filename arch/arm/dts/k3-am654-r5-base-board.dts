@@ -103,13 +103,6 @@
 		clock-frequency = <200000000>;
 		u-boot,dm-spl;
 	};
-
-	clk_133mhz: dummy_clock {
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-		clock-frequency = <133333333>;
-		u-boot,dm-spl;
-	};
 };
 
 &dmsc {
@@ -232,10 +225,6 @@
 };
 
 &ospi0 {
-	/delete-property/ power-domains;
-
-	clocks = <&clk_133mhz>;
-
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi0_pins_default>;
