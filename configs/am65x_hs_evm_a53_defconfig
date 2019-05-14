@@ -23,7 +23,7 @@ CONFIG_SPL_FIT_IMAGE_POST_PROCESS=y
 CONFIG_OF_BOARD_SETUP=y
 CONFIG_USE_BOOTARGS=y
 CONFIG_BOOTARGS="androidboot.serialno=${serial#} console=ttyS2,115200 androidboot.console=ttyS2 androidboot.hardware=am65xevmboard"
-CONFIG_BOOTCOMMAND="run check_dofastboot; run findfdt; run check_android; if test $is_android -eq 1; then run emmc_android_boot; fi; setenv mmcdev 1; run envboot; run init_${boot}; run get_kern_${boot}; run get_fdt_${boot}; run get_overlay_${boot}; run run_kern"
+CONFIG_BOOTCOMMAND="run check_dofastboot; run findfdt; run check_android; if test $is_android -eq 1; then run emmc_android_boot; fi; setenv mmcdev 1; run envboot; run init_${boot}; run get_fit_${boot}; run get_overlaystring; run run_fit"
 CONFIG_CONSOLE_MUX=y
 # CONFIG_DISPLAY_CPUINFO is not set
 CONFIG_SPL_SYS_MALLOC_SIMPLE=y
