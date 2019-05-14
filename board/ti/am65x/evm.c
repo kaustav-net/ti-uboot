@@ -388,6 +388,13 @@ int ft_board_setup(void *blob, bd_t *bd)
 	if (ret)
 		printf("%s: fixing up msmc ram failed %d\n", __func__, ret);
 
+#if defined(CONFIG_TI_SECURE_DEVICE)
+	/* Make HW RNG reserved for secure world use */
+	ret = fdt_disable_node(blob, "/interconnect@100000/trng@4e10000");
+	if (ret)
+		printf("%s: disabling TRGN failed %d\n", __func__, ret);
+#endif
+
 	return ret;
 }
 #endif
