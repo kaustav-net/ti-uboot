@@ -113,6 +113,7 @@
 		"done;\0"						\
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
 		"${bootdir}/${name_kern}\0"				\
+	"get_fit_mmc=load mmc ${bootpart} ${fit_loadaddr} ${bootdir}/${fit_bootfile}\0" \
 	"partitions=" PARTS_DEFAULT
 
 /* Command for booting the Android from eMMC */
@@ -138,8 +139,7 @@
 		"env delete boot_start\0"				\
 	"emmc_android_boot="						\
 		"echo Trying to boot Android from eMMC ...; "		\
-		"setenv fit_loadaddr 0x90000000; "			\
-		"setenv loadaddr ${fit_loadaddr}; "			\
+		"run update_to_fit; "					\
 		"setenv eval_bootargs setenv bootargs $bootargs; "	\
 		"run eval_bootargs; "					\
 		"setenv mmcdev 0; "					\
@@ -148,11 +148,8 @@
 		"part start mmc ${mmcdev} boot boot_start; "		\
 		"part size mmc ${mmcdev} boot boot_size; "		\
 		"mmc read ${fit_loadaddr} ${boot_start} ${boot_size}; "	\
-		"for overlay in $overlay_files;"			\
-		"do;"							\
-		"setenv overlaystring ${overlaystring}'#'${overlay};"	\
-		"done;"							\
-		"bootm ${fit_loadaddr}#${fdtfile}${overlaystring}\0"
+		"run get_overlaystring; "				\
+		"run run_fit\0"
 
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
